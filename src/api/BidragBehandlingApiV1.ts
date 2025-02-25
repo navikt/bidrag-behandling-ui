@@ -284,6 +284,8 @@ export enum Resultatkode {
     GEBYR_ILAGT = "GEBYR_ILAGT",
     BARNETERSELVFORSORGET = "BARNET_ER_SELVFORSØRGET",
     DIREKTEOPPJOR = "DIREKTE_OPPJØR",
+    IKKE_DOKUMENTERT_SKOLEGANG = "IKKE_DOKUMENTERT_SKOLEGANG",
+    AVSLUTTET_SKOLEGANG = "AVSLUTTET_SKOLEGANG",
     IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
     BIDRAGSPLIKTIGERDOD = "BIDRAGSPLIKTIG_ER_DØD",
     BEREGNET_BIDRAG = "BEREGNET_BIDRAG",
@@ -704,6 +706,7 @@ export interface BeregnetInntekterDto {
 }
 
 export interface BeregnetPrivatAvtaleDto {
+    gjelderBarn: PersoninfoDto;
     perioder: BeregnetPrivatAvtalePeriodeDto[];
 }
 
@@ -1132,24 +1135,6 @@ export interface OverlappendePeriode {
     overlapperMedPerioder: DatoperiodeDto[];
 }
 
-export interface OverlappendePrivatAvtalePeriode {
-    periode: Datoperiode;
-    /**
-     * Teknisk id på inntekter som overlapper
-     * @uniqueItems true
-     */
-    idListe: number[];
-}
-
-export interface OverlappendeSamvaerPeriode {
-    periode: Datoperiode;
-    /**
-     * Teknisk id på inntekter som overlapper
-     * @uniqueItems true
-     */
-    idListe: number[];
-}
-
 export interface PeriodeAndreVoksneIHusstanden {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
@@ -1205,12 +1190,12 @@ export interface PersoninfoDto {
 export interface PrivatAvtaleDto {
     /** @format int64 */
     id: number;
-    gjelderBarn: string;
+    gjelderBarn: PersoninfoDto;
+    /** @format date */
+    avtaleDato?: string;
     skalIndeksreguleres: boolean;
-    /** Saksbehandlers begrunnelse */
-    begrunnelse?: BegrunnelseDto;
-    /** Saksbehandlers begrunnelse */
-    begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
+    begrunnelse?: string;
+    begrunnelseFraOpprinneligVedtak?: string;
     valideringsfeil?: PrivatAvtaleValideringsfeilDto;
     perioder: PrivatAvtalePeriodeDto[];
     beregnetPrivatAvtale?: BeregnetPrivatAvtaleDto;
@@ -1221,19 +1206,20 @@ export interface PrivatAvtalePeriodeDto {
     id?: number;
     /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
+    beløp: number;
 }
 
 export interface PrivatAvtaleValideringsfeilDto {
     /** @format int64 */
     privatAvtaleId: number;
     manglerBegrunnelse: boolean;
-    ugyldigSluttperiode: boolean;
+    manglerAvtaledato: boolean;
+    ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
-    overlappendePerioder: OverlappendePrivatAvtalePeriode[];
-    hullIPerioder: Datoperiode[];
+    overlappendePerioder: OverlappendePeriode[];
     gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
 }
 
 export interface RolleDto {
@@ -1268,12 +1254,12 @@ export interface SamvaerValideringsfeilDto {
     manglerSamvær: boolean;
     ugyldigSluttperiode: boolean;
     /** @uniqueItems true */
-    overlappendePerioder: OverlappendeSamvaerPeriode[];
+    overlappendePerioder: OverlappendePeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
     gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1761,28 +1747,31 @@ export interface OppdaterSamvaerResponsDto {
     oppdatertSamvær?: SamvaerDto;
 }
 
-export interface OppdaterePrivatAvtaleSkalIndeksreguleresRequest {
-    skalIndeksreguleres: boolean;
-}
-
-export interface OppdaterePrivatAvtaleResponsDto {
-    oppdatertPrivatAvtale?: PrivatAvtaleDto;
-}
-
 export interface OppdaterePrivatAvtalePeriodeDto {
     /** @format int64 */
     id?: number;
     /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
+    beløp: number;
 }
 
-export interface OppdaterePrivatAvtaleBegrunnelseRequest {
-    begrunnelse: string;
-}
-
-export interface OppdaterePrivatAvtaleAvtaleDatoRequest {
-    /** @format date */
+export interface OppdaterePrivatAvtaleRequest {
+    /**
+     * Setter avtaledato på privat avtalen. Dersom avtaleDato er null, vil avtaledato fjernes.
+     * @format date
+     */
     avtaleDato?: string;
+    /** Setter om privat avtale periodene skal indeksreguleres eller ikke. Dersom skalIndeksreguleres er null, vil ikke indeksregulering endres. */
+    skalIndeksreguleres?: boolean;
+    /** Oppdater begrunnelse */
+    begrunnelse?: string;
+    oppdaterPeriode?: OppdaterePrivatAvtalePeriodeDto;
+    /** @format int64 */
+    slettePeriodeId?: number;
+}
+
+export interface OppdaterePrivatAvtaleResponsDto {
+    oppdatertPrivatAvtale?: PrivatAvtaleDto;
 }
 
 export interface OppdaterOpphorsdatoRequestDto {
@@ -2263,10 +2252,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2297,9 +2286,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2438,7 +2427,6 @@ export interface SluttberegningBarnebidrag {
     bpAndelAvUVedDeltBostedBeløp: number;
     løpendeForskudd?: number;
     løpendeBidrag?: number;
-    ingenEndringUnderGrense: boolean;
     barnetErSelvforsørget: boolean;
     bidragJustertForDeltBosted: boolean;
     bidragJustertForNettoBarnetilleggBP: boolean;
@@ -2828,9 +2816,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -2842,6 +2830,13 @@ export interface NotatBeregnetBidragPerBarnDto {
 export interface NotatBeregnetInntektDto {
     gjelderBarn: NotatPersonDto;
     summertInntektListe: DelberegningSumInntekt[];
+}
+
+export interface NotatBeregnetPrivatAvtalePeriodeDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
+    periode: DatoperiodeDto;
+    indeksfaktor: number;
+    beløp: number;
 }
 
 export interface NotatBidragsevneUtgifterBolig {
@@ -2898,8 +2893,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -2982,15 +2977,32 @@ export interface NotatPersonDto {
     virkningstidspunkt?: string;
 }
 
+export interface NotatPrivatAvtaleDto {
+    gjelderBarn: NotatPersonDto;
+    /** @format date */
+    avtaleDato?: string;
+    skalIndeksreguleres: boolean;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse?: NotatBegrunnelseDto;
+    perioder: NotatPrivatAvtalePeriodeDto[];
+    beregnetPrivatAvtalePerioder: NotatBeregnetPrivatAvtalePeriodeDto[];
+}
+
+export interface NotatPrivatAvtalePeriodeDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
+    periode: DatoperiodeDto;
+    beløp: number;
+}
+
 export interface NotatResultatBeregningInntekterDto {
     inntektBM?: number;
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3035,8 +3047,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -3067,9 +3079,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3307,6 +3319,7 @@ export interface VedtakNotatDto {
     gebyr?: NotatGebyrRolleDto[];
     underholdskostnader?: NotatUnderholdDto;
     personer: NotatPersonDto[];
+    privatavtale: NotatPrivatAvtaleDto[];
     roller: NotatPersonDto[];
     inntekter: NotatInntekterDto;
     vedtak: NotatVedtakDetaljerDto;
@@ -3847,21 +3860,21 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppdatere privat avtale om det skal indeksreguleres eller ikke Returnerer oppdatert element.
+         * @description Oppdatere privat avtale. Returnerer oppdatert element.
          *
          * @tags privat-avtale-controller
-         * @name OppdaterePrivatAvtaleSkalIndeksreguleres
-         * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}/skalIndeksreguleres
+         * @name OppdaterPrivatAvtale
+         * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}
          * @secure
          */
-        oppdaterePrivatAvtaleSkalIndeksreguleres: (
+        oppdaterPrivatAvtale: (
             behandlingsid: number,
             privatavtaleid: number,
-            data: OppdaterePrivatAvtaleSkalIndeksreguleresRequest,
+            data: OppdaterePrivatAvtaleRequest,
             params: RequestParams = {}
         ) =>
             this.request<OppdaterePrivatAvtaleResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}/skalIndeksreguleres`,
+                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}`,
                 method: "PUT",
                 body: data,
                 secure: true,
@@ -3871,74 +3884,18 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppdatere privat avtale periode. Returnerer oppdatert element.
+         * @description Sletter privat avtale.
          *
          * @tags privat-avtale-controller
-         * @name OppdaterePrivatAvtalePeriode
-         * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}/periode
+         * @name SlettePrivatAvtale
+         * @request DELETE:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}
          * @secure
          */
-        oppdaterePrivatAvtalePeriode: (
-            behandlingsid: number,
-            privatavtaleid: number,
-            data: OppdaterePrivatAvtalePeriodeDto,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterePrivatAvtaleResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}/periode`,
-                method: "PUT",
-                body: data,
+        slettePrivatAvtale: (behandlingsid: number, privatavtaleid: number, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}`,
+                method: "DELETE",
                 secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Oppdatere begrunnelse for underhold relatert til søknadsbarn eller andre barn.
-         *
-         * @tags privat-avtale-controller
-         * @name OppdatereBegrunnelse1
-         * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}/begrunnelse
-         * @secure
-         */
-        oppdatereBegrunnelse1: (
-            behandlingsid: number,
-            privatavtaleid: number,
-            data: OppdaterePrivatAvtaleBegrunnelseRequest,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterePrivatAvtaleResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}/begrunnelse`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Oppdatere privat avtale avtaledato. Returnerer oppdatert element.
-         *
-         * @tags privat-avtale-controller
-         * @name OppdaterePrivatAvtaleAvtaleDato
-         * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}/avtaledato
-         * @secure
-         */
-        oppdaterePrivatAvtaleAvtaleDato: (
-            behandlingsid: number,
-            privatavtaleid: number,
-            data: OppdaterePrivatAvtaleAvtaleDatoRequest,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterePrivatAvtaleResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}/avtaledato`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
                 ...params,
             }),
 
@@ -4648,22 +4605,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Sletter privat avtale.
-         *
-         * @tags privat-avtale-controller
-         * @name SlettePrivatAvtale
-         * @request DELETE:/api/v2/behandling/{behandlingsid}/privatavtale/{privatavtaleid}
-         * @secure
-         */
-        slettePrivatAvtale: (behandlingsid: number, privatavtaleid: number, params: RequestParams = {}) =>
-            this.request<void, any>({
-                path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}`,
-                method: "DELETE",
-                secure: true,
                 ...params,
             }),
     };

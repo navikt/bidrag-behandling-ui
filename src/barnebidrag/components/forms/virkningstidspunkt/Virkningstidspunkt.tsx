@@ -53,6 +53,8 @@ const årsakListe = [
 ];
 
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -141,6 +143,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
+    const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -183,22 +186,33 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                                 ))}
                         </optgroup>
                     )}
-                    <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                        {avslagsListe.map((value) => (
-                            <option key={value} value={value}>
-                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                            </option>
-                        ))}
-                        {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
-                            <>
-                                {avslagsListeDeprekert.map((value) => (
-                                    <option key={value} value={value} disabled>
-                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                    </option>
-                                ))}
-                            </>
-                        )}
-                    </optgroup>
+
+                    {er18ÅrsBidrag ? (
+                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
+                            {(erTypeOpphør ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                </option>
+                            ))}
+                        </optgroup>
+                    ) : (
+                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
+                            {avslagsListe.map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                </option>
+                            ))}
+                            {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
+                                <>
+                                    {avslagsListeDeprekert.map((value) => (
+                                        <option key={value} value={value} disabled>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    ))}
+                                </>
+                            )}
+                        </optgroup>
+                    )}
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
                     name="virkningstidspunkt"
