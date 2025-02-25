@@ -90,7 +90,9 @@ const createInitialValues = (
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
     const årsak = årsakListe.find((value) => value === values.årsakAvslag);
-    const avslag = avslagsListe.find((value) => value === values.årsakAvslag);
+    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør].find(
+        (value) => value === values.årsakAvslag
+    );
     return {
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
