@@ -52,7 +52,16 @@ const årsakListe = [
     TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
     TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
-
+const årsakListe18årsBidrag = [
+    TypeArsakstype.FRAMANEDENETTERFYLTE18AR,
+    TypeArsakstype.FRABARNETSFLYTTEMANED,
+    TypeArsakstype.FRA_SAMLIVSBRUDD,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.TREARSREGELEN,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+    TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
+    TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
+];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
@@ -89,7 +98,7 @@ const createInitialValues = (
 };
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
-    const årsak = årsakListe.find((value) => value === values.årsakAvslag);
+    const årsak = [...årsakListe, ...årsakListe18årsBidrag].find((value) => value === values.årsakAvslag);
     const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør].find(
         (value) => value === values.årsakAvslag
     );
@@ -147,6 +156,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
+    const virkningsårsaker = er18ÅrsBidrag ? årsakListe18årsBidrag : årsakListe;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -177,7 +187,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
                     {skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
-                            {årsakListe
+                            {virkningsårsaker
                                 .filter((value) => {
                                     if (kunEtBarnIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
