@@ -7,6 +7,7 @@ export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK === "true";
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
+    const enableOpphørsdato = useFlag("behandling.opphorsdato");
     const utvikler = useFlag("bidrag.utvikler");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
@@ -24,12 +25,20 @@ export default function useFeatureToogle() {
     }, [userId]);
 
     useEffect(() => {
-        console.debug("enableFatteVedtak", enableFatteVedtak, "enableAdmin", enableAdmin);
+        console.debug(
+            "enableFatteVedtak",
+            enableFatteVedtak,
+            "enableAdmin",
+            enableAdmin,
+            "enableOpphørsdato",
+            enableOpphørsdato
+        );
     }, [enableFatteVedtak, enableAdmin]);
     return {
         isAdminEnabled: enableAdmin,
         isDeveloper: utvikler,
         isFatteVedtakEnabled: enableFatteVedtak,
+        isOpphørsdatoEnabled: enableOpphørsdato,
         isbehandlingVesntremenyEnabled: enableBehandlingVesntremeny,
     };
 }
