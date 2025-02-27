@@ -211,13 +211,14 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         if (barnIsOver18) {
             const selectedStatusIsOver18 = gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
+            const selectedStatusIsUnder18 = boforholdOptions[behandling.type].under18År.includes(selectedStatus);
             const selectedDatoFomIsAfterOrSameAsMonthOver18 = isAfterEqualsDate(selectedDatoFom, monthAfter18);
             const isInvalidStatusOver18 =
                 !selectedStatusIsOver18 &&
                 (selectedDatoFomIsAfterOrSameAsMonthOver18 ||
                     selectedDatoTom === null ||
                     isAfterEqualsDate(selectedDatoTom, monthAfter18));
-            const isInvalidStatusUnder18 = selectedStatusIsOver18 && !selectedDatoFomIsAfterOrSameAsMonthOver18;
+            const isInvalidStatusUnder18 = !selectedStatusIsUnder18 && !selectedDatoFomIsAfterOrSameAsMonthOver18;
 
             if (isInvalidStatusOver18) {
                 setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
