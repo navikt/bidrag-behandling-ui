@@ -317,6 +317,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
         }
     };
 
+    if (behandling.virkningstidspunkt.avslag != null) return null;
     if (!isOpphørsdatoEnabled) return null;
     return (
         <>
