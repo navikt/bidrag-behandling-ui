@@ -1,6 +1,14 @@
 import { BehandlingDtoV2, TypeArsakstype } from "@api/BidragBehandlingApiV1";
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, isBeforeDate, minOfDates } from "@utils/date-utils";
+import {
+    addMonthsIgnoreDay,
+    dateOrNull,
+    deductMonths,
+    firstDayOfMonth,
+    isAfterDate,
+    isBeforeDate,
+    minOfDates,
+} from "@utils/date-utils";
 import { addMonths } from "date-fns";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
@@ -35,6 +43,10 @@ export const mapÅrsakTilVirkningstidspunkt = (
     switch (aarsak) {
         case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
             return firstDayOfMonth(addMonths(mottatOrSoktFraDato, 1));
+        case TypeArsakstype.FRAMANEDENETTERFYLTE18AR:
+            return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), soktFraDato)
+                ? firstDayOfMonth(addMonthsIgnoreDay(new Date(barnsFødselsdato), 1))
+                : firstDayOfMonth(soktFraDato);
         case TypeArsakstype.FRABARNETSFODSEL:
             return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), soktFraDato)
                 ? firstDayOfMonth(new Date(barnsFødselsdato))

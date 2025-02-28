@@ -29,7 +29,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
-import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -150,7 +150,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
         const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(behandling.virkningstidspunkt.opphør.opphørsdato);
         if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
-        if (opphørsdato) return opphørsdato;
+        if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
     }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
@@ -254,6 +254,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     const { isOpphørsdatoEnabled } = useFeatureToogle();
     const behandling = useGetBehandlingV2();
+    //TODO: Dette må tilpasses per barn i V3 av bidrag
     const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
     const opphør = behandling.virkningstidspunkt.opphør.opphørRoller.find(
         (opphørRolle) => opphørRolle.rolle.ident === baRolle.ident
@@ -316,6 +317,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
         }
     };
 
+    if (behandling.virkningstidspunkt.avslag != null) return null;
     if (!isOpphørsdatoEnabled) return null;
     return (
         <>
@@ -471,6 +473,10 @@ const VirkningstidspunktForm = () => {
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
+                //TODO: Dette må tilpasses per barn i V3 av bidrag
+                const initialValues = createInitialValues(response.virkningstidspunkt, response.stønadstype);
+                useFormMethods.setValue("opphørsdato", initialValues.opphørsdato);
+                useFormMethods.setValue("opphørsvarighet", initialValues.opphørsvarighet);
                 setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
             },
             onError: () => {

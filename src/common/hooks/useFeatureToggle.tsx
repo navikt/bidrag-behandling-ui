@@ -8,6 +8,7 @@ export default function useFeatureToogle() {
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
     const enableOpphørsdato = useFlag("behandling.opphorsdato");
+    const enableBidragV2 = useFlag("behandling.v2_endring");
     const utvikler = useFlag("bidrag.utvikler");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
@@ -31,7 +32,9 @@ export default function useFeatureToogle() {
             "enableAdmin",
             enableAdmin,
             "enableOpphørsdato",
-            enableOpphørsdato
+            enableOpphørsdato,
+            "enableBidragV2",
+            enableBidragV2
         );
     }, [enableFatteVedtak, enableAdmin]);
     return {
@@ -39,6 +42,7 @@ export default function useFeatureToogle() {
         isDeveloper: utvikler,
         isFatteVedtakEnabled: enableFatteVedtak,
         isOpphørsdatoEnabled: enableOpphørsdato,
+        isBidragV2Enabled: enableBidragV2,
         isbehandlingVesntremenyEnabled: enableBehandlingVesntremeny,
     };
 }

@@ -1449,6 +1449,7 @@ export enum TypeBehandling {
     FORSKUDD = "FORSKUDD",
     SAeRBIDRAG = "SÆRBIDRAG",
     BIDRAG = "BIDRAG",
+    BIDRAG18AR = "BIDRAG_18_ÅR",
 }
 
 export interface UnderholdBarnDto {
@@ -2493,6 +2494,7 @@ export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
     utgift?: UtgiftValideringsfeilDto;
     inntekter?: InntektValideringsfeilDto;
+    privatAvtale?: PrivatAvtaleValideringsfeilDto[];
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenPeriodeseringsfeil;
     sivilstand?: SivilstandPeriodeseringsfeil;
