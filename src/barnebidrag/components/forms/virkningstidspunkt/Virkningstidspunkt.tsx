@@ -29,7 +29,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
-import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -150,7 +150,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
         const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(behandling.virkningstidspunkt.opphør.opphørsdato);
         if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
-        if (opphørsdato) return opphørsdato;
+        if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
     }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
