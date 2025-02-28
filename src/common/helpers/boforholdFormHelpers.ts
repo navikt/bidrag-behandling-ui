@@ -50,10 +50,25 @@ export const gyldigBostatusOver18År = {
     ],
 };
 
+export const gyldigBostatus18ÅrsBidragSøknadsbarn = {
+    [TypeBehandling.FORSKUDD]: [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG],
+    [TypeBehandling.SAeRBIDRAG]: [
+        Bostatuskode.REGNES_IKKE_SOM_BARN,
+        Bostatuskode.DOKUMENTERT_SKOLEGANG,
+        Bostatuskode.IKKE_MED_FORELDER,
+    ],
+    [TypeBehandling.BIDRAG]: [Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.MED_FORELDER],
+};
+
 export const boforholdOptions = {
     [TypeBehandling.FORSKUDD]: {
         under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
         likEllerOver18År: [
+            ...gyldigBostatusOver18År[TypeBehandling.FORSKUDD],
+            Bostatuskode.MED_FORELDER,
+            Bostatuskode.IKKE_MED_FORELDER,
+        ],
+        bidrag18År: [
             ...gyldigBostatusOver18År[TypeBehandling.FORSKUDD],
             Bostatuskode.MED_FORELDER,
             Bostatuskode.IKKE_MED_FORELDER,
@@ -63,6 +78,7 @@ export const boforholdOptions = {
         under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.DELT_BOSTED],
         // Trenger ikke alle perioder pga at det ikke kan periodiseres i særbidrag
         likEllerOver18År: [...gyldigBostatusOver18År[TypeBehandling.SAeRBIDRAG]],
+        bidrag18År: [...gyldigBostatusOver18År[TypeBehandling.SAeRBIDRAG]],
     },
     [TypeBehandling.BIDRAG]: {
         under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.DELT_BOSTED],
@@ -72,6 +88,7 @@ export const boforholdOptions = {
             Bostatuskode.MED_FORELDER,
             Bostatuskode.DELT_BOSTED,
         ],
+        bidrag18År: [Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.MED_FORELDER],
     },
 };
 export const andreVoksneIHusstandenBoforholdOptions = [

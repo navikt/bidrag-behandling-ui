@@ -5,6 +5,7 @@ import {
     Kilde,
     OppdatereBoforholdRequestV2,
     OpplysningerType,
+    Stonadstype,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { BoforholdOpplysninger } from "@common/components/boforhold/BoforholdOpplysninger";
@@ -18,6 +19,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
     boforholdOptions,
     getFirstDayOfMonthAfterEighteenYears,
+    gyldigBostatus18ÅrsBidragSøknadsbarn,
     gyldigBostatusOver18År,
     isOver18YearsOld,
 } from "@common/helpers/boforholdFormHelpers";
@@ -111,7 +113,7 @@ const Status = ({
     item: BostatusperiodeDto;
 }) => {
     const { clearErrors } = useFormContext<BoforholdFormValues>();
-    const { type } = useGetBehandlingV2();
+    const { type, stønadstype } = useGetBehandlingV2();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
         const visningsnavn = hentVisningsnavn(bostsatus);
         if (gyldigBostatusOver18År[type].includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
@@ -120,9 +122,12 @@ const Status = ({
         return visningsnavn;
     };
 
-    const boforholdStatusOptions = isOver18YearsOld(barn.fødselsdato)
-        ? boforholdOptions[type].likEllerOver18År
-        : boforholdOptions[type].under18År;
+    const bidrag18ÅrOgSøknadsbarn = stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+    const boforholdStatusOptions = bidrag18ÅrOgSøknadsbarn
+        ? boforholdOptions[type].bidrag18År
+        : isOver18YearsOld(barn.fødselsdato)
+          ? boforholdOptions[type].likEllerOver18År
+          : boforholdOptions[type].under18År;
 
     return editableRow ? (
         <FormControlledSelectField
@@ -209,9 +214,16 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const selectedDatoFom = periodeValues?.datoFom;
         const selectedDatoTom = periodeValues?.datoTom;
 
+        const bidrag18År = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
         if (barnIsOver18) {
-            const selectedStatusIsOver18 = gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
-            const selectedStatusIsUnder18 = boforholdOptions[behandling.type].under18År.includes(selectedStatus);
+            const selectedStatusIsOver18 = bidrag18År
+                ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
+                : gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
+            const selectedStatusIsUnder18 = (
+                bidrag18År
+                    ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
+                    : boforholdOptions[behandling.type].under18År
+            ).includes(selectedStatus);
             const selectedDatoFomIsAfterOrSameAsMonthOver18 = isAfterEqualsDate(selectedDatoFom, monthAfter18);
             const isInvalidStatusOver18 =
                 !selectedStatusIsOver18 &&

@@ -254,6 +254,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     const { isOpphørsdatoEnabled } = useFeatureToogle();
     const behandling = useGetBehandlingV2();
+    //TODO: Dette må tilpasses per barn i V3 av bidrag
     const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
     const opphør = behandling.virkningstidspunkt.opphør.opphørRoller.find(
         (opphørRolle) => opphørRolle.rolle.ident === baRolle.ident
@@ -316,6 +317,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
         }
     };
 
+    if (behandling.virkningstidspunkt.avslag != null) return null;
     if (!isOpphørsdatoEnabled) return null;
     return (
         <>
@@ -471,6 +473,10 @@ const VirkningstidspunktForm = () => {
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
+                //TODO: Dette må tilpasses per barn i V3 av bidrag
+                const initialValues = createInitialValues(response.virkningstidspunkt, response.stønadstype);
+                useFormMethods.setValue("opphørsdato", initialValues.opphørsdato);
+                useFormMethods.setValue("opphørsvarighet", initialValues.opphørsvarighet);
                 setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
             },
             onError: () => {
