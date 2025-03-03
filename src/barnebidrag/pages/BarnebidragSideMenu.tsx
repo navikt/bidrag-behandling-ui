@@ -105,6 +105,12 @@ export const BarnebidragSideMenu = () => {
             />
             <MenuButton
                 step={"2."}
+                title={text.title.privatAvtale}
+                onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
+                active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
+            />
+            <MenuButton
+                step={"3."}
                 title={text.title.underholdskostnad}
                 interactive={interactive}
                 valideringsfeil={underholdskostnadHasValideringsFeil}
@@ -312,7 +318,7 @@ export const BarnebidragSideMenu = () => {
                     ))}
             />
             <MenuButton
-                step={"3."}
+                step={"4."}
                 title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.INNTEKT])}
                 interactive={interactive}
@@ -555,7 +561,7 @@ export const BarnebidragSideMenu = () => {
                 ))}
             />
             <MenuButton
-                step={"4."}
+                step={"5."}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
                 interactive={!!gebyr}
@@ -563,7 +569,7 @@ export const BarnebidragSideMenu = () => {
                 valideringsfeil={gebyrValideringsFeil}
             />
             <MenuButton
-                step={"5."}
+                step={"6."}
                 title={text.title.boforhold}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD])}
                 interactive={interactive}
@@ -572,7 +578,7 @@ export const BarnebidragSideMenu = () => {
                 unconfirmedUpdates={boforholdIkkeAktiverteEndringer}
             />
             <MenuButton
-                step={"6."}
+                step={"7."}
                 title={text.title.samvær}
                 interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
@@ -580,7 +586,7 @@ export const BarnebidragSideMenu = () => {
                 valideringsfeil={samværValideringsFeil}
             />
             <MenuButton
-                step={"7."}
+                step={"8."}
                 title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK])}
                 active={activeButton === BarnebidragStepper.VEDTAK}
