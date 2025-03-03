@@ -112,17 +112,19 @@ const Status = ({
     barn: HusstandsmedlemDtoV2;
     item: BostatusperiodeDto;
 }) => {
-    const { clearErrors } = useFormContext<BoforholdFormValues>();
     const { type, stønadstype } = useGetBehandlingV2();
+    const bidrag18ÅrOgSøknadsbarn = stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+    const { clearErrors } = useFormContext<BoforholdFormValues>();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
         const visningsnavn = hentVisningsnavn(bostsatus);
-        if (gyldigBostatusOver18År[type].includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
+        // Ønsker ikke å vise 18 år prefiks for 18 åring i 18års bidrag
+        const bosstatus18År = bidrag18ÅrOgSøknadsbarn ? [] : gyldigBostatusOver18År[type];
+        if (bosstatus18År.includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
     };
 
-    const bidrag18ÅrOgSøknadsbarn = stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
     const boforholdStatusOptions = bidrag18ÅrOgSøknadsbarn
         ? boforholdOptions[type].bidrag18År
         : isOver18YearsOld(barn.fødselsdato)
