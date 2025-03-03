@@ -22,6 +22,7 @@ import {
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
     OppdaterGebyrDto,
+    OppdaterOpphorsdatoRequestDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
@@ -744,12 +745,29 @@ export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
                 privatAvtaleId,
                 payload
             );
+
+            return data;
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+        },
+    });
+};
+
+export const useUpdateOpphørsdato = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
+        mutationFn: async (payload: OppdaterOpphorsdatoRequestDto): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereOpphorsdato(Number(behandlingId), payload);
             return data;
         },
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+            LoggerService.error("Feil ved oppdatering av opphørsdato", error);
         },
     });
 };

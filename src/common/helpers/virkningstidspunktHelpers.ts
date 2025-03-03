@@ -1,6 +1,14 @@
 import { BehandlingDtoV2, TypeArsakstype } from "@api/BidragBehandlingApiV1";
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "@utils/date-utils";
+import {
+    addMonthsIgnoreDay,
+    dateOrNull,
+    deductMonths,
+    firstDayOfMonth,
+    isAfterDate,
+    isBeforeDate,
+    minOfDates,
+} from "@utils/date-utils";
 import { addMonths } from "date-fns";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
@@ -35,6 +43,10 @@ export const mapÅrsakTilVirkningstidspunkt = (
     switch (aarsak) {
         case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
             return firstDayOfMonth(addMonths(mottatOrSoktFraDato, 1));
+        case TypeArsakstype.FRAMANEDENETTERFYLTE18AR:
+            return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), soktFraDato)
+                ? firstDayOfMonth(addMonthsIgnoreDay(new Date(barnsFødselsdato), 1))
+                : firstDayOfMonth(soktFraDato);
         case TypeArsakstype.FRABARNETSFODSEL:
             return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), soktFraDato)
                 ? firstDayOfMonth(new Date(barnsFødselsdato))
@@ -64,9 +76,14 @@ export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) 
     return [fom, tom];
 };
 
-export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
+export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, opphørsdato?: Date) => {
+    const lastDayOfPreviousMonth = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
+    const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(deductMonths(firstDayOfMonth(opphørsdato), 1));
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
-    const tom = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
+    const tom =
+        lastDayOfOpphørsdatoMonth && isBeforeDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
+            ? lastDayOfOpphørsdatoMonth
+            : lastDayOfPreviousMonth;
 
     return [fom, tom];
 };

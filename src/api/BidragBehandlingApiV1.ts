@@ -451,6 +451,7 @@ export enum TypeArsakstype {
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
     FRAMANEDENETTERPRIVATAVTALE = "FRA_MÅNEDEN_ETTER_PRIVAT_AVTALE",
+    FRAMANEDENETTERFYLTE18AR = "FRA_MÅNEDEN_ETTER_FYLTE_18_ÅR",
     BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE = "BIDRAGSPLIKTIG_HAR_IKKE_BIDRATT_TIL_FORSØRGELSE",
 }
 
@@ -485,6 +486,8 @@ export interface OppdatereVirkningstidspunkt {
 export interface AktiveGrunnlagsdata {
     /** @uniqueItems true */
     arbeidsforhold: ArbeidsforholdGrunnlagDto[];
+    /** @uniqueItems true */
+    husstandsmedlemBM: HusstandsmedlemGrunnlagDto[];
     /** @uniqueItems true */
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
@@ -948,6 +951,8 @@ export interface IkkeAktivInntektDto {
 
 export interface IkkeAktiveGrunnlagsdata {
     inntekter: IkkeAktiveInntekter;
+    /** @uniqueItems true */
+    husstandsmedlemBM: HusstandsmedlemGrunnlagDto[];
     /** @uniqueItems true */
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     /** @uniqueItems true */
@@ -1448,6 +1453,7 @@ export enum TypeBehandling {
     FORSKUDD = "FORSKUDD",
     SAeRBIDRAG = "SÆRBIDRAG",
     BIDRAG = "BIDRAG",
+    BIDRAG18AR = "BIDRAG_18_ÅR",
 }
 
 export interface UnderholdBarnDto {
@@ -2286,9 +2292,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 
@@ -2492,6 +2498,7 @@ export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
     utgift?: UtgiftValideringsfeilDto;
     inntekter?: InntektValideringsfeilDto;
+    privatAvtale?: PrivatAvtaleValideringsfeilDto[];
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenPeriodeseringsfeil;
     sivilstand?: SivilstandPeriodeseringsfeil;
@@ -2816,10 +2823,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2893,8 +2900,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3025,8 +3032,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3079,9 +3086,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 

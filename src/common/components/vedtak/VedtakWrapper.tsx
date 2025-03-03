@@ -43,6 +43,38 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
+        if (feilInnhold.privatAvtale != null && "privatavtale" in steps) {
+            feilInnhold.privatAvtale.forEach((value) => {
+                if (value?.manglerBegrunnelse === true) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                            Privat avtale: Begrunnelse må fylles ut for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
+                if (value?.ingenLøpendePeriode === true) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                            Privat avtale: Det må legges til løpende periode for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
+                if (value?.manglerAvtaledato === true) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                            Privat avtale: Avtaledato mangler for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
+                if (value?.harPeriodiseringsfeil) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                            Privat avtale: Perioder for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
+            });
+        }
         if (feilInnhold.virkningstidspunkt != null && "virkningstidspunkt" in steps) {
             if (feilInnhold.virkningstidspunkt?.manglerBegrunnelse === true) {
                 feilliste.push(
@@ -51,6 +83,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
+            feilInnhold.virkningstidspunkt?.manglerOpphørsdato.forEach((rolle) => {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Opphørsdato må settes for {rolle.navn} ved 18 års bidrag
+                    </ErrorSummary.Item>
+                );
+            });
         }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];
