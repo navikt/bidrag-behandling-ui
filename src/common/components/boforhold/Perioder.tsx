@@ -214,13 +214,14 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const selectedDatoFom = periodeValues?.datoFom;
         const selectedDatoTom = periodeValues?.datoTom;
 
-        const bidrag18År = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
+        const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+
         if (barnIsOver18) {
-            const selectedStatusIsOver18 = bidrag18År
+            const selectedStatusIsOver18 = bidrag18ÅrOgSøknadsbarn
                 ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                 : gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
             const selectedStatusIsUnder18 = (
-                bidrag18År
+                bidrag18ÅrOgSøknadsbarn
                     ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                     : boforholdOptions[behandling.type].under18År
             ).includes(selectedStatus);
@@ -346,11 +347,15 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
+            const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+
             barnPerioder.append({
                 datoFom: null,
                 datoTom: null,
                 bostatus: isOver18YearsOld(barn.fødselsdato)
-                    ? Bostatuskode.REGNES_IKKE_SOM_BARN
+                    ? bidrag18ÅrOgSøknadsbarn
+                        ? Bostatuskode.IKKE_MED_FORELDER
+                        : Bostatuskode.REGNES_IKKE_SOM_BARN
                     : Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             });
