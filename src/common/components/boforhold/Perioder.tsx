@@ -112,17 +112,19 @@ const Status = ({
     barn: HusstandsmedlemDtoV2;
     item: BostatusperiodeDto;
 }) => {
-    const { clearErrors } = useFormContext<BoforholdFormValues>();
     const { type, stønadstype } = useGetBehandlingV2();
+    const bidrag18ÅrOgSøknadsbarn = stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+    const { clearErrors } = useFormContext<BoforholdFormValues>();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
         const visningsnavn = hentVisningsnavn(bostsatus);
-        if (gyldigBostatusOver18År[type].includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
+        // Ønsker ikke å vise 18 år prefiks for 18 åring i 18års bidrag
+        const bosstatus18År = bidrag18ÅrOgSøknadsbarn ? [] : gyldigBostatusOver18År[type];
+        if (bosstatus18År.includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
     };
 
-    const bidrag18ÅrOgSøknadsbarn = stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
     const boforholdStatusOptions = bidrag18ÅrOgSøknadsbarn
         ? boforholdOptions[type].bidrag18År
         : isOver18YearsOld(barn.fødselsdato)
@@ -214,13 +216,14 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const selectedDatoFom = periodeValues?.datoFom;
         const selectedDatoTom = periodeValues?.datoTom;
 
-        const bidrag18År = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
+        const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+
         if (barnIsOver18) {
-            const selectedStatusIsOver18 = bidrag18År
+            const selectedStatusIsOver18 = bidrag18ÅrOgSøknadsbarn
                 ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                 : gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
             const selectedStatusIsUnder18 = (
-                bidrag18År
+                bidrag18ÅrOgSøknadsbarn
                     ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                     : boforholdOptions[behandling.type].under18År
             ).includes(selectedStatus);
@@ -346,11 +349,15 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
+            const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+
             barnPerioder.append({
                 datoFom: null,
                 datoTom: null,
                 bostatus: isOver18YearsOld(barn.fødselsdato)
-                    ? Bostatuskode.REGNES_IKKE_SOM_BARN
+                    ? bidrag18ÅrOgSøknadsbarn
+                        ? Bostatuskode.IKKE_MED_FORELDER
+                        : Bostatuskode.REGNES_IKKE_SOM_BARN
                     : Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             });
