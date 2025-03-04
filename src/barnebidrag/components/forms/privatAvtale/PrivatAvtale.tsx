@@ -1,4 +1,4 @@
-import { BarnDto, Rolletype } from "@api/BidragBehandlingApiV1";
+import { BarnDto, OppdaterePrivatAvtaleRequest, Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -111,7 +111,7 @@ const PrivatAvtaleBarn = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { lesemodus } = useBehandlingProvider();
+    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const createPrivatAvtale = useOnCreatePrivatAvtale();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
@@ -142,7 +142,12 @@ const PrivatAvtaleBarn = ({
                     };
                 });
             },
-            onError: () => {},
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onCreatePrivatAvtale(),
+                });
+            },
         });
     };
 
@@ -159,12 +164,16 @@ const PrivatAvtaleBarn = ({
                     };
                 });
             },
-            onError: () => {},
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onDeletePrivatAvtale(),
+                });
+            },
         });
     };
 
-    const onToggle = (e: ChangeEvent<HTMLInputElement>) => {
-        setValue(`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`, e.target.checked);
+    const updatePrivatAvtale = (e: ChangeEvent<HTMLInputElement>) => {
         updatePrivatAvtaleQuery.mutation.mutate(
             { skalIndeksreguleres: e.target.checked },
             {
@@ -179,9 +188,19 @@ const PrivatAvtaleBarn = ({
                         };
                     });
                 },
-                onError: () => {},
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updatePrivatAvtale(e),
+                    });
+                },
             }
         );
+    };
+
+    const onToggle = (e: ChangeEvent<HTMLInputElement>) => {
+        setValue(`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`, e.target.checked);
+        updatePrivatAvtale(e);
     };
 
     return (
@@ -242,7 +261,7 @@ const PrivatAvtaleBarn = ({
                                 checked={item.privatAvtale.skalIndeksreguleres}
                                 onChange={onToggle}
                                 size="small"
-                                readOnly={lesemodus}
+                                readOnly={lesemodus || !item.privatAvtale.perioder.length}
                             >
                                 {text.label.skalIndeksreguleres}
                             </Switch>
@@ -261,7 +280,7 @@ const Side = () => {
     const [searchParams] = useSearchParams();
     const { privatAvtale } = useGetBehandlingV2();
     const { onStepChange } = useBehandlingProvider();
-    const { getValues, watch } = useFormContext<PrivatAvtaleFormValues>();
+    const { getValues } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
     const roller = getValues("roller");
     const baRolleIndex = roller.findIndex((rolle) => rolle.gjelderBarn.ident === tabBarnIdent);
@@ -269,38 +288,6 @@ const Side = () => {
     const selectedBarnIdent = roller[rolleIndex].gjelderBarn.ident;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
-    const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(selectedPrivatAvtale.id);
-
-    useEffect(() => {
-        const subscription = watch((value, { name }) => {
-            if (name === `roller.${rolleIndex}.privatAvtale.begrunnelse`) {
-                debouncedOnSave();
-            }
-        });
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const onSave = () => {
-        updatePrivatAvtaleQuery.mutation.mutate(
-            { begrunnelse: getValues(`roller.${rolleIndex}.privatAvtale.begrunnelse`) },
-            {
-                onSuccess: (response) => {
-                    updatePrivatAvtaleQuery.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            privatAvtale: currentData.privatAvtale.map((avtale) => {
-                                if (avtale.id === selectedPrivatAvtale.id) return response.oppdatertPrivatAvtale;
-                                return avtale;
-                            }),
-                        };
-                    });
-                },
-                onError: () => {},
-            }
-        );
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]);
 
@@ -326,14 +313,68 @@ const Side = () => {
 };
 
 const PrivatAvtaleForm = () => {
-    const { privatAvtale, roller } = useGetBehandlingV2();
-    const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const baRoller = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const initialValues = useMemo(() => createInitialValues(privatAvtale, baRoller), [privatAvtale, baRoller]);
+    const [searchParams] = useSearchParams();
+    const { privatAvtale, roller: behandlingRoller } = useGetBehandlingV2();
+    const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
+    const baRoller = behandlingRoller.filter((rolle) => rolle.rolletype === Rolletype.BA);
+    const initialValues = useMemo(
+        () => createInitialValues(privatAvtale, baRoller),
+        [JSON.stringify(privatAvtale), JSON.stringify(baRoller)]
+    );
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    const tabBarnIdent = searchParams.get(urlSearchParams.tab);
+    const roller = useFormMethods.getValues("roller");
+    const baRolleIndex = roller.findIndex((rolle) => rolle.gjelderBarn.ident === tabBarnIdent);
+    const rolleIndex = baRolleIndex !== -1 ? baRolleIndex : 0;
+    const selectedBarnIdent = roller[rolleIndex].gjelderBarn.ident;
+    const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
+    const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(selectedPrivatAvtale.id);
+
+    const updatePrivatAvtale = (payload: OppdaterePrivatAvtaleRequest) => {
+        updatePrivatAvtaleQuery.mutation.mutate(payload, {
+            onSuccess: (response) => {
+                updatePrivatAvtaleQuery.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        privatAvtale: currentData.privatAvtale.map((avtale) => {
+                            if (avtale.id === selectedPrivatAvtale.id) return response.oppdatertPrivatAvtale;
+                            return avtale;
+                        }),
+                    };
+                });
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => updatePrivatAvtale(payload),
+                });
+            },
+        });
+    };
+
+    const debouncedOnSave = useDebounce(updatePrivatAvtale);
+
+    useEffect(() => {
+        const subscription = useFormMethods.watch((value, { name }) => {
+            if (name === `roller.${rolleIndex}.privatAvtale.begrunnelse`) {
+                const payload = { begrunnelse: value.roller[rolleIndex].privatAvtale.begrunnelse };
+                debouncedOnSave(payload);
+            }
+
+            if (
+                name === `roller.${rolleIndex}.privatAvtale.avtaleDato` &&
+                value.roller[rolleIndex].privatAvtale.avtaleDato
+            ) {
+                const payload = { avtaleDato: value.roller[rolleIndex].privatAvtale.avtaleDato };
+                updatePrivatAvtale(payload);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [updatePrivatAvtale]);
 
     useEffect(() => {
         setPageErrorsOrUnsavedState((prevState) => ({

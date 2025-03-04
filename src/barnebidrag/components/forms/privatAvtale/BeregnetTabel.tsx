@@ -8,6 +8,10 @@ import React from "react";
 export const BeregnetTabel = ({ privatAvtaleId }: { privatAvtaleId: number }) => {
     const { privatAvtale } = useGetBehandlingV2();
     const beregnetPrivatAvtale = privatAvtale.find((avtale) => avtale.id === privatAvtaleId)?.beregnetPrivatAvtale;
+
+    if (!beregnetPrivatAvtale?.perioder?.length) {
+        return null;
+    }
     return (
         <Table size="small" className="table-fixed table bg-white w-full">
             <Table.Header>
