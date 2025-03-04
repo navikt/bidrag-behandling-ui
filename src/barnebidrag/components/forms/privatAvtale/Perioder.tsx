@@ -27,6 +27,7 @@ import {
     PrivatAvtaleFormValuesPerBarn,
     PrivatAvtalePeriode,
 } from "../../../types/privatAvtaleFormValues";
+import { transformPrivatAvtalePeriode } from "../helpers/PrivatAvtaleHelpers";
 
 const Periode = ({
     item,
@@ -154,7 +155,7 @@ export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatA
     const { lesemodus, setErrorMessage, setErrorModalOpen } = useBehandlingProvider();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.avtaleId);
-    const { control, clearErrors, getValues } = useFormContext<PrivatAvtaleFormValues>();
+    const { control, clearErrors, getValues, setValue } = useFormContext<PrivatAvtaleFormValues>();
     const barnFieldArray = useFieldArray({
         control,
         name: `roller.${barnIndex}.privatAvtale.perioder`,
@@ -169,22 +170,30 @@ export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatA
 
     const onSaveRow = (index: number) => {
         const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
-        let payload: OppdaterePrivatAvtaleRequest;
-        const oppdaterPeriode = {
-            periode: {
-                fom: periode.fom,
-                tom: periode.tom,
+        let payload: OppdaterePrivatAvtaleRequest = {
+            oppdaterPeriode: {
+                periode: {
+                    fom: periode.fom,
+                    tom: periode.tom,
+                },
+                beløp: periode.beløp,
             },
-            beløp: periode.beløp,
         };
 
         if (periode.id) {
-            payload = { oppdaterPeriode: { ...oppdaterPeriode, id: periode.id } };
+            payload = { oppdaterPeriode: { ...payload.oppdaterPeriode, id: periode.id } };
         }
 
         updatePrivatAvtaleQuery.mutation.mutate(payload, {
             onSuccess: (response) => {
                 setEditableRow(undefined);
+                if (!periode.id) {
+                    setValue(
+                        `roller.${barnIndex}.privatAvtale.perioder`,
+                        response.oppdatertPrivatAvtale.perioder.map(transformPrivatAvtalePeriode)
+                    );
+                }
+
                 updatePrivatAvtaleQuery.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,

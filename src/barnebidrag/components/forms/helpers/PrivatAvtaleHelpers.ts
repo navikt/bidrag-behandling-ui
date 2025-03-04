@@ -1,4 +1,4 @@
-import { PrivatAvtaleDto, RolleDto } from "@api/BidragBehandlingApiV1";
+import { PrivatAvtaleDto, PrivatAvtalePeriodeDto, RolleDto } from "@api/BidragBehandlingApiV1";
 
 import { PrivatAvtaleFormValues, PrivatAvtaleFormValuesPerBarn } from "../../../types/privatAvtaleFormValues";
 
@@ -17,17 +17,19 @@ export const createInitialValues = (privatAvtaler: PrivatAvtaleDto[], baRoller: 
         }),
     };
 };
+export const transformPrivatAvtalePeriode = (periode: PrivatAvtalePeriodeDto) => ({
+    id: periode.id,
+    fom: periode.periode.fom,
+    tom: periode.periode.tom ?? null,
+    beløp: periode.beløp,
+});
+
 export const createPrivatAvtaleInitialValues = (privatAvtale: PrivatAvtaleDto): PrivatAvtaleFormValuesPerBarn => {
     return {
         avtaleId: privatAvtale.id,
         skalIndeksreguleres: privatAvtale.skalIndeksreguleres,
         avtaleDato: privatAvtale.avtaleDato ?? null,
         begrunnelse: privatAvtale.begrunnelse ?? "",
-        perioder: privatAvtale.perioder.map((periode) => ({
-            id: periode.id,
-            fom: periode.periode.fom,
-            tom: periode.periode.tom ?? null,
-            beløp: periode.beløp,
-        })),
+        perioder: privatAvtale.perioder.map(transformPrivatAvtalePeriode),
     };
 };
