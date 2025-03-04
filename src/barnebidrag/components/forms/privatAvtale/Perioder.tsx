@@ -152,7 +152,7 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
 };
 
 export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatAvtaleFormValuesPerBarn }) => {
-    const { lesemodus, setErrorMessage, setErrorModalOpen } = useBehandlingProvider();
+    const { lesemodus, setErrorMessage, setErrorModalOpen, setSaveErrorState } = useBehandlingProvider();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.avtaleId);
     const { control, clearErrors, getValues, setValue } = useFormContext<PrivatAvtaleFormValues>();
@@ -204,7 +204,12 @@ export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatA
                     };
                 });
             },
-            onError: () => {},
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onSaveRow(index),
+                });
+            },
         });
     };
 
@@ -264,7 +269,12 @@ export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatA
                                 };
                             });
                         },
-                        onError: () => {},
+                        onError: () => {
+                            setSaveErrorState({
+                                error: true,
+                                retryFn: () => onRemovePeriode(index),
+                            });
+                        },
                     }
                 );
             } else {
