@@ -3,6 +3,7 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import PersonNavnIdent from "@common/components/PersonNavnIdent";
@@ -15,9 +16,9 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Switch, Tabs } from "@navikt/ds-react";
+import { Box, Button, Tabs } from "@navikt/ds-react";
 import { addMonths, deductMonths } from "@utils/date-utils";
-import React, { ChangeEvent, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -228,12 +229,12 @@ const PrivatAvtalePerioder = ({
     initialValues: PrivatAvtaleFormValues;
 }) => {
     const { privatAvtale } = useGetBehandlingV2();
-    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState } = useBehandlingProvider();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = privatAvtale.find(
         (avtale) => avtale.id === item.privatAvtale.avtaleId
     )?.beregnetPrivatAvtale;
-    const { setValue, watch } = useFormContext<PrivatAvtaleFormValues>();
+    const { watch } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
 
@@ -279,9 +280,8 @@ const PrivatAvtalePerioder = ({
         return () => subscription.unsubscribe();
     }, [updatePrivatAvtale]);
 
-    const onToggle = (e: ChangeEvent<HTMLInputElement>) => {
-        setValue(`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`, e.target.checked);
-        updatePrivatAvtale({ skalIndeksreguleres: e.target.checked });
+    const onToggle = (checked: boolean) => {
+        updatePrivatAvtale({ skalIndeksreguleres: checked });
     };
 
     return (
@@ -299,15 +299,12 @@ const PrivatAvtalePerioder = ({
             </FlexRow>
             <Perioder barnIndex={barnIndex} item={item.privatAvtale} />
             <FlexRow>
-                <Switch
-                    value="barnHarTilysnsordning"
-                    checked={item.privatAvtale.skalIndeksreguleres}
+                <FormControlledSwitch
+                    name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}
+                    legend={text.label.skalIndeksreguleres}
                     onChange={onToggle}
-                    size="small"
-                    readOnly={lesemodus || !item.privatAvtale.perioder.length}
-                >
-                    {text.label.skalIndeksreguleres}
-                </Switch>
+                    readOnly={!item.privatAvtale.perioder.length}
+                />
             </FlexRow>
             {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (
                 <BeregnetTabel perioder={beregnetPrivatAvtale.perioder} />
