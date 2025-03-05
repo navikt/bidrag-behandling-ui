@@ -130,16 +130,10 @@ const PrivatAvtaleBarn = ({
                     `roller.${barnIndex}.privatAvtale`,
                     createPrivatAvtaleInitialValues(response.oppdatertPrivatAvtale)
                 );
-                createPrivatAvtale.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        privatAvtale: currentData.privatAvtale.map((avtale) => {
-                            if (avtale.gjelderBarn.ident === response.oppdatertPrivatAvtale.gjelderBarn.ident)
-                                return response.oppdatertPrivatAvtale;
-                            return avtale;
-                        }),
-                    };
-                });
+                createPrivatAvtale.queryClientUpdater((currentData) => ({
+                    ...currentData,
+                    privatAvtale: currentData.privatAvtale.concat(response.oppdatertPrivatAvtale),
+                }));
             },
             onError: () => {
                 setSaveErrorState({
@@ -154,14 +148,12 @@ const PrivatAvtaleBarn = ({
         deletePrivatAvtale.mutation.mutate(item.privatAvtale.avtaleId, {
             onSuccess: () => {
                 setValue(`roller.${barnIndex}.privatAvtale`, null);
-                deletePrivatAvtale.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        privatAvtale: currentData.privatAvtale.filter(
-                            (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
-                        ),
-                    };
-                });
+                deletePrivatAvtale.queryClientUpdater((currentData) => ({
+                    ...currentData,
+                    privatAvtale: currentData.privatAvtale.filter(
+                        (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
+                    ),
+                }));
             },
             onError: () => {
                 setSaveErrorState({
@@ -231,9 +223,9 @@ const PrivatAvtalePerioder = ({
     const { privatAvtale } = useGetBehandlingV2();
     const { setSaveErrorState } = useBehandlingProvider();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
-    const beregnetPrivatAvtale = privatAvtale.find(
-        (avtale) => avtale.id === item.privatAvtale.avtaleId
-    )?.beregnetPrivatAvtale;
+    const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
+    const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
+    const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const { watch } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
@@ -297,7 +289,7 @@ const PrivatAvtalePerioder = ({
                     required
                 />
             </FlexRow>
-            <Perioder barnIndex={barnIndex} item={item.privatAvtale} />
+            <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
             <FlexRow>
                 <FormControlledSwitch
                     name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}

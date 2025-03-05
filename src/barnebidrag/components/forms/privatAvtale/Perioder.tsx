@@ -1,4 +1,5 @@
-import { OppdaterePrivatAvtaleRequest } from "@api/BidragBehandlingApiV1";
+import { OppdaterePrivatAvtaleRequest, PrivatAvtaleValideringsfeilDto } from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import { OverlayLoader } from "@common/components/OverlayLoader";
@@ -8,7 +9,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { actionOnEnter } from "@common/helpers/keyboardHelpers";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Button, Table } from "@navikt/ds-react";
+import { BodyShort, Button, Heading, Table } from "@navikt/ds-react";
 import {
     addMonths,
     addMonthsIgnoreDay,
@@ -18,6 +19,7 @@ import {
     isAfterDate,
 } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
+import { removePlaceholder } from "@utils/string-utils";
 import React, { useMemo, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -151,7 +153,15 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
     );
 };
 
-export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatAvtaleFormValuesPerBarn }) => {
+export const Perioder = ({
+    barnIndex,
+    item,
+    valideringsfeil,
+}: {
+    barnIndex: number;
+    item: PrivatAvtaleFormValuesPerBarn;
+    valideringsfeil: PrivatAvtaleValideringsfeilDto;
+}) => {
     const { lesemodus, setErrorMessage, setErrorModalOpen, setSaveErrorState } = useBehandlingProvider();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.avtaleId);
@@ -285,6 +295,36 @@ export const Perioder = ({ barnIndex, item }: { barnIndex: number; item: PrivatA
 
     return (
         <div className="grid gap-2">
+            {!lesemodus && valideringsfeil && (
+                <BehandlingAlert variant="warning" className="mb-4">
+                    <Heading size="xsmall" level="6">
+                        {text.alert.feilIPeriodisering}.
+                    </Heading>
+                    {valideringsfeil?.overlappendePerioder?.length > 0 && (
+                        <>
+                            {valideringsfeil?.overlappendePerioder?.map(({ periode }, index) => (
+                                <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
+                                    {periode.tom &&
+                                        removePlaceholder(
+                                            text.alert.overlappendePerioder,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom)),
+                                            DateToDDMMYYYYString(dateOrNull(periode.tom))
+                                        )}
+                                    {!periode.tom &&
+                                        removePlaceholder(
+                                            text.alert.overlappendeLøpendePerioder,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom))
+                                        )}
+                                </BodyShort>
+                            ))}
+                            <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
+                        </>
+                    )}
+                    {valideringsfeil?.ingenLøpendePeriode && (
+                        <BodyShort size="small">{text.error.ingenLøpendePeriode}</BodyShort>
+                    )}
+                </BehandlingAlert>
+            )}
             {controlledFields.length > 0 && (
                 <div
                     className={`${
