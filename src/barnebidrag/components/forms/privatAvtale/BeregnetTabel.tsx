@@ -16,7 +16,7 @@ export const BeregnetTabel = ({ perioder }: { perioder: BeregnetPrivatAvtalePeri
                     <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
                         {text.label.tilOgMed}
                     </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
+                    <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                         {text.label.indeksprosent}
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col" align="right">
@@ -33,8 +33,8 @@ export const BeregnetTabel = ({ perioder }: { perioder: BeregnetPrivatAvtalePeri
                         <Table.DataCell>
                             <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.periode.til))}</BodyShort>
                         </Table.DataCell>
-                        <Table.DataCell>
-                            <BodyShort size="small">{formatterBeløpForBeregning(periode.indeksprosent)}</BodyShort>
+                        <Table.DataCell align="right">
+                            <BodyShort size="small">{formatterBeløpForBeregning(periode.indeksprosent)}%</BodyShort>
                         </Table.DataCell>
                         <Table.DataCell align="right">
                             <BodyShort size="small">{formatterBeløpForBeregning(periode.beløp)}</BodyShort>
