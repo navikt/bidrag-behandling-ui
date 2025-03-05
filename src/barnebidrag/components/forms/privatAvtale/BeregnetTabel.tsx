@@ -1,17 +1,11 @@
+import { BeregnetPrivatAvtalePeriodeDto } from "@api/BidragBehandlingApiV1";
 import text from "@common/constants/texts";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { BodyShort, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import { formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
 
-export const BeregnetTabel = ({ privatAvtaleId }: { privatAvtaleId: number }) => {
-    const { privatAvtale } = useGetBehandlingV2();
-    const beregnetPrivatAvtale = privatAvtale.find((avtale) => avtale.id === privatAvtaleId)?.beregnetPrivatAvtale;
-
-    if (!beregnetPrivatAvtale?.perioder?.length) {
-        return null;
-    }
+export const BeregnetTabel = ({ perioder }: { perioder: BeregnetPrivatAvtalePeriodeDto[] }) => {
     return (
         <Table size="small" className="table-fixed table bg-white w-full">
             <Table.Header>
@@ -31,7 +25,7 @@ export const BeregnetTabel = ({ privatAvtaleId }: { privatAvtaleId: number }) =>
                 </Table.Row>
             </Table.Header>
             <Table.Body>
-                {beregnetPrivatAvtale.perioder.map((periode, index) => (
+                {perioder.map((periode, index) => (
                     <Table.Row key={`${index}-periode`} className="align-top">
                         <Table.DataCell>
                             <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.periode.fom))}</BodyShort>

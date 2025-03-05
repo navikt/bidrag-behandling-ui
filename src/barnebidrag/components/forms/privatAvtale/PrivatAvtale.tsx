@@ -227,8 +227,12 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
+    const { privatAvtale } = useGetBehandlingV2();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
+    const beregnetPrivatAvtale = privatAvtale.find(
+        (avtale) => avtale.id === item.privatAvtale.avtaleId
+    )?.beregnetPrivatAvtale;
     const { setValue, watch } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
@@ -305,7 +309,9 @@ const PrivatAvtalePerioder = ({
                     {text.label.skalIndeksreguleres}
                 </Switch>
             </FlexRow>
-            {item.privatAvtale.skalIndeksreguleres && <BeregnetTabel privatAvtaleId={item.privatAvtale.avtaleId} />}
+            {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (
+                <BeregnetTabel perioder={beregnetPrivatAvtale.perioder} />
+            )}
         </>
     );
 };
