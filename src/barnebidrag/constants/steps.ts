@@ -2,10 +2,11 @@ import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
 export const STEPS = {
     [BarnebidragStepper.VIRKNINGSTIDSPUNKT]: 1,
-    [BarnebidragStepper.UNDERHOLDSKOSTNAD]: 2,
-    [BarnebidragStepper.INNTEKT]: 3,
-    [BarnebidragStepper.GEBYR]: 4,
-    [BarnebidragStepper.BOFORHOLD]: 5,
-    [BarnebidragStepper.SAMVÆR]: 6,
-    [BarnebidragStepper.VEDTAK]: 7,
+    [BarnebidragStepper.PRIVAT_AVTALE]: 2,
+    [BarnebidragStepper.UNDERHOLDSKOSTNAD]: 3,
+    [BarnebidragStepper.INNTEKT]: 4,
+    [BarnebidragStepper.GEBYR]: 5,
+    [BarnebidragStepper.BOFORHOLD]: 6,
+    [BarnebidragStepper.SAMVÆR]: 7,
+    [BarnebidragStepper.VEDTAK]: 8,
 };

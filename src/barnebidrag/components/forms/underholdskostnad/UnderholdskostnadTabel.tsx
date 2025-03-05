@@ -273,13 +273,13 @@ export const UnderholdskostnadTabel = ({
                                 <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
                                     {periode.tom &&
                                         removePlaceholder(
-                                            text.alert.overlappendePerioderUnderhold,
+                                            text.alert.overlappendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom)),
                                             DateToDDMMYYYYString(dateOrNull(periode.tom))
                                         )}
                                     {!periode.tom &&
                                         removePlaceholder(
-                                            text.alert.overlappendeLøpendePerioderUnderhold,
+                                            text.alert.overlappendeLøpendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom))
                                         )}
                                 </BodyShort>

@@ -191,6 +191,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     } = useBehandlingProvider();
     const {
         boforhold: { valideringsfeil, sivilstand: sivilstandBehandling },
+        feilOppståttVedSisteGrunnlagsinnhenting,
     } = useGetBehandlingV2();
     const saveBoforhold = useOnSaveBoforhold();
 
@@ -212,6 +213,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         control,
         name: `sivilstand`,
     });
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
+        (innhentingsFeil) => innhentingsFeil.grunnlagsdatatype === OpplysningerType.SIVILSTAND
+    );
 
     const watchFieldArray = useWatch({ control, name: `sivilstand` });
     const controlledFields = sivilstandPerioder.fields.map((field, index) => ({
@@ -431,6 +435,16 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         setShowResetButton(!overskriveManuelleOpplysninger);
                     }}
                 />
+
+                {feilVedInnhentingAvOffentligData && (
+                    <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                        <Heading size="small" level="3">
+                            {text.alert.feilVedInnhentingAvOffentligData}
+                        </Heading>
+                        {text.feilVedInnhentingAvOffentligData}
+                    </BehandlingAlert>
+                )}
+
                 {controlledFields.length > 0 && (
                     <div
                         className={`${

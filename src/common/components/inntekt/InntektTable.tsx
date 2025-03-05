@@ -420,13 +420,13 @@ export const InntektTabel = ({
                                 <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
                                     {periode.tom &&
                                         removePlaceholder(
-                                            text.alert.overlappendePerioder,
+                                            text.alert.overlappendePerioderInntekt,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom)),
                                             DateToDDMMYYYYString(dateOrNull(periode.tom))
                                         )}
                                     {!periode.tom &&
                                         removePlaceholder(
-                                            text.alert.overlappendeLøpendePerioder,
+                                            text.alert.overlappendeLøpendePerioderInntekt,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom))
                                         )}
                                 </BodyShort>

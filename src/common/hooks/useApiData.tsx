@@ -15,6 +15,8 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdaterePrivatAvtaleRequest,
+    OppdaterePrivatAvtaleResponsDto,
     OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
@@ -50,6 +52,7 @@ import { AxiosError } from "axios";
 
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
+    opprettePrivatAvtale: (behandlingId: string) => ["mutation", "createPrivatavtale", behandlingId],
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
     oppdaterManueltOverstyrtGebyr: (behandlingId: string) => [
         "mutation",
@@ -71,6 +74,8 @@ export const MutationKeys = {
     updateFaktiskeTilsynsutgifter: (behandlingId: string) => ["mutation", "faktiskeTilsynsutgifter", behandlingId],
     updateTilleggstønad: (behandlingId: string) => ["mutation", "tilleggstønad", behandlingId],
     slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
+    oppdaterePrivatAvtale: (behandlingId: string) => ["mutation", "oppdaterePrivatAvtale", behandlingId],
+    slettePrivatAvtale: (behandlingId: string) => ["mutation", "slettePrivatAvtale", behandlingId],
 };
 
 export const QueryKeys = {
@@ -729,6 +734,27 @@ export const useUpdateGebyr = () => {
     });
 };
 
+export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterePrivatAvtale(behandlingId),
+        mutationFn: async (payload: OppdaterePrivatAvtaleRequest): Promise<OppdaterePrivatAvtaleResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterPrivatAvtale(
+                Number(behandlingId),
+                privatAvtaleId,
+                payload
+            );
+
+            return data;
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+        },
+    });
+};
+
 export const useUpdateOpphørsdato = () => {
     const { behandlingId } = useBehandlingProvider();
 
@@ -742,6 +768,39 @@ export const useUpdateOpphørsdato = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av opphørsdato", error);
+        },
+    });
+};
+
+export const useCreatePrivatAvtale = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.opprettePrivatAvtale(behandlingId),
+        mutationFn: async (payload: BarnDto): Promise<OppdaterePrivatAvtaleResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.opprettePrivatAvtale(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppretting av privat avtale", error);
+        },
+    });
+};
+
+export const useDeletePrivatAvtale = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.slettePrivatAvtale(behandlingId),
+        mutationFn: async (privatAvtaleId: number): Promise<void> => {
+            await BEHANDLING_API_V1.api.slettePrivatAvtale(Number(behandlingId), privatAvtaleId);
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved sletting av privat avtale", error);
         },
     });
 };
