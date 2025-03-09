@@ -4,12 +4,14 @@ import { createContext, useContext } from "react";
 import {
     BidragPeriodeBeregningsdetaljer,
     ResultatBarnebidragsberegningPeriodeDto,
+    Resultatkode,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { BarnetilleggSkatteprosent } from "./BarnetilleggSkatteprosent";
 import { BeregningBegrensetRevurdering } from "./BeregningBegrensetRevurdering";
 import { EndeligBidragTable } from "./BeregningEndeligBidrag";
+import { BeregningEndringUnderGrense } from "./BeregningEndringUnderGrense";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
 import { BeregningJusterBMsBarnetillegg } from "./BeregningJusterBMsBarnetillegg";
 import { BeregningJusterBPsBarnetillegg } from "./BeregningJusterBPsBarnetillegg";
@@ -22,6 +24,8 @@ type DetaljertBeregningBidragProps = {
 };
 
 type BidragBeregningContextProps = {
+    endeligBeløp: number;
+    erEndringUnderGrense: boolean;
     beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
 };
 export const BidragBeregningContext = createContext<BidragBeregningContextProps | null>(null);
@@ -39,7 +43,13 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
     if (beregningsdetaljer.sluttberegning.ikkeOmsorgForBarnet) return null;
     return (
         <VStack gap="6" className={"w-[800px]"}>
-            <BidragBeregningContext.Provider value={{ beregningsdetaljer }}>
+            <BidragBeregningContext.Provider
+                value={{
+                    beregningsdetaljer,
+                    endeligBeløp: periode.faktiskBidrag,
+                    erEndringUnderGrense: periode.resultatKode === Resultatkode.INGEN_ENDRING_UNDER_GRENSE,
+                }}
+            >
                 <BPsAndelUnderholdskostnad />
                 {!beregningsdetaljer.deltBosted && <BeregningSamværsfradrag />}
                 {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBM.barnetillegg.length > 0 && (
@@ -65,6 +75,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     </VStack>
                 )}
                 <EndeligBidragTable />
+                <BeregningEndringUnderGrense />
             </BidragBeregningContext.Provider>
         </VStack>
     );
