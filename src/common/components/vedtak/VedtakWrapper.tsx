@@ -37,8 +37,9 @@ const validerForRoller = {
 };
 
 export default function VedtakWrapper({ feil, steps, children }: PropsWithChildren<VedtakWrapperProps>) {
-    const { onStepChange } = useBehandlingProvider();
-    const onStepChange2 = (step: string) => onStepChange(step, { navigertFra: "vedtak" });
+    const { onStepChange: onStepChangeFn } = useBehandlingProvider();
+    const onStepChange = (step: number, query?: Record<string, string>, hash?: string) =>
+        onStepChangeFn(step, { navigertFra: "vedtak", ...query }, hash);
     const { type } = useGetBehandlingV2();
     function renderFeilmeldinger() {
         if (!feil?.detaljer) return null;
