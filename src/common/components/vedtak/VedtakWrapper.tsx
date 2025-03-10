@@ -43,32 +43,32 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
-        if (feilInnhold.privatAvtale != null && "privatavtale" in steps) {
+        if (feilInnhold.privatAvtale != null && "privat_avtale" in steps) {
             feilInnhold.privatAvtale.forEach((value) => {
                 if (value?.manglerBegrunnelse === true) {
                     feilliste.push(
-                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
                             Privat avtale: Begrunnelse må fylles ut for barn {value.gjelderBarnNavn}
                         </ErrorSummary.Item>
                     );
                 }
                 if (value?.ingenLøpendePeriode === true) {
                     feilliste.push(
-                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
                             Privat avtale: Det må legges til løpende periode for barn {value.gjelderBarnNavn}
                         </ErrorSummary.Item>
                     );
                 }
                 if (value?.manglerAvtaledato === true) {
                     feilliste.push(
-                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
                             Privat avtale: Avtaledato mangler for barn {value.gjelderBarnNavn}
                         </ErrorSummary.Item>
                     );
                 }
                 if (value?.harPeriodiseringsfeil) {
                     feilliste.push(
-                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privatavtale)}>
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
                             Privat avtale: Perioder for barn {value.gjelderBarnNavn}
                         </ErrorSummary.Item>
                     );
@@ -340,10 +340,10 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                                 [behandlingQueryKeys.tab]:
                                     value.type === OpplysningerType.BARNETILSYN
                                         ? toUnderholdskostnadTabQueryParameter(
-                                              value.gjelderBarn?.husstandsmedlemId,
-                                              value.underholdskostnadId,
-                                              true
-                                          )
+                                            value.gjelderBarn?.husstandsmedlemId,
+                                            value.underholdskostnadId,
+                                            true
+                                        )
                                         : value.rolle?.id?.toString(),
                             })
                         }
@@ -357,12 +357,12 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 typeof feil.detaljer == "string"
                     ? []
                     : Object.keys(feil.detaljer)
-                          .filter((key) =>
-                              !Array.isArray(feil.detaljer[key])
-                                  ? feil.detaljer[key] != null
-                                  : feil.detaljer[key].length > 0
-                          )
-                          .map((key) => capitalizeFirstLetter(key));
+                        .filter((key) =>
+                            !Array.isArray(feil.detaljer[key])
+                                ? feil.detaljer[key] != null
+                                : feil.detaljer[key].length > 0
+                        )
+                        .map((key) => capitalizeFirstLetter(key));
 
             feilliste.push(
                 <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
