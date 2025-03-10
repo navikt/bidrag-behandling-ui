@@ -151,14 +151,10 @@ const VedtakTableBody = ({
                         <Table.ExpandableRow
                             togglePlacement="right"
                             expandOnRowClick
-                            expansionDisabled={
-                                periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
-                                periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet
-                            }
+                            expansionDisabled={periode.erBeregnetAvslag}
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
-                            {periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
-                            periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet ? (
+                            {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
                                 <TableRowResultatAvslag periode={periode} />
                             ) : (
                                 <TableRowResultat periode={periode} />
