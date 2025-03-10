@@ -10,6 +10,11 @@
     border-end-end-radius: 0;
 }
 
+.error .ql-editor {
+    border: 1px solid;
+    border-color: var(--a-border-danger);
+}
+
 .ql-editor {
     width: 400px;
     height: min-content;

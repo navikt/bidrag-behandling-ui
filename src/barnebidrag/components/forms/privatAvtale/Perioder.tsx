@@ -293,9 +293,12 @@ export const Perioder = ({
         }
     };
 
+    const tableValideringsfeil =
+        valideringsfeil?.overlappendePerioder?.length > 0 || valideringsfeil?.ingenLøpendePeriode;
+
     return (
         <div className="grid gap-2">
-            {!lesemodus && valideringsfeil && (
+            {!lesemodus && tableValideringsfeil && (
                 <BehandlingAlert variant="warning" className="mb-4">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.

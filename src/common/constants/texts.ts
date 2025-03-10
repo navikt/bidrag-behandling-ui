@@ -301,6 +301,7 @@ const tekster = {
             "Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorikk. Notatet blir generert automatisk basert på opplysningene oppgitt.",
         ønskerDuÅSlette: "Ønsker du å slette?",
         ønskerDuÅSletteBarnet: "Ønsker du å slette barnet som er lagt til i beregningen?",
+        ønskerDuÅSlettePrivatAvtale: "Ønsker du å slette privat avtale?",
         ønskerDuÅGåVidere: "Feil ved utfylling",
         statusIkkeLagret: "Statusen er ikke lagret",
         statusIkkeLagretDescription: "Hvis ikke statusen lagres vil ikke endringene tas med i beregningen",

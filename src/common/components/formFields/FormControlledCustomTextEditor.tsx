@@ -18,7 +18,7 @@ export function FormControlledCustomTextareaEditor({
     readOnly?: boolean;
 }) {
     const { setValue, trigger, control } = useFormContext();
-    const { field } = useController({ name, control });
+    const { field, fieldState } = useController({ name, control });
 
     function onChange(value: string) {
         setValue(name, value);
@@ -29,6 +29,7 @@ export function FormControlledCustomTextareaEditor({
         <CustomTextareaEditor
             name={name}
             value={field.value}
+            error={fieldState?.error?.message}
             onChange={onChange}
             readOnly={readOnly}
             label={label}
