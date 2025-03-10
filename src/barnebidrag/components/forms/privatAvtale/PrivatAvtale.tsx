@@ -6,6 +6,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import PersonNavnIdent from "@common/components/PersonNavnIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
@@ -15,10 +16,11 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Tabs } from "@navikt/ds-react";
+import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, deductMonths } from "@utils/date-utils";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -31,6 +33,44 @@ import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/pr
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
+
+export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
+    const ref = useRef<HTMLDialogElement>(null);
+    const onConfirm = () => {
+        ref.current?.close();
+        onDelete();
+    };
+
+    return (
+        <>
+            <div className="flex items-center justify-end">
+                <Button
+                    type="button"
+                    onClick={() => ref.current?.showModal()}
+                    icon={<TrashIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            </div>
+            <ConfirmationModal
+                ref={ref}
+                closeable
+                description={text.varsel.ønskerDuÅSlettePrivatAvtale}
+                heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
+                footer={
+                    <>
+                        <Button type="button" onClick={onConfirm} size="small">
+                            {text.label.jaSlett}
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={() => ref.current?.close()}>
+                            {text.label.avbryt}
+                        </Button>
+                    </>
+                }
+            />
+        </>
+    );
+};
 
 const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     const { control } = useFormContext<PrivatAvtaleFormValues>();
@@ -114,7 +154,6 @@ const PrivatAvtaleBarn = ({
 }) => {
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const createPrivatAvtale = useOnCreatePrivatAvtale();
-    const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const { setValue } = useFormContext<PrivatAvtaleFormValues>();
 
     const onCreatePrivatAvtale = () => {
@@ -139,26 +178,6 @@ const PrivatAvtaleBarn = ({
                 setSaveErrorState({
                     error: true,
                     retryFn: () => onCreatePrivatAvtale(),
-                });
-            },
-        });
-    };
-
-    const onDeletePrivatAvtale = () => {
-        deletePrivatAvtale.mutation.mutate(item.privatAvtale.avtaleId, {
-            onSuccess: () => {
-                setValue(`roller.${barnIndex}.privatAvtale`, null);
-                deletePrivatAvtale.queryClientUpdater((currentData) => ({
-                    ...currentData,
-                    privatAvtale: currentData.privatAvtale.filter(
-                        (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
-                    ),
-                }));
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => onDeletePrivatAvtale(),
                 });
             },
         });
@@ -192,19 +211,7 @@ const PrivatAvtaleBarn = ({
                     </Button>
                 )}
                 {item.privatAvtale && (
-                    <>
-                        <Button
-                            type="button"
-                            onClick={onDeletePrivatAvtale}
-                            variant="secondary"
-                            size="small"
-                            className="w-fit"
-                            disabled={lesemodus}
-                        >
-                            {text.label.slettPrivatAvtale}
-                        </Button>
-                        <PrivatAvtalePerioder item={item} barnIndex={barnIndex} initialValues={initialValues} />
-                    </>
+                    <PrivatAvtalePerioder item={item} barnIndex={barnIndex} initialValues={initialValues} />
                 )}
             </Box>
         </>
@@ -222,13 +229,51 @@ const PrivatAvtalePerioder = ({
 }) => {
     const { privatAvtale } = useGetBehandlingV2();
     const { setSaveErrorState } = useBehandlingProvider();
+    const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
-    const { watch } = useFormContext<PrivatAvtaleFormValues>();
+    const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
+
+    useEffect(() => {
+        const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);
+        const { error: manglerBegrunnelseError } = getFieldState(`roller.${barnIndex}.privatAvtale.begrunnelse`);
+        if (valideringsfeil?.manglerAvtaledato && !avtaleDatoError) {
+            setError(`roller.${barnIndex}.privatAvtale.avtaleDato`, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        }
+        if (valideringsfeil?.manglerBegrunnelse && !manglerBegrunnelseError) {
+            setError(`roller.${barnIndex}.privatAvtale.begrunnelse`, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        }
+    }, [valideringsfeil?.manglerAvtaledato, valideringsfeil?.manglerBegrunnelse]);
+
+    const onDeletePrivatAvtale = () => {
+        deletePrivatAvtale.mutation.mutate(item.privatAvtale.avtaleId, {
+            onSuccess: () => {
+                setValue(`roller.${barnIndex}.privatAvtale`, null);
+                deletePrivatAvtale.queryClientUpdater((currentData) => ({
+                    ...currentData,
+                    privatAvtale: currentData.privatAvtale.filter(
+                        (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
+                    ),
+                }));
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onDeletePrivatAvtale(),
+                });
+            },
+        });
+    };
 
     const updatePrivatAvtale = (payload: OppdaterePrivatAvtaleRequest) => {
         updatePrivatAvtaleQuery.mutation.mutate(payload, {
@@ -278,7 +323,7 @@ const PrivatAvtalePerioder = ({
 
     return (
         <>
-            <FlexRow>
+            <FlexRow className="justify-between">
                 <FormControlledMonthPicker
                     name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
                     label={text.label.avtaleDato}
@@ -288,6 +333,7 @@ const PrivatAvtalePerioder = ({
                     toDate={tom}
                     required
                 />
+                <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
             <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
             <FlexRow>

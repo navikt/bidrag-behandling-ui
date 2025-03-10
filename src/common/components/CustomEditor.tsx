@@ -1,5 +1,5 @@
 import { ExpandIcon, PadlockLockedFillIcon } from "@navikt/aksel-icons";
-import { BodyLong, BodyShort, Button, Label } from "@navikt/ds-react";
+import { BodyLong, BodyShort, Button, ErrorMessage, Label } from "@navikt/ds-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useBehandlingProvider } from "../context/BehandlingContext";
@@ -19,6 +19,7 @@ export function CustomTextareaEditor({
     readOnly,
     onChange,
     withOpenInNewWindow,
+    error,
 }: {
     name;
     value?: string;
@@ -29,6 +30,7 @@ export function CustomTextareaEditor({
     readOnly?: boolean;
     onChange?: (html: string) => void;
     withOpenInNewWindow?: boolean;
+    error?: string;
 }) {
     const { lesemodus } = useBehandlingProvider();
     const [openInNewWindow, setOpenInNewWindow] = useState<boolean>(false);
@@ -102,7 +104,13 @@ export function CustomTextareaEditor({
                     readOnly={lesemodus || readOnly}
                     defaultValue={reformattedValue}
                     onTextChange={onTextChange}
+                    error={!!error}
                 />
+                {error && (
+                    <ErrorMessage showIcon size="small" className="mt-2">
+                        {error}
+                    </ErrorMessage>
+                )}
             </BodyLong>
         </>
     );
