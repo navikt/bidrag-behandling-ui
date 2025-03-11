@@ -125,6 +125,7 @@ export enum Grunnlagstype {
     DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE = "DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE",
     DELBEREGNING_ENDRING_SJEKK_GRENSE = "DELBEREGNING_ENDRING_SJEKK_GRENSE",
     DELBEREGNING_PRIVAT_AVTALE_PERIODE = "DELBEREGNING_PRIVAT_AVTALE_PERIODE",
+    DELBEREGNING_INDEKSREGULERING_PERIODE = "DELBEREGNING_INDEKSREGULERING_PERIODE",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     BARNETILLEGG_PERIODE = "BARNETILLEGG_PERIODE",
     BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
@@ -258,6 +259,7 @@ export enum OpplysningerType {
     BARNETILSYN = "BARNETILSYN",
     ANDRE_BARN = "ANDRE_BARN",
     BOFORHOLD = "BOFORHOLD",
+    BOFORHOLDBMSOKNADSBARN = "BOFORHOLD_BM_SØKNADSBARN",
     BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
     KONTANTSTOTTE = "KONTANTSTØTTE",
     SIVILSTAND = "SIVILSTAND",
@@ -324,6 +326,7 @@ export enum Resultatkode {
     AVSLAGPRIVATAVTALEOMSAeRBIDRAG = "AVSLAG_PRIVAT_AVTALE_OM_SÆRBIDRAG",
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
     GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
+    INGEN_ENDRING_UNDER_GRENSE = "INGEN_ENDRING_UNDER_GRENSE",
 }
 
 export enum Rolletype {
@@ -486,6 +489,8 @@ export interface OppdatereVirkningstidspunkt {
 export interface AktiveGrunnlagsdata {
     /** @uniqueItems true */
     arbeidsforhold: ArbeidsforholdGrunnlagDto[];
+    /** @uniqueItems true */
+    husstandsmedlemBM: HusstandsmedlemGrunnlagDto[];
     /** @uniqueItems true */
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
@@ -950,6 +955,8 @@ export interface IkkeAktivInntektDto {
 export interface IkkeAktiveGrunnlagsdata {
     inntekter: IkkeAktiveInntekter;
     /** @uniqueItems true */
+    husstandsmedlemBM: HusstandsmedlemGrunnlagDto[];
+    /** @uniqueItems true */
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     /** @uniqueItems true */
     arbeidsforhold: ArbeidsforholdGrunnlagDto[];
@@ -1150,9 +1157,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1218,9 +1225,9 @@ export interface PrivatAvtaleValideringsfeilDto {
     ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1258,9 +1265,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendePeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2177,9 +2184,9 @@ export interface KanBehandlesINyLosningRequest {
     søktFomDato?: string;
     /** @format date */
     mottattdato?: string;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2254,9 +2261,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2290,8 +2297,8 @@ export interface Skatt {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2326,6 +2333,7 @@ export interface ResultatRolle {
     /** @format date */
     fødselsdato: string;
     innbetaltBeløp?: number;
+    referanse: string;
 }
 
 export interface BarnetilleggDetaljerDto {
@@ -2353,6 +2361,7 @@ export interface BidragPeriodeBeregningsdetaljer {
     inntekter?: ResultatBeregningInntekterDto;
     delberegningBidragsevne?: DelberegningBidragsevneDto;
     samværsfradrag?: BeregningsdetaljerSamvaersfradrag;
+    endringUnderGrense?: DelberegningEndringSjekkGrensePeriode;
     sluttberegning?: SluttberegningBarnebidrag;
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
@@ -2379,6 +2388,15 @@ export interface DelberegningBarnetilleggSkattesats {
     sumInntekt: number;
 }
 
+export interface DelberegningEndringSjekkGrensePeriode {
+    periode: TypeArManedsperiode;
+    løpendeBidragBeløp?: number;
+    løpendeBidragFraPrivatAvtale: boolean;
+    beregnetBidragBeløp?: number;
+    faktiskEndringFaktor?: number;
+    endringErOverGrense: boolean;
+}
+
 export interface DelberegningUnderholdskostnad {
     periode: TypeArManedsperiode;
     forbruksutgift: number;
@@ -2400,6 +2418,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
     faktiskBidrag: number;
     resultatKode?: Resultatkode;
     erDirekteAvslag: boolean;
+    erBeregnetAvslag: boolean;
+    erEndringUnderGrense: boolean;
     beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
     resultatkodeVisningsnavn?: string;
 }
@@ -2524,10 +2544,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
-    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-    gjelderBarn?: HusstandsmedlemDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+    gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2819,10 +2839,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
+    kategoriVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2911,9 +2931,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3002,9 +3022,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -3028,8 +3048,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3084,8 +3104,8 @@ export interface NotatSkattBeregning {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3591,7 +3611,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3683,7 +3706,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

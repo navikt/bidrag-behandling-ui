@@ -1,5 +1,7 @@
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
+import { AndreVoksneIHusstanden } from "@common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
 import { BarnPerioder } from "@common/components/boforhold/BarnPerioder";
+import BeregnetBoforhold from "@common/components/boforhold/BeregnetBoforhold";
 import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpplysninger";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -11,23 +13,37 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { AndreVoksneIHusstanden } from "../../../../common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
-import BeregnetBoforhold from "../../../../common/components/boforhold/BeregnetBoforhold";
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { Begrunnelse } from "./Begrunnelse";
+import { BoforholdBM } from "./BoforholdBM";
 
 const Main = () => {
+    const {
+        aktiveGrunnlagsdata: { husstandsmedlemBM },
+    } = useGetBehandlingV2();
+
     useEffect(scrollToHash, []);
 
     return (
         <>
-            <Heading level="2" size="small">
-                {text.label.barn}
-            </Heading>
+            {husstandsmedlemBM.length > 0 && (
+                <>
+                    <Heading level="2" size="medium">
+                        {text.title.boforholdBM}
+                    </Heading>
+                    <BoforholdBM />
+                </>
+            )}
+            <div>
+                <Heading level="2" size="medium">
+                    {text.title.boforholdBp}
+                </Heading>
+                <Heading level="3" size="small">
+                    {text.label.barn}
+                </Heading>
+            </div>
             <BarnPerioder />
-
             <AndreVoksneIHusstanden />
-
             <BeregnetBoforhold />
         </>
     );
@@ -50,12 +66,7 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <NewFormLayout
-                    title={text.title.boforholdBp}
-                    main={<Main />}
-                    side={<Begrunnelse />}
-                    pageAlert={<NyOpplysningerAlert />}
-                />
+                <NewFormLayout main={<Main />} side={<Begrunnelse />} pageAlert={<NyOpplysningerAlert />} />
             </form>
         </FormProvider>
     );
