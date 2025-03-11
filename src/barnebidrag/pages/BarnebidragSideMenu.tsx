@@ -25,7 +25,6 @@ export const BarnebidragSideMenu = () => {
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
-        gebyr: { valideringsfeil: gebyrValideringsfeil },
         samvær,
         gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -57,17 +56,18 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
-    const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
-    const boforholdValideringsFeil = husstandsmedlemValideringsFeil;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
     const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
     const boforholdIkkeAktiverteEndringer =
         husstandsmedlemIkkeAktiverteEndringer || andreVoksneIHusstandenIkkeAktiverteEndringer;
+    const boforholdValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
     const inntektHasValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
-    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const gebyrValideringsFeil = gebyr?.valideringsfeil?.some((valideringsfeil) => {
+        return valideringsfeil.manglerBegrunnelse;
+    });
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
@@ -568,7 +568,7 @@ export const BarnebidragSideMenu = () => {
                 step={isBidragV2Enabled ? "5." : "4"}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-                interactive={!!gebyr}
+                interactive={interactive && !!gebyr?.gebyrRoller.length}
                 active={activeButton === BarnebidragStepper.GEBYR}
                 valideringsfeil={gebyrValideringsFeil}
             />
