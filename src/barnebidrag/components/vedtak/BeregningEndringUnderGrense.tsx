@@ -25,7 +25,7 @@ export const BeregningEndringUnderGrense = () => {
                     label: "Endring i prosent",
                     textRight: false,
                     labelBold: true,
-                    value: `(${formatterBeløpForBeregning(endeligBeløp)} - ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}) / ${formatterBeløpForBeregning(endeligBeløp)} = ${formatterProsent(endringUnderGrense.faktiskEndringFaktor)}`,
+                    value: `(${formatterBeløpForBeregning(endeligBeløp)} - ${formatterBeløpForBeregning(sluttberegning.resultatBeløp)}) / ${formatterBeløpForBeregning(endeligBeløp)} = ${formatterProsent(endringUnderGrense.faktiskEndringFaktor)}`,
                 },
             ].filter((d) => d)}
         />
