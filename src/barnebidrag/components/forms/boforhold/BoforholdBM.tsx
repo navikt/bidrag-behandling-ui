@@ -18,7 +18,7 @@ export const BoforholdBM = () => {
     return (
         <ExpansionCard size="small" aria-label="Small-variant">
             <ExpansionCard.Header>
-                <ExpansionCard.Title>{text.title.opplysningerFraFolkeregistret}</ExpansionCard.Title>
+                <ExpansionCard.Title size="small">{text.title.opplysningerFraFolkeregistret}</ExpansionCard.Title>
             </ExpansionCard.Header>
             <ExpansionCard.Content>
                 {husstandsmedlemBM.map((husstandsmedlem) => (
