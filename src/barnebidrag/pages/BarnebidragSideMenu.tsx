@@ -56,12 +56,11 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
-    const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
-    const boforholdValideringsFeil = husstandsmedlemValideringsFeil;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
     const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
     const boforholdIkkeAktiverteEndringer =
         husstandsmedlemIkkeAktiverteEndringer || andreVoksneIHusstandenIkkeAktiverteEndringer;
+    const boforholdValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
     const inntektHasValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
