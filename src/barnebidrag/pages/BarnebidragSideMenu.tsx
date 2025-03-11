@@ -66,7 +66,9 @@ export const BarnebidragSideMenu = () => {
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
-    const gebyrValideringsFeil = !!gebyr?.valideringsfeil?.length;
+    const gebyrValideringsFeil = gebyr?.valideringsfeil?.some((valideringsfeil) => {
+        return valideringsfeil.manglerBegrunnelse;
+    });
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
