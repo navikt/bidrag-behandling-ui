@@ -25,7 +25,6 @@ export const BarnebidragSideMenu = () => {
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
-        gebyr: { valideringsfeil: gebyrValideringsfeil },
         samvær,
         gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -67,7 +66,7 @@ export const BarnebidragSideMenu = () => {
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
-    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const gebyrValideringsFeil = !!gebyr?.valideringsfeil?.length;
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
@@ -568,7 +567,7 @@ export const BarnebidragSideMenu = () => {
                 step={isBidragV2Enabled ? "5." : "4"}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-                interactive={!!gebyr}
+                interactive={interactive && !!gebyr?.gebyrRoller.length}
                 active={activeButton === BarnebidragStepper.GEBYR}
                 valideringsfeil={gebyrValideringsFeil}
             />
