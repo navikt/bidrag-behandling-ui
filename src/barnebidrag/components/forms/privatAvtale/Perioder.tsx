@@ -165,7 +165,8 @@ export const Perioder = ({
     const { lesemodus, setErrorMessage, setErrorModalOpen, setSaveErrorState } = useBehandlingProvider();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.avtaleId);
-    const { control, clearErrors, getValues, setValue } = useFormContext<PrivatAvtaleFormValues>();
+    const { control, clearErrors, getValues, setValue, setError, getFieldState } =
+        useFormContext<PrivatAvtaleFormValues>();
     const barnFieldArray = useFieldArray({
         control,
         name: `roller.${barnIndex}.privatAvtale.perioder`,
@@ -178,7 +179,21 @@ export const Perioder = ({
         };
     });
 
+    const validateRow = (index: number) => {
+        const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+        if (periode.fom === null) {
+            setError(`roller.${barnIndex}.privatAvtale.perioder.${index}.fom`, {
+                type: "notValid",
+                message: text.error.datoMåFyllesUt,
+            });
+        }
+    };
+
     const onSaveRow = (index: number) => {
+        validateRow(index);
+        const fieldState = getFieldState(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+        if (fieldState.error) return;
+
         const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
         let payload: OppdaterePrivatAvtaleRequest = {
             oppdaterPeriode: {
