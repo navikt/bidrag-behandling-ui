@@ -43,6 +43,10 @@ export type BarnebidragPageErrorsOrUnsavedState = {
             [_key: UnderholdskostnadTables]: boolean;
         };
     };
+    privatAvtale: {
+        error: boolean;
+        openFields?: boolean;
+    };
 };
 
 function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
@@ -51,6 +55,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         boforhold: { error: false },
         samvær: { error: false },
         inntekt: { error: false },
+        privatAvtale: { error: false },
     });
     const formSteps = { defaultStep: BarnebidragStepper.VIRKNINGSTIDSPUNKT, steps: BarnebidragSteps };
 

@@ -8,6 +8,7 @@ import Vedtak from "../vedtak/Vedtak";
 import Boforhold from "./boforhold/Boforhold";
 import Gebyr from "./gebyr/Gebyr";
 import Inntekt from "./inntekt/Inntekt";
+import PrivatAvtale from "./privatAvtale/PrivatAvtale";
 import Samvær from "./samvær/Samvær";
 import Underholdskostnad from "./underholdskostnad/Underholdskostnad";
 import Virkningstidspunkt from "./virkningstidspunkt/Virkningstidspunkt";
@@ -16,6 +17,8 @@ const BarnebidragForm = memo(({ activeStep }: { activeStep: string }) => {
     switch (activeStep) {
         case BarnebidragStepper.VIRKNINGSTIDSPUNKT:
             return <Virkningstidspunkt />;
+        case BarnebidragStepper.PRIVAT_AVTALE:
+            return <PrivatAvtale />;
         case BarnebidragStepper.UNDERHOLDSKOSTNAD:
             return <Underholdskostnad />;
         case BarnebidragStepper.GEBYR:
