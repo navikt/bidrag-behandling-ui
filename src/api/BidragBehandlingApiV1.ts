@@ -125,6 +125,7 @@ export enum Grunnlagstype {
     DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE = "DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE",
     DELBEREGNING_ENDRING_SJEKK_GRENSE = "DELBEREGNING_ENDRING_SJEKK_GRENSE",
     DELBEREGNING_PRIVAT_AVTALE_PERIODE = "DELBEREGNING_PRIVAT_AVTALE_PERIODE",
+    DELBEREGNING_INDEKSREGULERING_PERIODE = "DELBEREGNING_INDEKSREGULERING_PERIODE",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     BARNETILLEGG_PERIODE = "BARNETILLEGG_PERIODE",
     BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
@@ -258,6 +259,7 @@ export enum OpplysningerType {
     BARNETILSYN = "BARNETILSYN",
     ANDRE_BARN = "ANDRE_BARN",
     BOFORHOLD = "BOFORHOLD",
+    BOFORHOLDBMSOKNADSBARN = "BOFORHOLD_BM_SØKNADSBARN",
     BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
     KONTANTSTOTTE = "KONTANTSTØTTE",
     SIVILSTAND = "SIVILSTAND",
@@ -324,6 +326,7 @@ export enum Resultatkode {
     AVSLAGPRIVATAVTALEOMSAeRBIDRAG = "AVSLAG_PRIVAT_AVTALE_OM_SÆRBIDRAG",
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
     GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
+    INGEN_ENDRING_UNDER_GRENSE = "INGEN_ENDRING_UNDER_GRENSE",
 }
 
 export enum Rolletype {
@@ -2330,6 +2333,7 @@ export interface ResultatRolle {
     /** @format date */
     fødselsdato: string;
     innbetaltBeløp?: number;
+    referanse: string;
 }
 
 export interface BarnetilleggDetaljerDto {
@@ -2357,6 +2361,7 @@ export interface BidragPeriodeBeregningsdetaljer {
     inntekter?: ResultatBeregningInntekterDto;
     delberegningBidragsevne?: DelberegningBidragsevneDto;
     samværsfradrag?: BeregningsdetaljerSamvaersfradrag;
+    endringUnderGrense?: DelberegningEndringSjekkGrensePeriode;
     sluttberegning?: SluttberegningBarnebidrag;
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
@@ -2383,6 +2388,12 @@ export interface DelberegningBarnetilleggSkattesats {
     sumInntekt: number;
 }
 
+export interface DelberegningEndringSjekkGrensePeriode {
+    periode: TypeArManedsperiode;
+    faktiskEndringFaktor?: number;
+    endringErOverGrense: boolean;
+}
+
 export interface DelberegningUnderholdskostnad {
     periode: TypeArManedsperiode;
     forbruksutgift: number;
@@ -2404,6 +2415,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
     faktiskBidrag: number;
     resultatKode?: Resultatkode;
     erDirekteAvslag: boolean;
+    erBeregnetAvslag: boolean;
+    erEndringUnderGrense: boolean;
     beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
     resultatkodeVisningsnavn?: string;
 }
@@ -2826,7 +2839,7 @@ export interface NotatBehandlingDetaljerDto {
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
