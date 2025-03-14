@@ -13,7 +13,7 @@ export const useDebounce = (callback: (...args: any) => void) => {
 
     const debouncedCallback = useMemo(() => {
         const func = (...args: any) => {
-            ref.current?.(args);
+            ref.current?.(...args);
             setDebouncing(false);
         };
 
@@ -22,6 +22,6 @@ export const useDebounce = (callback: (...args: any) => void) => {
 
     return (...args: any) => {
         setDebouncing(true);
-        debouncedCallback(args);
+        debouncedCallback(...args);
     };
 };

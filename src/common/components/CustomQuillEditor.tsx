@@ -62,9 +62,10 @@ type EditorProps = {
     defaultValue: string;
     onTextChange: (html: string) => void;
     resize?: boolean;
+    error?: boolean;
     ref;
 };
-export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, resize }: EditorProps) => {
+export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, resize, error }: EditorProps) => {
     const containerRef = useRef(null);
     const [quill, setQuill] = useState(null);
 
@@ -139,7 +140,7 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
 
     return (
         <div
-            className={`ql-top-container ${readOnly ? "readonly" : ""} ${resize ? "resizable" : ""}`}
+            className={`ql-top-container ${readOnly ? "readonly" : ""} ${resize ? "resizable" : ""} ${error ? "error" : ""}`}
             ref={containerRef}
         ></div>
     );

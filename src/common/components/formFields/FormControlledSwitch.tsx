@@ -8,11 +8,13 @@ export const FormControlledSwitch = ({
     legend,
     onChange,
     className,
+    readOnly,
 }: {
     name: string;
     legend: string;
     onChange?: (checked: boolean) => void;
     className?: string;
+    readOnly?: boolean;
 }) => {
     const { control } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
@@ -30,7 +32,7 @@ export const FormControlledSwitch = ({
             className={className}
             onChange={handleOnChange}
             size="small"
-            readOnly={lesemodus}
+            readOnly={lesemodus || readOnly}
         >
             {legend}
         </Switch>

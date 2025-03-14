@@ -1,4 +1,6 @@
 import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { PersonIdent } from "@common/components/PersonIdent";
+import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
 import behandlingQueryKeys, {
     toUnderholdskostnadTabQueryParameter,
@@ -8,22 +10,21 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { PersonIdent } from "../../common/components/PersonIdent";
-import { PersonNavn } from "../../common/components/PersonNavn";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
 export const BarnebidragSideMenu = () => {
     const { onStepChange } = useBehandlingProvider();
+    const { isBidragV2Enabled } = useFeatureToogle();
     const {
         vedtakstype,
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
-        gebyr: { valideringsfeil: gebyrValideringsfeil },
         samvær,
         gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -55,17 +56,18 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
-    const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
-    const boforholdValideringsFeil = husstandsmedlemValideringsFeil;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
     const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
     const boforholdIkkeAktiverteEndringer =
         husstandsmedlemIkkeAktiverteEndringer || andreVoksneIHusstandenIkkeAktiverteEndringer;
+    const boforholdValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
     const inntektHasValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
-    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const gebyrValideringsFeil = gebyr?.valideringsfeil?.some((valideringsfeil) => {
+        return valideringsfeil.manglerBegrunnelse;
+    });
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
@@ -103,8 +105,16 @@ export const BarnebidragSideMenu = () => {
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VIRKNINGSTIDSPUNKT])}
                 active={activeButton === BarnebidragStepper.VIRKNINGSTIDSPUNKT}
             />
+            {isBidragV2Enabled && (
+                <MenuButton
+                    step={"2."}
+                    title={text.title.privatAvtale}
+                    onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
+                    active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
+                />
+            )}
             <MenuButton
-                step={"2."}
+                step={isBidragV2Enabled ? "3." : "2"}
                 title={text.title.underholdskostnad}
                 interactive={interactive}
                 valideringsfeil={underholdskostnadHasValideringsFeil}
@@ -312,7 +322,7 @@ export const BarnebidragSideMenu = () => {
                     ))}
             />
             <MenuButton
-                step={"3."}
+                step={isBidragV2Enabled ? "4." : "3"}
                 title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.INNTEKT])}
                 interactive={interactive}
@@ -555,15 +565,15 @@ export const BarnebidragSideMenu = () => {
                 ))}
             />
             <MenuButton
-                step={"4."}
+                step={isBidragV2Enabled ? "5." : "4"}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-                interactive={!!gebyr}
+                interactive={interactive && !!gebyr?.gebyrRoller.length}
                 active={activeButton === BarnebidragStepper.GEBYR}
                 valideringsfeil={gebyrValideringsFeil}
             />
             <MenuButton
-                step={"5."}
+                step={isBidragV2Enabled ? "6." : "5"}
                 title={text.title.boforhold}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD])}
                 interactive={interactive}
@@ -572,7 +582,7 @@ export const BarnebidragSideMenu = () => {
                 unconfirmedUpdates={boforholdIkkeAktiverteEndringer}
             />
             <MenuButton
-                step={"6."}
+                step={isBidragV2Enabled ? "7." : "6"}
                 title={text.title.samvær}
                 interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
@@ -580,7 +590,7 @@ export const BarnebidragSideMenu = () => {
                 valideringsfeil={samværValideringsFeil}
             />
             <MenuButton
-                step={"7."}
+                step={isBidragV2Enabled ? "8." : "7"}
                 title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK])}
                 active={activeButton === BarnebidragStepper.VEDTAK}

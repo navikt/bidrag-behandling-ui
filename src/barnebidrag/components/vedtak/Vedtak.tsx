@@ -151,14 +151,10 @@ const VedtakTableBody = ({
                         <Table.ExpandableRow
                             togglePlacement="right"
                             expandOnRowClick
-                            expansionDisabled={
-                                periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
-                                periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet
-                            }
+                            expansionDisabled={periode.erBeregnetAvslag}
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
-                            {periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
-                            periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet ? (
+                            {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
                                 <TableRowResultatAvslag periode={periode} />
                             ) : (
                                 <TableRowResultat periode={periode} />
@@ -292,19 +288,19 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     BPs andel U
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
                     Samvær
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
                     Evne / 25%
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
                     Beregnet bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
                     Endelig bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "390px" }}>
                     Resultat
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
