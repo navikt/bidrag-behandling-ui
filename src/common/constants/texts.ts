@@ -16,7 +16,7 @@ const tekster = {
         barnSomHarBlittLagtInn: "Barn som har blitt lagt inn i nye opplysninger fra Folkeregisteret:",
         barnSomIkkeFinnes: "Barn som ikke finnes i nye opplysninger fra Folkeregisteret:",
         beløpEndret: "Beløp for en eller flere perioder har blitt endret",
-        bidragOpphørt: "Bidrag er opphørt fra før {} i vedtak fattet {}.",
+        bidragOpphørt: "Bidraget opphører fra {}, i vedtak fattet {}.",
         endretVirkningstidspunkt:
             "Virkningstidspunktet er endret. Dette kan påvirke beregningen. <br> Inntekter og boforhold må manuelt vurderes på nytt",
         endringer: "Følgende endringer har blitt utført:",

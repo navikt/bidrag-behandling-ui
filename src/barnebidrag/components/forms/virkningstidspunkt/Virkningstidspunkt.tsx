@@ -322,12 +322,12 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     return (
         <>
             {opphør?.eksisterendeOpphør && (
-                <BehandlingAlert variant="info" className="w-[488px]">
+                <BehandlingAlert variant="info" className="!w-[520px]">
                     <BodyShort>
                         {removePlaceholder(
                             text.alert.bidragOpphørt,
-                            opphør.eksisterendeOpphør.opphørsdato,
-                            opphør.eksisterendeOpphør.vedtaksdato
+                            DateToDDMMYYYYString(dateOrNull(opphør.eksisterendeOpphør.opphørsdato)),
+                            DateToDDMMYYYYString(dateOrNull(opphør.eksisterendeOpphør.vedtaksdato))
                         )}
                     </BodyShort>
                 </BehandlingAlert>
