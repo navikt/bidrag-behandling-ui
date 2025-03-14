@@ -463,6 +463,7 @@ const opplysningTilStep = (opplysningstype: MaBekrefteNyeOpplysninger, steps: ST
         case OpplysningerType.SIVILSTAND:
         case OpplysningerType.BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN:
         case OpplysningerType.BOFORHOLD:
+        case OpplysningerType.BOFORHOLDBMSOKNADSBARN:
             return steps.boforhold;
     }
 };
