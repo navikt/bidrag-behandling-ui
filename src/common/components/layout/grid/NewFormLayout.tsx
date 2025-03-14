@@ -14,11 +14,13 @@ export const NewFormLayout = ({
 }) => {
     return (
         <>
-            <div className="flex flex-row gap-2">
-                <Heading level="1" size="medium">
-                    {title}
-                </Heading>
-            </div>
+            {title && (
+                <div className="flex flex-row gap-2">
+                    <Heading level="1" size="medium">
+                        {title}
+                    </Heading>
+                </div>
+            )}
             <div className="grid 2xl:grid-cols-[960px_auto] gap-6">
                 <div className="h-fit grid gap-y-4">
                     {pageAlert}
