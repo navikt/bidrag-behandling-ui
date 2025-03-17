@@ -348,6 +348,8 @@ export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
             } for ${tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}${forRolle}`;
+        case OpplysningerType.BOFORHOLDBMSOKNADSBARN:
+            return `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes} for boforhold til Bidragsmottaker`;
         case OpplysningerType.BOFORHOLD:
             return opplysningstype.gjelderBarn
                 ? `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes} for barn ${opplysningstype.gjelderBarn?.navn}`
