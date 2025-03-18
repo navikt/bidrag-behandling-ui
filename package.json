@@ -113,7 +113,7 @@
     "postcss-loader": "^8.1.1",
     "prettier": "^3.5.0",
     "process": "^0.11.10",
-    "react-refresh": "^0.14.2",
+    "react-refresh": "^0.16.0",
     "rehype-slug": "6.0.0",
     "sinon": "^19.0.2",
     "style-loader": "^3.3.3",
