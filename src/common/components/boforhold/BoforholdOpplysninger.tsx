@@ -193,7 +193,7 @@ export const BoforholdOpplysninger = ({
                         </div>
                     )}
             </div>
-            {!hasNewOpplysningerFraFolkeregistre && !lesemodus && (
+            {hasNewOpplysningerFraFolkeregistre && !lesemodus && (
                 <NyOpplysningerFraFolkeregistreTabell
                     ikkeAktivertePerioder={ikkeAktivertePerioder}
                     onActivate={onActivate}
