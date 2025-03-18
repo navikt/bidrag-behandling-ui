@@ -98,7 +98,9 @@ const Perioder = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
 function NyOpplysningerFraFolkeregistreTabell({ ident }: { ident: string }) {
     const {
         ikkeAktiverteEndringerIGrunnlagsdata: { husstandsmedlemBM },
+        roller,
     } = useGetBehandlingV2();
+    const bmRolle = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const ikkeAktivertePerioder = husstandsmedlemBM.find(
         (husstandsmedlem) => husstandsmedlem.ident === ident
     )?.perioder;
@@ -110,7 +112,7 @@ function NyOpplysningerFraFolkeregistreTabell({ ident }: { ident: string }) {
         activateGrunnlag.mutation.mutate(
             {
                 overskriveManuelleOpplysninger: false,
-                personident: ident,
+                personident: bmRolle.ident,
                 grunnlagstype: OpplysningerType.BOFORHOLDBMSOKNADSBARN,
             },
             {
