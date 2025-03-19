@@ -23,7 +23,7 @@ export const BoforholdBM = () => {
     );
 
     return (
-        <ExpansionCard size="small" aria-label="Small-variant">
+        <ExpansionCard size="small" aria-label="Small-variant" defaultOpen={harNyeOpplysninger}>
             <ExpansionCard.Header>
                 <ExpansionCard.Title size="small">
                     {text.title.opplysningerFraFolkeregistret}{" "}
@@ -35,6 +35,7 @@ export const BoforholdBM = () => {
                 </ExpansionCard.Title>
             </ExpansionCard.Header>
             <ExpansionCard.Content>
+                {harNyeOpplysninger && <NyOpplysningerFraFolkeregistreTabell />}
                 {husstandsmedlemBM.map((husstandsmedlem) => (
                     <Fragment key={husstandsmedlem.ident}>
                         <Box
@@ -51,7 +52,6 @@ export const BoforholdBM = () => {
                                 </div>
                             </div>
                             <Perioder perioder={husstandsmedlem.perioder} />
-                            <NyOpplysningerFraFolkeregistreTabell ident={husstandsmedlem.ident} />
                         </Box>
                     </Fragment>
                 ))}
@@ -61,6 +61,7 @@ export const BoforholdBM = () => {
 };
 
 const Perioder = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
+    const virkningsOrSoktFraDato = useVirkningsdato();
     return (
         <Table size="small" className="table-fixed table bg-white w-full">
             <Table.Header>
@@ -80,7 +81,11 @@ const Perioder = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
                 {perioder.map((periode, index) => (
                     <Table.Row key={`periode-${index}`} className="align-top">
                         <Table.DataCell>
-                            <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.datoFom))}</BodyShort>
+                            <BodyShort size="small">
+                                {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
+                                    ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
+                                    : DateToDDMMYYYYString(new Date(periode.datoFom))}
+                            </BodyShort>
                         </Table.DataCell>
                         <Table.DataCell>
                             <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.datoTom))}</BodyShort>
@@ -95,16 +100,12 @@ const Perioder = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
     );
 };
 
-function NyOpplysningerFraFolkeregistreTabell({ ident }: { ident: string }) {
+const NyOpplysningerFraFolkeregistreTabell = () => {
     const {
         ikkeAktiverteEndringerIGrunnlagsdata: { husstandsmedlemBM },
         roller,
     } = useGetBehandlingV2();
     const bmRolle = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
-    const ikkeAktivertePerioder = husstandsmedlemBM.find(
-        (husstandsmedlem) => husstandsmedlem.ident === ident
-    )?.perioder;
-    const virkningsOrSoktFraDato = useVirkningsdato();
     const { setSaveErrorState } = useBehandlingProvider();
     const activateGrunnlag = useOnActivateGrunnlag();
 
@@ -128,14 +129,12 @@ function NyOpplysningerFraFolkeregistreTabell({ ident }: { ident: string }) {
                 onError: () => {
                     setSaveErrorState({
                         error: true,
-                        retryFn: () => onActivate(),
+                        retryFn: onActivate,
                     });
                 },
             }
         );
     };
-
-    if (!ikkeAktivertePerioder || ikkeAktivertePerioder.length === 0) return null;
 
     return (
         <Box
@@ -147,36 +146,26 @@ function NyOpplysningerFraFolkeregistreTabell({ ident }: { ident: string }) {
             className="w-[708px]"
         >
             <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
-            <table className="mt-2">
-                <thead>
-                    <tr>
-                        <th align="left">{text.label.fraOgMed}</th>
-                        <th align="left">{text.label.tilOgMed}</th>
-                        <th align="left">{text.label.status}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {ikkeAktivertePerioder?.map((periode, index) => (
-                        <tr key={index + periode.datoFom}>
-                            <td width="100px" scope="row">
-                                {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
-                                    ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
-                                    : DateToDDMMYYYYString(new Date(periode.datoFom))}
-                            </td>
-                            <td width="100px">
-                                {" "}
-                                {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
-                            </td>
-                            <td width="250px">{hentVisningsnavn(periode.bostatus)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="grid gap-4">
+                {husstandsmedlemBM.map((husstandsmedlem) => (
+                    <Box key={husstandsmedlem.ident} background="surface-subtle">
+                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
+                            <div>
+                                <RolleTag rolleType={Rolletype.BA} />
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <PersonNavnIdent ident={husstandsmedlem.ident} />
+                            </div>
+                        </div>
+                        <Perioder perioder={husstandsmedlem.perioder} />
+                    </Box>
+                ))}
+            </div>
             <HStack gap="6" className="mt-4">
-                <Button type="button" variant="secondary" size="xsmall" onClick={() => onActivate()}>
-                    Ja
+                <Button type="button" variant="secondary" size="xsmall" onClick={onActivate}>
+                    {text.label.oppdaterOpplysninger}
                 </Button>
             </HStack>
         </Box>
     );
-}
+};
