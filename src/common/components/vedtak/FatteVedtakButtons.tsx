@@ -1,7 +1,8 @@
 import { faro } from "@grafana/faro-react";
 import { RedirectTo } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Select } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
+import { useIsMutating, useMutation } from "@tanstack/react-query";
+import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
@@ -23,6 +24,7 @@ export class MåBekrefteOpplysningerStemmerError extends Error {
 }
 
 const utsettDagerListe = [3, 4, 5, 6, 7, 8, 9];
+const fatteVedtakMutationKey = ["fatteVedtak"];
 export const FatteVedtakButtons = ({
     isBeregningError,
     disabled = false,
@@ -38,10 +40,12 @@ export const FatteVedtakButtons = ({
     const [innkrevingUtsattAntallDager, setInnkrevingUtsattAntallDager] = useState<number | null>(
         erBarnebidrag ? 3 : null
     );
+    const isMutating = Boolean(useIsMutating({ mutationKey: fatteVedtakMutationKey }));
     const { engangsbeløptype, stønadstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
+        mutationKey: fatteVedtakMutationKey,
         mutationFn: () => {
             if (!bekreftetVedtak) {
                 throw new MåBekrefteOpplysningerStemmerError();
@@ -61,6 +65,7 @@ export const FatteVedtakButtons = ({
             }
         },
     });
+    const throttledSubmit = debounce(fatteVedtakFn.mutate, 100);
 
     const måBekrefteAtOpplysningerStemmerFeil =
         fatteVedtakFn.isError && fatteVedtakFn.error instanceof MåBekrefteOpplysningerStemmerError;
@@ -122,8 +127,8 @@ export const FatteVedtakButtons = ({
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || fatteVedtakFn.isSuccess || disabled}
-                    onClick={() => fatteVedtakFn.mutate()}
+                    disabled={isBeregningError || fatteVedtakFn.isSuccess || disabled || isMutating}
+                    onClick={() => throttledSubmit()}
                     className="w-max"
                     size="small"
                 >
