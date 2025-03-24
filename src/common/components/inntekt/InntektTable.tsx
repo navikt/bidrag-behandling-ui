@@ -33,7 +33,7 @@ import { useInntektTableProvider } from "./InntektTableContext";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
-        <div className="h-8 w-full flex items-center justify-center">
+        <div className="w-full flex justify-center">
             {kilde === Kilde.OFFENTLIG ? (
                 <Buildings2Icon title="Offentlig" fontSize="1.5rem" />
             ) : (
@@ -56,7 +56,7 @@ export const TaMed = ({
 
     if (viewOnly) return null;
     return (
-        <div className="h-8 w-full flex items-center justify-center">
+        <div className="h-6 w-full flex items-center justify-center">
             <FormControlledCheckbox
                 name={`${fieldName}.${index}.taMed`}
                 onChange={(checked) => handleOnSelect(checked, index)}
@@ -79,7 +79,7 @@ export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: strin
                 hideLabel
             />
         ) : (
-            <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
+            <div className="h-6 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
         )}
     </>
 );
@@ -100,14 +100,14 @@ export const EditOrSaveButton = ({
 
     if (item.kanRedigeres === false || viewOnly) return null;
     return (
-        <div className="h-8 flex items-center justify-center">
+        <div className="h-6 flex items-center justify-center">
             {!lesemodus && item.taMed && !item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onEditRow(index)}
                     icon={<PencilIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
             {!lesemodus && item.erRedigerbart && (
@@ -116,7 +116,7 @@ export const EditOrSaveButton = ({
                     onClick={() => onSaveRow(index)}
                     icon={<FloppydiskIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
         </div>
@@ -186,7 +186,7 @@ export const Periode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">
+        <div className="h-6 flex items-center">
             {item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}
         </div>
     );

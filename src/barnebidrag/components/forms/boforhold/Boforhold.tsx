@@ -22,7 +22,7 @@ const Main = () => {
     return (
         <>
             <Heading level="2" size="small">
-                {text.label.barn}
+                {text.title.BP}
             </Heading>
             <BarnPerioder />
 
@@ -51,7 +51,7 @@ const BoforholdsForm = () => {
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
                 <NewFormLayout
-                    title={text.title.boforholdBp}
+                    title={text.title.boforhold}
                     main={<Main />}
                     side={<Begrunnelse />}
                     pageAlert={<NyOpplysningerAlert />}

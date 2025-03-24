@@ -153,6 +153,8 @@ export const BoforholdOpplysninger = ({
         );
     };
 
+    if (!hasOpplysningerFraFolkeregistre) return null;
+
     return (
         <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4" data-section={elementIds.seksjon_offentlige_opplysninger}>

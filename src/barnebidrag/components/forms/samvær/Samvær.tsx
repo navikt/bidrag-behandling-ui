@@ -664,7 +664,7 @@ const EditOrSaveButton = ({
             onClick={() => onSaveRow(index)}
             icon={<FloppydiskIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <Button
@@ -672,7 +672,7 @@ const EditOrSaveButton = ({
             onClick={() => onEditRow(index)}
             icon={<PencilIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     );
 };
@@ -685,7 +685,7 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
             onClick={() => onRemovePeriode(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>

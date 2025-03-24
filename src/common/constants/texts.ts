@@ -266,6 +266,8 @@ const tekster = {
         boforhold: "Boforhold",
         boforholdBM: "Boforhold (BM)",
         boforholdBp: "Boforhold (BP)",
+        BM: "BM",
+        BP: "BP",
         copyButton: "Kopier {}",
         detaljer: "Detaljer",
         direkteBetaltAvBp: "Direkte betalt av BP",

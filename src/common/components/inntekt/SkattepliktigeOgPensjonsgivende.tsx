@@ -34,7 +34,7 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8 flex flex-row gap-0 align-center" size="small">
+        <BodyShort className="leading-6 flex flex-row gap-0 align-center" size="small">
             {hentVisningsnavn(
                 item.rapporteringstype,
                 item.opprinneligFom ?? item.datoFom,

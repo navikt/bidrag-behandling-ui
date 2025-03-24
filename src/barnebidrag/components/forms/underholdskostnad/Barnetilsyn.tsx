@@ -139,7 +139,7 @@ export const UnderholdskostnadPeriode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">
+        <div className="h-6 flex items-center">
             {item[field] && <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>}
         </div>
     );

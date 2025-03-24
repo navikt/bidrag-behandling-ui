@@ -156,7 +156,7 @@ const Main = () => {
                     <Fragment key={item?.rolle?.id}>
                         <Box
                             background="surface-subtle"
-                            className="grid gap-2 py-2 mt-2 px-4"
+                            className="grid gap-2 py-2 px-4"
                             id={`${elementIds.seksjon_gebyr}_${item?.rolle?.id}`}
                         >
                             <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white">

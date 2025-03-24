@@ -38,7 +38,7 @@ const Dagsats = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">
+                <div className="h-6 flex items-center justify-end">
                     <BodyShort size="small">{formatterBeløp(item.dagsats)}</BodyShort>
                 </div>
             )}
@@ -47,7 +47,7 @@ const Dagsats = ({
 };
 const Totalt12Måned = ({ item }: { item: TilleggsstonadPeriode }) => {
     return (
-        <div className="h-8 flex items-center justify-end">
+        <div className="h-6 flex items-center justify-end">
             <BodyShort size="small">{formatterBeløpForBeregning(item.total)}</BodyShort>
         </div>
     );
