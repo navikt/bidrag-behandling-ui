@@ -26,25 +26,20 @@ const Main = () => {
 
     return (
         <>
+            <Heading level="2" size="small">
+                {text.title.BP}
+            </Heading>
+            <BarnPerioder />
+            <AndreVoksneIHusstanden />
+            <BeregnetBoforhold />
             {husstandsmedlemBM.length > 0 && (
                 <>
-                    <Heading level="2" size="medium">
-                        {text.title.boforholdBM}
+                    <Heading level="2" size="small">
+                        {text.title.BM}
                     </Heading>
                     <BoforholdBM />
                 </>
             )}
-            <div>
-                <Heading level="2" size="medium">
-                    {text.title.boforholdBp}
-                </Heading>
-                <Heading level="3" size="small">
-                    {text.label.barn}
-                </Heading>
-            </div>
-            <BarnPerioder />
-            <AndreVoksneIHusstanden />
-            <BeregnetBoforhold />
         </>
     );
 };
@@ -66,7 +61,12 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <NewFormLayout main={<Main />} side={<Begrunnelse />} pageAlert={<NyOpplysningerAlert />} />
+                <NewFormLayout
+                    title={text.title.boforhold}
+                    main={<Main />}
+                    side={<Begrunnelse />}
+                    pageAlert={<NyOpplysningerAlert />}
+                />
             </form>
         </FormProvider>
     );

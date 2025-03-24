@@ -60,7 +60,7 @@ const DeleteButton = ({
             onClick={() => onRemovePeriode(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>
@@ -88,7 +88,7 @@ const EditOrSaveButton = ({
             onClick={() => onSaveRow(index)}
             icon={<FloppydiskIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <Button
@@ -96,7 +96,7 @@ const EditOrSaveButton = ({
             onClick={() => onEditRow(index)}
             icon={<PencilIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     );
 };
@@ -144,7 +144,7 @@ const Status = ({
             onSelect={() => clearErrors(`${fieldName}.bostatus`)}
         />
     ) : (
-        <div className="h-8 flex items-center">{bosstatusToVisningsnavn(item.bostatus)}</div>
+        <div className="h-6 flex items-center">{bosstatusToVisningsnavn(item.bostatus)}</div>
     );
 };
 export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
@@ -507,7 +507,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     variant="info"
                     size="small"
                     alertKey={"18åralert" + behandlingId + barn.ident}
-                    className="w-[708px] mb-2"
+                    className="w-[708px]"
                     closeButton
                 >
                     <Heading size="small" level="3">
@@ -517,7 +517,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </StatefulAlert>
             )}
             {feilVedInnhentingAvOffentligData && (
-                <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                <BehandlingAlert variant="info" className="w-[708px]">
                     <Heading size="small" level="3">
                         {text.alert.feilVedInnhentingAvOffentligData}
                     </Heading>
@@ -525,7 +525,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </BehandlingAlert>
             )}
             {valideringsfeilForBarn && (
-                <div className="mb-4">
+                <div>
                     <BehandlingAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}

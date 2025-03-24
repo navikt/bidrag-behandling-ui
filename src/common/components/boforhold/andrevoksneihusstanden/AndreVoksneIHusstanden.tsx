@@ -89,7 +89,7 @@ export const Periode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
+        <div className="h-6 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
     );
 };
 
@@ -103,7 +103,7 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
             onClick={() => onRemovePeriode(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>
@@ -131,7 +131,7 @@ const EditOrSaveButton = ({
             onClick={() => onSaveRow(index)}
             icon={<FloppydiskIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <Button
@@ -139,7 +139,7 @@ const EditOrSaveButton = ({
             onClick={() => onEditRow(index)}
             icon={<PencilIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     );
 };
@@ -170,7 +170,7 @@ const Status = ({
             onSelect={() => clearErrors(`${fieldName}.bostatus`)}
         />
     ) : (
-        <div className="h-8 flex items-center">{hentVisningsnavn(item.bostatus)}</div>
+        <div className="h-6 flex items-center">{hentVisningsnavn(item.bostatus)}</div>
     );
 };
 export const AndreVoksneIHusstanden = () => {

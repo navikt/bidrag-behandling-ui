@@ -64,6 +64,6 @@ export const Samværsperiode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
+        <div className="h-6 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
     );
 };

@@ -57,7 +57,7 @@ const Omfang = ({
             onSelect={() => clearErrors(`${fieldName}.tilsynstype`)}
         />
     ) : (
-        <div className="h-8 flex items-center">
+        <div className="h-6 flex items-center">
             <BodyShort size="small">{STONAD_TIL_BARNETILSYNS_TYPE[item.tilsynstype]}</BodyShort>
         </div>
     );
@@ -90,7 +90,7 @@ const StønadTilBarnetilsyn = ({
             onSelect={() => clearErrors(`${fieldName}.skolealder`)}
         />
     ) : (
-        <div className="h-8 flex items-center">
+        <div className="h-6 flex items-center">
             <BodyShort size="small">{STONAD_TIL_BARNETILSYNS_SKOLEALDER[item.skolealder]}</BodyShort>
         </div>
     );

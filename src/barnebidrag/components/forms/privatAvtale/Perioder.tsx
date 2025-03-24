@@ -78,7 +78,7 @@ const Periode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
+        <div className="h-6 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
     );
 };
 
@@ -97,7 +97,7 @@ const Beløp = ({ item, editableRow, field }: { item: PrivatAvtalePeriode; edita
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
+                <div className="h-6 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
             )}
         </>
     );
@@ -124,7 +124,7 @@ const EditOrSaveButton = ({
             onClick={() => onSaveRow(index)}
             icon={<FloppydiskIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <Button
@@ -132,7 +132,7 @@ const EditOrSaveButton = ({
             onClick={() => onEditRow(index)}
             icon={<PencilIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     );
 };
@@ -146,7 +146,7 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
             onClick={() => onRemovePeriode(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>
