@@ -48,14 +48,14 @@ export const EditOrSaveButton = ({
 
     if (item.kanRedigeres === false) return null;
     return (
-        <div className="h-8 flex items-center justify-center">
+        <div className="h-6 flex items-center justify-center">
             {!lesemodus && !item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onEditRow(index)}
                     icon={<PencilIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
             {!lesemodus && item.erRedigerbart && (
@@ -64,7 +64,7 @@ export const EditOrSaveButton = ({
                     onClick={() => onSaveRow(index)}
                     icon={<FloppydiskIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
         </div>
@@ -75,7 +75,7 @@ export const DeleteButton = ({ onDelete }: { onDelete: () => void }) => {
     const { lesemodus } = useBehandlingProvider();
 
     return !lesemodus ? (
-        <Button type="button" onClick={onDelete} icon={<TrashIcon aria-hidden />} variant="tertiary" size="small" />
+        <Button type="button" onClick={onDelete} icon={<TrashIcon aria-hidden />} variant="tertiary" size="xsmall" />
     ) : (
         <div className="min-w-[40px]"></div>
     );
