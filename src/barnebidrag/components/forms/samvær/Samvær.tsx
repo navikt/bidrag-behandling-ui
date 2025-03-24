@@ -612,7 +612,7 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
                                 item={item}
                             />
                         </Table.DataCell>
-                        <Table.DataCell textSize="small" align="right" className="align-middle">
+                        <Table.DataCell textSize="small" align="right">
                             <SamværskalkulatorButton
                                 editableRow={editableRowIndex === index}
                                 fieldname={`${fieldName}.${index}`}
