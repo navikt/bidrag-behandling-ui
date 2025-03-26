@@ -146,7 +146,6 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
-    const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
     const onAarsakSelect = (value: string) => {
         const barnsFødselsdato = kunEtBarnIBehandlingen
             ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
@@ -170,7 +169,11 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
-    const virkningsårsaker = er18ÅrsBidrag ? årsakListe18årsBidrag : årsakListe;
+    const virkningsårsaker = er18ÅrsBidrag
+        ? årsakListe18årsBidrag
+        : behandling.virkningstidspunkt.harLøpendeBidrag
+          ? harLøpendeBidragÅrsakListe
+          : årsakListe;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -199,12 +202,9 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     className="w-max"
                 >
                     {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
-                    {skalViseÅrsakstyper && (
+                    {!erTypeOpphør && (
                         <optgroup label={text.label.årsak}>
-                            {(behandling.virkningstidspunkt.harLøpendeBidrag
-                                ? harLøpendeBidragÅrsakListe
-                                : virkningsårsaker
-                            )
+                            {virkningsårsaker
                                 .filter((value) => {
                                     if (kunEtBarnIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
