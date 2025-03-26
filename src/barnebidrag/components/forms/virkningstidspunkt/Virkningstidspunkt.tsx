@@ -109,8 +109,10 @@ const createInitialValues = (
 };
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
-    const årsak = [...årsakListe, ...årsakListe18årsBidrag].find((value) => value === values.årsakAvslag);
-    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør].find(
+    const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
+        (value) => value === values.årsakAvslag
+    );
+    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør].find(
         (value) => value === values.årsakAvslag
     );
     return {
@@ -166,6 +168,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
+    const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
     const virkningsårsaker = er18ÅrsBidrag ? årsakListe18årsBidrag : årsakListe;
     return (
@@ -198,11 +201,11 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
                     {skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
-                            {virkningsårsaker
+                            {(behandling.virkningstidspunkt.harLøpendeBidrag
+                                ? harLøpendeBidragÅrsakListe
+                                : virkningsårsaker
+                            )
                                 .filter((value) => {
-                                    if (behandling.virkningstidspunkt.harLøpendeBidrag)
-                                        return harLøpendeBidragÅrsakListe.includes(value);
-
                                     if (kunEtBarnIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
                                 })
@@ -215,31 +218,16 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     )}
 
                     {er18ÅrsBidrag ? (
-                        <optgroup
-                            label={
-                                erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
-                                    ? text.label.opphør
-                                    : text.label.avslag
-                            }
-                        >
-                            {(erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
-                                ? avslagsListe18ÅrOpphør
-                                : avslagsListe18År
-                            ).map((value) => (
+                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                            {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
                             ))}
                         </optgroup>
                     ) : (
-                        <optgroup
-                            label={
-                                erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
-                                    ? text.label.opphør
-                                    : text.label.avslag
-                            }
-                        >
-                            {(erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
+                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                            {(erTypeOpphørOrLøpendeBidrag
                                 ? avslagsListeOpphør.filter((value) =>
                                       erTypeOpphør ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT : true
                                   )
