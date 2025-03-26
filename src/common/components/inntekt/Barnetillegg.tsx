@@ -41,7 +41,7 @@ const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string 
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8 flex align-center" size="small">
+        <BodyShort className="leading-6 flex align-center" size="small">
             {hentVisningsnavn(
                 item.inntektstype,
                 item.opprinneligFom ?? item.datoFom,
@@ -63,7 +63,7 @@ const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) =>
                 hideLabel
             />
         ) : (
-            <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløpMnd)}</div>
+            <div className="h-6 flex items-center justify-end">{formatterBeløp(item.beløpMnd)}</div>
         )}
     </>
 );
@@ -242,7 +242,7 @@ export const Barnetillegg = () => {
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
-                                                                <div className="h-8 flex items-center justify-end">
+                                                                <div className="h-6 flex items-center justify-end">
                                                                     {formatterBeløp(
                                                                         item.kilde === Kilde.MANUELL
                                                                             ? item.beløpMnd * 12
