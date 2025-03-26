@@ -222,7 +222,10 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                                     : text.label.avslag
                             }
                         >
-                            {(erTypeOpphør ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
+                            {(erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
+                                ? avslagsListe18ÅrOpphør
+                                : avslagsListe18År
+                            ).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
