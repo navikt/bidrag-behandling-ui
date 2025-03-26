@@ -62,9 +62,16 @@ const årsakListe18årsBidrag = [
     TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
     TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
+const harLøpendeBidragÅrsakListe = [
+    TypeArsakstype.MANEDETTERBETALTFORFALTBIDRAG,
+    TypeArsakstype.FRA_ENDRINGSTIDSPUNKT,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -189,6 +196,8 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         <optgroup label={text.label.årsak}>
                             {virkningsårsaker
                                 .filter((value) => {
+                                    if (behandling.virkningstidspunkt.harLøpendeBidrag)
+                                        return harLøpendeBidragÅrsakListe.includes(value);
                                     if (kunEtBarnIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
                                 })
@@ -210,7 +219,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         </optgroup>
                     ) : (
                         <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                            {avslagsListe.map((value) => (
+                            {(erTypeOpphør ? avslagsListeOpphør : avslagsListe).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
