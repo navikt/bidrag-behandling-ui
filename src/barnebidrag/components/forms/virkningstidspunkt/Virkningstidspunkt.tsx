@@ -71,7 +71,11 @@ const harLøpendeBidragÅrsakListe = [
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListeOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.IKKE_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -198,6 +202,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                                 .filter((value) => {
                                     if (behandling.virkningstidspunkt.harLøpendeBidrag)
                                         return harLøpendeBidragÅrsakListe.includes(value);
+
                                     if (kunEtBarnIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
                                 })
@@ -210,7 +215,13 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     )}
 
                     {er18ÅrsBidrag ? (
-                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
+                        <optgroup
+                            label={
+                                erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
+                                    ? text.label.opphør
+                                    : text.label.avslag
+                            }
+                        >
                             {(erTypeOpphør ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -218,8 +229,21 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                             ))}
                         </optgroup>
                     ) : (
-                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                            {(erTypeOpphør ? avslagsListeOpphør : avslagsListe).map((value) => (
+                        <optgroup
+                            label={
+                                erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
+                                    ? text.label.opphør
+                                    : text.label.avslag
+                            }
+                        >
+                            {(erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
+                                ? avslagsListeOpphør.filter((value) =>
+                                      behandling.virkningstidspunkt.harLøpendeBidrag
+                                          ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
+                                          : true
+                                  )
+                                : avslagsListe
+                            ).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
