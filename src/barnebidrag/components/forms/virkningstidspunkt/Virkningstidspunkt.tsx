@@ -241,9 +241,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         >
                             {(erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag
                                 ? avslagsListeOpphør.filter((value) =>
-                                      behandling.virkningstidspunkt.harLøpendeBidrag
-                                          ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
-                                          : true
+                                      erTypeOpphør ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT : true
                                   )
                                 : avslagsListe
                             ).map((value) => (
