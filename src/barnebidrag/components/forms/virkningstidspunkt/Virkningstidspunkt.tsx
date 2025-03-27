@@ -62,9 +62,20 @@ const årsakListe18årsBidrag = [
     TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
     TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
+const harLøpendeBidragÅrsakListe = [
+    TypeArsakstype.MANEDETTERBETALTFORFALTBIDRAG,
+    TypeArsakstype.FRA_ENDRINGSTIDSPUNKT,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListeOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.IKKE_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -98,8 +109,10 @@ const createInitialValues = (
 };
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
-    const årsak = [...årsakListe, ...årsakListe18årsBidrag].find((value) => value === values.årsakAvslag);
-    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør].find(
+    const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
+        (value) => value === values.årsakAvslag
+    );
+    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør].find(
         (value) => value === values.årsakAvslag
     );
     return {
@@ -133,7 +146,6 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
-    const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
     const onAarsakSelect = (value: string) => {
         const barnsFødselsdato = kunEtBarnIBehandlingen
             ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
@@ -155,8 +167,13 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
+    const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
-    const virkningsårsaker = er18ÅrsBidrag ? årsakListe18årsBidrag : årsakListe;
+    const virkningsårsaker = er18ÅrsBidrag
+        ? årsakListe18årsBidrag
+        : behandling.virkningstidspunkt.harLøpendeBidrag
+          ? harLøpendeBidragÅrsakListe
+          : årsakListe;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -185,7 +202,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     className="w-max"
                 >
                     {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
-                    {skalViseÅrsakstyper && (
+                    {!erTypeOpphør && (
                         <optgroup label={text.label.årsak}>
                             {virkningsårsaker
                                 .filter((value) => {
@@ -201,16 +218,21 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     )}
 
                     {er18ÅrsBidrag ? (
-                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                            {(erTypeOpphør ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
+                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                            {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
                             ))}
                         </optgroup>
                     ) : (
-                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                            {avslagsListe.map((value) => (
+                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                            {(erTypeOpphørOrLøpendeBidrag
+                                ? avslagsListeOpphør.filter((value) =>
+                                      erTypeOpphør ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT : true
+                                  )
+                                : avslagsListe
+                            ).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
