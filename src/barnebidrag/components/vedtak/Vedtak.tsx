@@ -176,7 +176,7 @@ const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidragsbere
 
             <Table.DataCell textSize="small" colSpan={5}></Table.DataCell>
 
-            <Table.DataCell textSize="small">Avslag</Table.DataCell>
+            <Table.DataCell textSize="small">Opphør</Table.DataCell>
 
             <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
         </>
