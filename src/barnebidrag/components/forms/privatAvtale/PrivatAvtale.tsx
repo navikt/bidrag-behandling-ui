@@ -1,4 +1,4 @@
-import { BarnDto, OppdaterePrivatAvtaleRequest, Rolletype } from "@api/BidragBehandlingApiV1";
+import { BarnDto, OppdaterePrivatAvtaleRequest, Rolletype, Stonadstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -14,12 +14,13 @@ import { default as urlSearchParams } from "@common/constants/behandlingQueryKey
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
-import { addMonths, deductMonths } from "@utils/date-utils";
+import { addMonths, firstDayOfMonth } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -227,7 +228,7 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale } = useGetBehandlingV2();
+    const { privatAvtale, stønadstype } = useGetBehandlingV2();
     const { setSaveErrorState } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
@@ -235,7 +236,12 @@ const PrivatAvtalePerioder = ({
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
-    const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
+    const fom = useMemo(() => {
+        if (stønadstype === Stonadstype.BIDRAG18AAR) {
+            return getFirstDayOfMonthAfterEighteenYears(new Date(selectedPrivatAvtale.gjelderBarn.fødselsdato));
+        }
+        return addMonths(firstDayOfMonth(new Date(selectedPrivatAvtale.gjelderBarn.fødselsdato)), 1);
+    }, [selectedPrivatAvtale.gjelderBarn.ident]);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
 
     useEffect(() => {
