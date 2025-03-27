@@ -70,7 +70,11 @@ const harLøpendeBidragÅrsakListe = [
 ];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18ÅrOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.AVSLUTTET_SKOLEGANG,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+];
 const avslagsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
     Resultatkode.IKKE_OMSORG_FOR_BARNET,
