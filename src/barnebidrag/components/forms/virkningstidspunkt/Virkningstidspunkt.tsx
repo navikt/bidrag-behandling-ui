@@ -70,13 +70,21 @@ const harLøpendeBidragÅrsakListe = [
 ];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18ÅrOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.AVSLUTTET_SKOLEGANG,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+];
 const avslagsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
     Resultatkode.IKKE_OMSORG_FOR_BARNET,
     Resultatkode.BIDRAGSPLIKTIGERDOD,
 ];
 
+const avslaglisteAlle = Array.from(
+    new Set([...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør])
+);
+const årsakslisteAlle = Array.from(new Set([...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe]));
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
 const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
@@ -142,6 +150,7 @@ const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stona
 };
 
 const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVirkningsDatoAlert }) => {
+    const { lesemodus } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
@@ -169,11 +178,14 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
-    const virkningsårsaker = er18ÅrsBidrag
-        ? årsakListe18årsBidrag
-        : behandling.virkningstidspunkt.harLøpendeBidrag
-          ? harLøpendeBidragÅrsakListe
-          : årsakListe;
+    const virkningsårsaker = lesemodus
+        ? årsakslisteAlle
+        : er18ÅrsBidrag
+          ? årsakListe18årsBidrag
+          : behandling.virkningstidspunkt.harLøpendeBidrag
+            ? harLøpendeBidragÅrsakListe
+            : årsakListe;
+
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -227,11 +239,15 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         </optgroup>
                     ) : (
                         <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
-                            {(erTypeOpphørOrLøpendeBidrag
-                                ? avslagsListeOpphør.filter((value) =>
-                                      erTypeOpphør ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT : true
-                                  )
-                                : avslagsListe
+                            {(lesemodus
+                                ? avslaglisteAlle
+                                : erTypeOpphørOrLøpendeBidrag
+                                  ? avslagsListeOpphør.filter((value) =>
+                                        erTypeOpphør
+                                            ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
+                                            : true
+                                    )
+                                  : avslagsListe
                             ).map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -394,7 +410,7 @@ const Side = () => {
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
         onStepChange(
-            avslagsListe.includes(årsakAvslag)
+            avslaglisteAlle.includes(årsakAvslag)
                 ? gebyr !== undefined
                     ? STEPS[BarnebidragStepper.GEBYR]
                     : STEPS[BarnebidragStepper.VEDTAK]
