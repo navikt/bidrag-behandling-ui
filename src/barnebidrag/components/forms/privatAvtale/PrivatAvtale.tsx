@@ -35,6 +35,13 @@ import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
 
+export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: string) => {
+    if (stønadstype === Stonadstype.BIDRAG18AAR) {
+        return getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
+    }
+    return addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+};
+
 export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
     const ref = useRef<HTMLDialogElement>(null);
     const onConfirm = () => {
@@ -237,11 +244,8 @@ const PrivatAvtalePerioder = ({
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => {
-        if (stønadstype === Stonadstype.BIDRAG18AAR) {
-            return getFirstDayOfMonthAfterEighteenYears(new Date(selectedPrivatAvtale.gjelderBarn.fødselsdato));
-        }
-        return addMonths(firstDayOfMonth(new Date(selectedPrivatAvtale.gjelderBarn.fødselsdato)), 1);
-    }, [selectedPrivatAvtale.gjelderBarn.ident]);
+        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
+    }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
 
     useEffect(() => {

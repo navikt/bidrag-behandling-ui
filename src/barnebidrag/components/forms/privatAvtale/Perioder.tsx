@@ -1,4 +1,8 @@
-import { OppdaterePrivatAvtaleRequest, PrivatAvtaleValideringsfeilDto } from "@api/BidragBehandlingApiV1";
+import {
+    OppdaterePrivatAvtaleRequest,
+    PrivatAvtaleDto,
+    PrivatAvtaleValideringsfeilDto,
+} from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
@@ -7,17 +11,11 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { actionOnEnter } from "@common/helpers/keyboardHelpers";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Table } from "@navikt/ds-react";
-import {
-    addMonths,
-    addMonthsIgnoreDay,
-    dateOrNull,
-    DateToDDMMYYYYString,
-    deductMonths,
-    isAfterDate,
-} from "@utils/date-utils";
+import { addMonths, addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useMemo, useState } from "react";
@@ -30,6 +28,7 @@ import {
     PrivatAvtalePeriode,
 } from "../../../types/privatAvtaleFormValues";
 import { transformPrivatAvtalePeriode } from "../helpers/PrivatAvtaleHelpers";
+import { getFomForPrivatAvtale } from "./PrivatAvtale";
 
 const Periode = ({
     item,
@@ -37,16 +36,21 @@ const Periode = ({
     fieldName,
     label,
     editableRow,
+    privatAvtale,
 }: {
     item: PrivatAvtalePeriode;
     fieldName: `roller.${number}.privatAvtale.perioder.${number}`;
     field: "fom" | "tom";
     label: string;
     editableRow: boolean;
+    privatAvtale: PrivatAvtaleDto;
 }) => {
+    const { stønadstype } = useGetBehandlingV2();
     const { lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<PrivatAvtaleFormValues>();
-    const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
+    const fom = useMemo(() => {
+        return getFomForPrivatAvtale(stønadstype, privatAvtale.gjelderBarn.fødselsdato);
+    }, [stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
     const fieldIsDatoTom = field === "tom";
 
@@ -162,7 +166,9 @@ export const Perioder = ({
     item: PrivatAvtaleFormValuesPerBarn;
     valideringsfeil: PrivatAvtaleValideringsfeilDto;
 }) => {
+    const { privatAvtale } = useGetBehandlingV2();
     const { lesemodus, setErrorMessage, setErrorModalOpen, setSaveErrorState } = useBehandlingProvider();
+    const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.avtaleId);
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.avtaleId);
     const { control, clearErrors, getValues, setValue, setError, getFieldState } =
@@ -381,6 +387,7 @@ export const Perioder = ({
                                             field="fom"
                                             item={item}
                                             editableRow={editableRow === index}
+                                            privatAvtale={selectedPrivatAvtale}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
@@ -390,6 +397,7 @@ export const Perioder = ({
                                             field="tom"
                                             item={item}
                                             editableRow={editableRow === index}
+                                            privatAvtale={selectedPrivatAvtale}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
