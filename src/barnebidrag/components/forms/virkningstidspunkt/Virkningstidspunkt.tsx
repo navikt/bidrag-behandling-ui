@@ -77,6 +77,7 @@ const avslagsListeOpphør = [
     Resultatkode.BIDRAGSPLIKTIGERDOD,
 ];
 
+const avslaglisteAlle = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør];
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
 const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
@@ -394,7 +395,7 @@ const Side = () => {
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
         onStepChange(
-            avslagsListe.includes(årsakAvslag)
+            avslaglisteAlle.includes(årsakAvslag)
                 ? gebyr !== undefined
                     ? STEPS[BarnebidragStepper.GEBYR]
                     : STEPS[BarnebidragStepper.VEDTAK]
