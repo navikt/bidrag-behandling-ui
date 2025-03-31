@@ -53,6 +53,10 @@ const Periode = ({
     }, [stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
     const fieldIsDatoTom = field === "tom";
+    const disabledMonths = privatAvtale.perioderLøperBidrag.map((periode) => ({
+        from: new Date(periode.fom),
+        to: new Date(periode.til),
+    }));
 
     const validateFomOgTom = () => {
         const periode = getValues(fieldName);
@@ -79,6 +83,7 @@ const Periode = ({
             toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
+            disabledMonths={disabledMonths.length > 0 ? disabledMonths : undefined}
             hideLabel
         />
     ) : (
@@ -319,6 +324,25 @@ export const Perioder = ({
 
     return (
         <div className="grid gap-2">
+            {selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
+                <BehandlingAlert variant="info" className="mb-4">
+                    <Heading size="xsmall" level="6">
+                        {text.alert.løpendeBidrag}.
+                    </Heading>
+                    <BodyShort size="small">
+                        {removePlaceholder(
+                            text.alert.løpendeBidragPerioder,
+                            selectedPrivatAvtale.perioderLøperBidrag
+                                .map(
+                                    (periode) =>
+                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${DateToDDMMYYYYString(dateOrNull(periode.til))}`
+                                )
+                                .join(", ")
+                        )}
+                        .
+                    </BodyShort>
+                </BehandlingAlert>
+            )}
             {!lesemodus && tableValideringsfeil && (
                 <BehandlingAlert variant="warning" className="mb-4">
                     <Heading size="xsmall" level="6">
