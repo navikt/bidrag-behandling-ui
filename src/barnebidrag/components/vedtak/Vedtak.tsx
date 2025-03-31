@@ -99,7 +99,7 @@ const VedtakResultat = () => {
                         <ResultatDescription
                             data={[
                                 {
-                                    label: "Første indeksår",
+                                    label: "Neste indeksår",
                                     textRight: false,
                                     labelBold: true,
                                     value: r.indeksår,
@@ -227,7 +227,7 @@ const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningP
                                 <td className="w-[10px]">/</td>
                                 <td>
                                     {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                    Samvaersklasse.DELT_BOSTED
+                                        Samvaersklasse.DELT_BOSTED
                                         ? "D"
                                         : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag.samværsklasse)}
                                 </td>
