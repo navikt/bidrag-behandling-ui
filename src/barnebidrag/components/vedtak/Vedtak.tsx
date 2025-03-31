@@ -95,6 +95,18 @@ const VedtakResultat = () => {
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
                     <VedtakUgyldigBeregning resultat={r} />
+                    {r.indeksår && (
+                        <ResultatDescription
+                            data={[
+                                {
+                                    label: "Første indeksår",
+                                    textRight: false,
+                                    labelBold: true,
+                                    value: r.indeksår,
+                                },
+                            ].filter((d) => d)}
+                        />
+                    )}
                     {r.barn.innbetaltBeløp && (
                         <ResultatDescription
                             data={[
