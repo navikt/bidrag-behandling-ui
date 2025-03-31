@@ -126,7 +126,7 @@ const tekster = {
         avslag: "Avslag",
         avslagsGrunn: "Avslagsgrunn",
         avbryt: "Avbryt",
-        avtaleDato: "Avtaledato",
+        avtaleDato: "Avtalemåned",
         barn: "Barn",
         barnHarTilsysnsordning: "Barn har tilsynsordning",
         barnetillegg: "Barnetillegg",

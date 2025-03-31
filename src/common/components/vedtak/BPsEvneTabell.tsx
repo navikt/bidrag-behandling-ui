@@ -8,6 +8,7 @@ type BPsEvneProps = {
 };
 
 export const BPsEvne = ({ bidragsevne, inntekter }: BPsEvneProps) => {
+    if (!bidragsevne) return null;
     return (
         <CalculationTabell
             title="BP's evne"
