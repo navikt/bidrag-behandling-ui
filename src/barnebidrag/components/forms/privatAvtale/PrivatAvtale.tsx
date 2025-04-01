@@ -1,4 +1,11 @@
-import { BarnDto, OppdaterePrivatAvtaleRequest, Rolletype, Stonadstype } from "@api/BidragBehandlingApiV1";
+import {
+    BarnDto,
+    OppdaterePrivatAvtaleRequest,
+    OppdaterePrivatAvtaleRequestAvtaleTypeEnum,
+    PrivatAvtaleDtoAvtaleTypeEnum,
+    Rolletype,
+    Stonadstype,
+} from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -25,6 +32,8 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
+import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
@@ -323,6 +332,17 @@ const PrivatAvtalePerioder = ({
                 const payload = { avtaleDato: value.roller[barnIndex].privatAvtale.avtaleDato };
                 updatePrivatAvtale(payload);
             }
+
+            if (
+                name === `roller.${barnIndex}.privatAvtale.avtaleType` &&
+                value.roller[barnIndex].privatAvtale.avtaleType
+            ) {
+                const payload = {
+                    avtaleType: value.roller[barnIndex].privatAvtale
+                        .avtaleType as OppdaterePrivatAvtaleRequestAvtaleTypeEnum,
+                };
+                updatePrivatAvtale(payload);
+            }
         });
         return () => subscription.unsubscribe();
     }, [updatePrivatAvtale]);
@@ -334,15 +354,28 @@ const PrivatAvtalePerioder = ({
     return (
         <>
             <FlexRow className="justify-between">
-                <FormControlledMonthPicker
-                    name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
-                    label={text.label.avtaleDato}
-                    placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
-                    fromDate={fom}
-                    toDate={tom}
-                    required
-                />
+                <div className="flex flex-row gap-2">
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
+                        label={text.label.avtaleDato}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
+                        fromDate={fom}
+                        toDate={tom}
+                        required
+                    />
+                    <FormControlledSelectField
+                        name={`roller.${barnIndex}.privatAvtale.avtaleType`}
+                        label={"Avtaletype"}
+                        className="w-max max-h-[10px]"
+                    >
+                        {Object.keys(PrivatAvtaleDtoAvtaleTypeEnum).map((value) => (
+                            <option key={value} value={value}>
+                                {hentVisningsnavn(value)}
+                            </option>
+                        ))}
+                    </FormControlledSelectField>
+                </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
             <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />

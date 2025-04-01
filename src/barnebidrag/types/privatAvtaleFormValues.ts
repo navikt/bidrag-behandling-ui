@@ -17,6 +17,7 @@ export type PrivatAvtalePeriode = {
 };
 export type PrivatAvtaleFormValuesPerBarn = {
     avtaleDato: string | null;
+    avtaleType: string | null;
     begrunnelse: string;
     perioder: PrivatAvtalePeriode[];
     skalIndeksreguleres: boolean;

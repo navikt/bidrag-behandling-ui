@@ -15,7 +15,14 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Table } from "@navikt/ds-react";
-import { addMonths, addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import {
+    addMonths,
+    addMonthsIgnoreDay,
+    dateOrNull,
+    DateToDDMMYYYYString,
+    deductMonthsIgnoreday,
+    isAfterDate,
+} from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useMemo, useState } from "react";
@@ -55,7 +62,7 @@ const Periode = ({
     const fieldIsDatoTom = field === "tom";
     const disabledMonths = privatAvtale.perioderLøperBidrag.map((periode) => ({
         from: new Date(periode.fom),
-        to: new Date(periode.til),
+        to: periode.til ? deductMonthsIgnoreday(dateOrNull(periode.til), 1) : null,
     }));
 
     const validateFomOgTom = () => {
