@@ -255,7 +255,7 @@ const PrivatAvtalePerioder = ({
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
     }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
-    const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
+    const tom = useMemo(() => new Date(), []);
 
     useEffect(() => {
         const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);

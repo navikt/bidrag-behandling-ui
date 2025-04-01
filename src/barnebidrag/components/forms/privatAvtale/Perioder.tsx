@@ -16,7 +16,6 @@ import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Table } from "@navikt/ds-react";
 import {
-    addMonths,
     addMonthsIgnoreDay,
     dateOrNull,
     DateToDDMMYYYYString,
@@ -58,7 +57,7 @@ const Periode = ({
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, privatAvtale.gjelderBarn.fødselsdato);
     }, [stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
-    const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
+    const tom = useMemo(() => new Date(), []);
     const fieldIsDatoTom = field === "tom";
     const disabledMonths = privatAvtale.perioderLøperBidrag.map((periode) => ({
         from: new Date(periode.fom),
