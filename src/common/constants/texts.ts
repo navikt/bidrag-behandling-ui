@@ -8,7 +8,7 @@ import {
 
 const tekster = {
     alert: {
-        løpendeBidragPerioder: "Det løper et eller flere bidrag i ulike perioder: {}",
+        løpendeBidragPerioder: "Det løper et eller flere bidrag i ulike peioder: {}",
         ansettelsesdetaljerEndret: "Ansettelsesdetaljer fra arbeidsgiver {} er endret",
         antallArbeidsforholdEndret: "Antall arbeidsforhold for {} har blitt endret",
         antallBarnetilleggPerioderEndret: "Antall barnetillegg perioder har blitt endret",

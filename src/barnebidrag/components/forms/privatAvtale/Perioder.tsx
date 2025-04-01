@@ -322,6 +322,15 @@ export const Perioder = ({
     const tableValideringsfeil =
         valideringsfeil?.overlappendePerioder?.length > 0 || valideringsfeil?.ingenLøpendePeriode;
 
+    function periodeRange() {
+        const førstePeriode = selectedPrivatAvtale.perioderLøperBidrag.sort(
+            (a, b) => new Date(a.fom).getTime() - new Date(b.fom).getTime()
+        )[0];
+        const sistePeriode = selectedPrivatAvtale.perioderLøperBidrag.sort(
+            (a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime()
+        )[0];
+        return `${DateToDDMMYYYYString(dateOrNull(førstePeriode.fom))} - ${DateToDDMMYYYYString(dateOrNull(sistePeriode.til)) ?? ""}`;
+    }
     return (
         <div className="grid gap-2">
             {selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
@@ -335,7 +344,7 @@ export const Perioder = ({
                             selectedPrivatAvtale.perioderLøperBidrag
                                 .map(
                                     (periode) =>
-                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${periode.til ? DateToDDMMYYYYString(dateOrNull(periode.til)) : ""}`
+                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${DateToDDMMYYYYString(dateOrNull(periode.til))}`
                                 )
                                 .join(", ")
                         )}
@@ -375,9 +384,8 @@ export const Perioder = ({
             )}
             {controlledFields.length > 0 && (
                 <div
-                    className={`${
-                        updatePrivatAvtaleQuery.mutation.isPending ? "relative" : "inherit"
-                    } block overflow-x-auto whitespace-nowrap`}
+                    className={`${updatePrivatAvtaleQuery.mutation.isPending ? "relative" : "inherit"
+                        } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={updatePrivatAvtaleQuery.mutation.isPending} />
