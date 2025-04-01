@@ -335,7 +335,7 @@ export const Perioder = ({
                             selectedPrivatAvtale.perioderLøperBidrag
                                 .map(
                                     (periode) =>
-                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${DateToDDMMYYYYString(dateOrNull(periode.til))}`
+                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${periode.til ? DateToDDMMYYYYString(dateOrNull(periode.til)) : ""}`
                                 )
                                 .join(", ")
                         )}
