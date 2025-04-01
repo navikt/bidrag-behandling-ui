@@ -339,16 +339,7 @@ export const Perioder = ({
                         {text.alert.løpendeBidrag}.
                     </Heading>
                     <BodyShort size="small">
-                        {removePlaceholder(
-                            text.alert.løpendeBidragPerioder,
-                            selectedPrivatAvtale.perioderLøperBidrag
-                                .map(
-                                    (periode) =>
-                                        `${DateToDDMMYYYYString(dateOrNull(periode.fom))} - ${DateToDDMMYYYYString(dateOrNull(periode.til))}`
-                                )
-                                .join(", ")
-                        )}
-                        .
+                        {removePlaceholder(text.alert.løpendeBidragPerioder, periodeRange())}.
                     </BodyShort>
                 </BehandlingAlert>
             )}
