@@ -35,7 +35,14 @@ import {
 } from "../../../types/privatAvtaleFormValues";
 import { transformPrivatAvtalePeriode } from "../helpers/PrivatAvtaleHelpers";
 import { getFomForPrivatAvtale } from "./PrivatAvtale";
+const isDateWithinRange = (date: Date, range: { from: Date; to: Date }): boolean => {
+    return date >= range.from && date <= range.to;
+};
 
+const isPeriodeDisabled = (periode: PrivatAvtalePeriode, disabledRanges: { from: Date; to: Date }[]): boolean => {
+    const periodeStart = new Date(periode.fom);
+    return disabledRanges.some((range) => isDateWithinRange(periodeStart, range));
+};
 const Periode = ({
     item,
     field,
@@ -61,20 +68,26 @@ const Periode = ({
     const fieldIsDatoTom = field === "tom";
     const disabledMonths = privatAvtale.perioderLøperBidrag.map((periode) => ({
         from: new Date(periode.fom),
-        to: periode.til ? deductMonthsIgnoreday(dateOrNull(periode.til), 1) : null,
+        to: periode.til ? deductMonthsIgnoreday(dateOrNull(periode.til), 1) : new Date(),
     }));
 
     const validateFomOgTom = () => {
         const periode = getValues(fieldName);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.tom) && isAfterDate(periode?.fom, periode.tom);
+        const periodeIsDisabled = isPeriodeDisabled(periode, disabledMonths);
 
-        if (fomOgTomInvalid) {
-            setError(`${fieldName}.fom`, {
+        if (periodeIsDisabled) {
+            setError(`${fieldName}.${field}`, {
+                type: "notValid",
+                message: "Perioden overlapper med løpende bidrag",
+            });
+        } else if (fomOgTomInvalid) {
+            setError(`${fieldName}.${field}`, {
                 type: "notValid",
                 message: text.error.tomDatoKanIkkeVæreFørFomDato,
             });
         } else {
-            clearErrors(`${fieldName}.fom`);
+            clearErrors(`${fieldName}.${field}`);
         }
     };
 
@@ -89,7 +102,6 @@ const Periode = ({
             toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
-            disabledMonths={disabledMonths.length > 0 ? disabledMonths : undefined}
             hideLabel
         />
     ) : (

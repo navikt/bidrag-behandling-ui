@@ -281,6 +281,12 @@ export enum OpplysningerType {
     SUMMERTEARSINNTEKTER = "SUMMERTE_ÅRSINNTEKTER",
 }
 
+export enum PrivatAvtaleType {
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    DOM_RETTSFORLIK = "DOM_RETTSFORLIK",
+    VEDTAK_FRA_NAV = "VEDTAK_FRA_NAV",
+}
+
 export enum Resultatkode {
     OPPHOR = "OPPHØR",
     GEBYR_FRITATT = "GEBYR_FRITATT",
@@ -1200,7 +1206,7 @@ export interface PrivatAvtaleDto {
     perioderLøperBidrag: TypeArManedsperiode[];
     /** @format date */
     avtaleDato?: string;
-    avtaleType?: PrivatAvtaleDtoAvtaleTypeEnum;
+    avtaleType?: PrivatAvtaleType;
     skalIndeksreguleres: boolean;
     begrunnelse?: string;
     begrunnelseFraOpprinneligVedtak?: string;
@@ -1802,7 +1808,7 @@ export interface OppdaterePrivatAvtaleRequest {
     skalIndeksreguleres?: boolean;
     /** Oppdater begrunnelse */
     begrunnelse?: string;
-    avtaleType?: OppdaterePrivatAvtaleRequestAvtaleTypeEnum;
+    avtaleType?: PrivatAvtaleType;
     oppdaterPeriode?: OppdaterePrivatAvtalePeriodeDto;
     /** @format int64 */
     slettePeriodeId?: number;
@@ -3350,8 +3356,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3492,12 +3498,6 @@ export enum BarnetilsynGrunnlagDtoSkolealderEnum {
     IKKE_ANGITT = "IKKE_ANGITT",
 }
 
-export enum PrivatAvtaleDtoAvtaleTypeEnum {
-    PRIVAT_AVTALE = "PRIVAT_AVTALE",
-    DOM_RETTSFORLIK = "DOM_RETTSFORLIK",
-    VEDTAK_FRA_NAV = "VEDTAK_FRA_NAV",
-}
-
 export enum StonadTilBarnetilsynDtoSkolealderEnum {
     OVER = "OVER",
     UNDER = "UNDER",
@@ -3508,12 +3508,6 @@ export enum StonadTilBarnetilsynDtoTilsynstypeEnum {
     HELTID = "HELTID",
     DELTID = "DELTID",
     IKKE_ANGITT = "IKKE_ANGITT",
-}
-
-export enum OppdaterePrivatAvtaleRequestAvtaleTypeEnum {
-    PRIVAT_AVTALE = "PRIVAT_AVTALE",
-    DOM_RETTSFORLIK = "DOM_RETTSFORLIK",
-    VEDTAK_FRA_NAV = "VEDTAK_FRA_NAV",
 }
 
 export enum OppdaterRollerResponseStatusEnum {

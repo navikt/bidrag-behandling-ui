@@ -1,8 +1,7 @@
 import {
     BarnDto,
     OppdaterePrivatAvtaleRequest,
-    OppdaterePrivatAvtaleRequestAvtaleTypeEnum,
-    PrivatAvtaleDtoAvtaleTypeEnum,
+    PrivatAvtaleType,
     Rolletype,
     Stonadstype,
 } from "@api/BidragBehandlingApiV1";
@@ -338,8 +337,7 @@ const PrivatAvtalePerioder = ({
                 value.roller[barnIndex].privatAvtale.avtaleType
             ) {
                 const payload = {
-                    avtaleType: value.roller[barnIndex].privatAvtale
-                        .avtaleType as OppdaterePrivatAvtaleRequestAvtaleTypeEnum,
+                    avtaleType: value.roller[barnIndex].privatAvtale.avtaleType as PrivatAvtaleType,
                 };
                 updatePrivatAvtale(payload);
             }
@@ -369,7 +367,7 @@ const PrivatAvtalePerioder = ({
                         label={"Avtaletype"}
                         className="w-max max-h-[10px]"
                     >
-                        {Object.keys(PrivatAvtaleDtoAvtaleTypeEnum).map((value) => (
+                        {Object.keys(PrivatAvtaleType).map((value) => (
                             <option key={value} value={value}>
                                 {hentVisningsnavn(value)}
                             </option>

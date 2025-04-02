@@ -8925,6 +8925,15 @@ react-day-picker@9.6.1:
     date-fns "^4.1.0"
     date-fns-jalali "^4.1.0-0"
 
+react-day-picker@9.6.4:
+  version "9.6.4"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.6.4.tgz#9f3b2a181076572f783ebe80f175e4ed12b33384"
+  integrity sha512-OekyAWfaypSFN5zms4CD6Bcas5R0KbWdARkWTyQ2phJHQOolDfpLwrN6Q+U3ifPGNmKLf9ngXuSz25NKHMkR6w==
+  dependencies:
+    "@date-fns/tz" "^1.2.0"
+    date-fns "^4.1.0"
+    date-fns-jalali "^4.1.0-0"
+
 react-dom@^19.0.0:
   version "19.0.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-19.0.0.tgz#43446f1f01c65a4cd7f7588083e686a6726cfb57"
