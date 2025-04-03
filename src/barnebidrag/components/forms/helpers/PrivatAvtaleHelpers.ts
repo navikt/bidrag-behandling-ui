@@ -29,6 +29,7 @@ export const createPrivatAvtaleInitialValues = (privatAvtale: PrivatAvtaleDto): 
         avtaleId: privatAvtale.id,
         skalIndeksreguleres: privatAvtale.skalIndeksreguleres,
         avtaleDato: privatAvtale.avtaleDato ?? null,
+        avtaleType: privatAvtale.avtaleType ?? null,
         begrunnelse: privatAvtale.begrunnelse ?? "",
         perioder: privatAvtale.perioder.map(transformPrivatAvtalePeriode),
     };

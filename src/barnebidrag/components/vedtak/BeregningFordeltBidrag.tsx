@@ -7,6 +7,7 @@ export const BeregningFordeltBidrag = () => {
         beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne },
     } = useBidragBeregningPeriode();
 
+    if (!evne) return null;
     function renderResult() {
         if (sluttberegning.bidragJustertNedTilEvne) {
             return ` (redusert ned til evne)`;

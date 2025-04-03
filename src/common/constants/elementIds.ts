@@ -10,6 +10,7 @@ export default {
         tittel_utgift: "utgift",
         tittel_boforhold: "boforhold",
         tittel_underholdskostnad: "underholdskostnad",
+        tittel_privat_avtale: "privat-avtale",
         tittel_inntekt: "inntekt-generelt",
         tittel_vedtak: "fatte-vedtak",
         tittel_samvær: "samvær",

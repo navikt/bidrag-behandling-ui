@@ -1,4 +1,5 @@
 import { MonthPicker as NavMonthPicker, MonthValidationT, useMonthpicker } from "@navikt/ds-react";
+import { Matcher } from "@navikt/ds-react/src/date/utils";
 import { dateOrNull, isValidDate, lastDayOfMonth } from "@utils/date-utils";
 import React, { useEffect } from "react";
 
@@ -16,6 +17,7 @@ interface MonthPickerInputProps {
     lastDayOfMonthPicker?: boolean;
     readonly?: boolean;
     fieldValue?: Date | string;
+    disabledMonths?: Matcher[];
 }
 export const MonthPicker = ({
     label,
@@ -31,6 +33,7 @@ export const MonthPicker = ({
     lastDayOfMonthPicker,
     readonly,
     fieldValue,
+    disabledMonths,
 }: MonthPickerInputProps) => {
     const { monthpickerProps, inputProps, setSelected, selectedMonth } = useMonthpicker({
         fromDate,
@@ -39,6 +42,7 @@ export const MonthPicker = ({
         inputFormat: "dd.MM.yyyy",
         onValidate: (val) => onValidate?.(val),
         onMonthChange: (date) => onChange(date),
+        disabled: disabledMonths,
     });
 
     const onMonthSelect = (date) => {

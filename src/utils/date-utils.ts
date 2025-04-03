@@ -79,7 +79,7 @@ export const DateToDDMMYYYYHHMMString = (date: Date) =>
     });
 
 export const DateToMMYYYYString = (date: Date) =>
-    date.toLocaleDateString("nb-NO", { year: "numeric", month: "2-digit" });
+    date?.toLocaleDateString("nb-NO", { year: "numeric", month: "2-digit" });
 
 export const ISODateTimeStringToDDMMYYYYString = (isoDateTimeString: string) => {
     const date = new Date(isoDateTimeString);

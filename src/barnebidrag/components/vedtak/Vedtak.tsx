@@ -95,6 +95,18 @@ const VedtakResultat = () => {
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
                     <VedtakUgyldigBeregning resultat={r} />
+                    {r.indeksår && (
+                        <ResultatDescription
+                            data={[
+                                {
+                                    label: "Neste indeksår",
+                                    textRight: false,
+                                    labelBold: true,
+                                    value: r.indeksår,
+                                },
+                            ].filter((d) => d)}
+                        />
+                    )}
                     {r.barn.innbetaltBeløp && (
                         <ResultatDescription
                             data={[
@@ -176,7 +188,7 @@ const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidragsbere
 
             <Table.DataCell textSize="small" colSpan={5}></Table.DataCell>
 
-            <Table.DataCell textSize="small">Avslag</Table.DataCell>
+            <Table.DataCell textSize="small">Opphør</Table.DataCell>
 
             <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
         </>

@@ -1,4 +1,10 @@
-import { BarnDto, OppdaterePrivatAvtaleRequest, Rolletype } from "@api/BidragBehandlingApiV1";
+import {
+    BarnDto,
+    OppdaterePrivatAvtaleRequest,
+    PrivatAvtaleType,
+    Rolletype,
+    Stonadstype,
+} from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -14,16 +20,19 @@ import { default as urlSearchParams } from "@common/constants/behandlingQueryKey
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
-import { addMonths, deductMonths } from "@utils/date-utils";
+import { addMonths, firstDayOfMonth } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
+import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
@@ -33,6 +42,13 @@ import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/pr
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
+
+export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: string) => {
+    if (stønadstype === Stonadstype.BIDRAG18AAR) {
+        return getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
+    }
+    return addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+};
 
 export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
     const ref = useRef<HTMLDialogElement>(null);
@@ -227,7 +243,7 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale } = useGetBehandlingV2();
+    const { privatAvtale, stønadstype } = useGetBehandlingV2();
     const { setSaveErrorState } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
@@ -235,8 +251,10 @@ const PrivatAvtalePerioder = ({
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
-    const fom = useMemo(() => deductMonths(new Date(), 50 * 12), []);
-    const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
+    const fom = useMemo(() => {
+        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
+    }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
+    const tom = useMemo(() => new Date(), []);
 
     useEffect(() => {
         const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);
@@ -313,6 +331,16 @@ const PrivatAvtalePerioder = ({
                 const payload = { avtaleDato: value.roller[barnIndex].privatAvtale.avtaleDato };
                 updatePrivatAvtale(payload);
             }
+
+            if (
+                name === `roller.${barnIndex}.privatAvtale.avtaleType` &&
+                value.roller[barnIndex].privatAvtale.avtaleType
+            ) {
+                const payload = {
+                    avtaleType: value.roller[barnIndex].privatAvtale.avtaleType as PrivatAvtaleType,
+                };
+                updatePrivatAvtale(payload);
+            }
         });
         return () => subscription.unsubscribe();
     }, [updatePrivatAvtale]);
@@ -324,15 +352,28 @@ const PrivatAvtalePerioder = ({
     return (
         <>
             <FlexRow className="justify-between">
-                <FormControlledMonthPicker
-                    name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
-                    label={text.label.avtaleDato}
-                    placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
-                    fromDate={fom}
-                    toDate={tom}
-                    required
-                />
+                <div className="flex flex-row gap-2">
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
+                        label={text.label.avtaleDato}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
+                        fromDate={fom}
+                        toDate={tom}
+                        required
+                    />
+                    <FormControlledSelectField
+                        name={`roller.${barnIndex}.privatAvtale.avtaleType`}
+                        label={"Avtaletype"}
+                        className="w-max max-h-[10px]"
+                    >
+                        {Object.keys(PrivatAvtaleType).map((value) => (
+                            <option key={value} value={value}>
+                                {hentVisningsnavn(value)}
+                            </option>
+                        ))}
+                    </FormControlledSelectField>
+                </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
             <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
