@@ -51,6 +51,9 @@ const tekster = {
         overlappendePerioderFiks: "Rediger eller slett periodene.",
         overlappendeLøpendePerioder: "To eller flere løpende perioder fra {} overlapper.",
         overlappendePerioder: "To eller flere perioder i perioden {} - {} overlapper.",
+        overlappendeLøpendeBidragPerioder: "En eller flere perioder i perioden {} - {} overlapper med løpende bidrag.",
+        overlappendeLøpendeBidragPerioderForLøpende:
+            "En eller flere løpende perioder fra {} overlapper med løpende bidrag.",
         periodeUnderRedigering: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
         sluttdatoForArbeidsforholdEndret: "Sluttdato for arbeidsforhold {} er endret fra {} til {}",
         startdatoForArbeidsforholdEndret: "Startdato for arbeidsforhold {} er endret",

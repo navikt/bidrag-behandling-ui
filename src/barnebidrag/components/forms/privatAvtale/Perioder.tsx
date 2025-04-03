@@ -35,14 +35,7 @@ import {
 } from "../../../types/privatAvtaleFormValues";
 import { transformPrivatAvtalePeriode } from "../helpers/PrivatAvtaleHelpers";
 import { getFomForPrivatAvtale } from "./PrivatAvtale";
-const isDateWithinRange = (date: Date, range: { from: Date; to: Date }): boolean => {
-    return date >= range.from && date <= range.to;
-};
 
-const isPeriodeDisabled = (periode: PrivatAvtalePeriode, disabledRanges: { from: Date; to: Date }[]): boolean => {
-    const periodeStart = new Date(periode.fom);
-    return disabledRanges.some((range) => isDateWithinRange(periodeStart, range));
-};
 const Periode = ({
     item,
     field,
@@ -74,14 +67,8 @@ const Periode = ({
     const validateFomOgTom = () => {
         const periode = getValues(fieldName);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.tom) && isAfterDate(periode?.fom, periode.tom);
-        const periodeIsDisabled = isPeriodeDisabled(periode, disabledMonths);
 
-        if (periodeIsDisabled) {
-            setError(`${fieldName}.${field}`, {
-                type: "notValid",
-                message: "Perioden overlapper med løpende bidrag",
-            });
-        } else if (fomOgTomInvalid) {
+        if (fomOgTomInvalid) {
             setError(`${fieldName}.${field}`, {
                 type: "notValid",
                 message: text.error.tomDatoKanIkkeVæreFørFomDato,
@@ -337,8 +324,7 @@ export const Perioder = ({
         }
     };
 
-    const tableValideringsfeil =
-        valideringsfeil?.overlappendePerioder?.length > 0 || valideringsfeil?.ingenLøpendePeriode;
+    const tableValideringsfeil = valideringsfeil?.harPeriodiseringsfeil;
 
     function periodeRange() {
         const førstePeriode = selectedPrivatAvtale.perioderLøperBidrag.sort(
@@ -366,6 +352,26 @@ export const Perioder = ({
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
+                    {valideringsfeil?.perioderOverlapperMedLøpendeBidrag?.length > 0 && (
+                        <>
+                            {valideringsfeil?.perioderOverlapperMedLøpendeBidrag?.map((periode, index) => (
+                                <BodyShort key={`${periode.fom}-${periode.til}-${index}`} size="small">
+                                    {periode.til &&
+                                        removePlaceholder(
+                                            text.alert.overlappendeLøpendeBidragPerioder,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom)),
+                                            DateToDDMMYYYYString(dateOrNull(periode.til))
+                                        )}
+                                    {!periode.til &&
+                                        removePlaceholder(
+                                            text.alert.overlappendeLøpendeBidragPerioderForLøpende,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom))
+                                        )}
+                                </BodyShort>
+                            ))}
+                            <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
+                        </>
+                    )}
                     {valideringsfeil?.overlappendePerioder?.length > 0 && (
                         <>
                             {valideringsfeil?.overlappendePerioder?.map(({ periode }, index) => (
