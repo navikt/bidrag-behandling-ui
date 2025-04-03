@@ -86,7 +86,7 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, op
             ? lastDayOfOpphørsdatoMonth
             : lastDayOfPreviousMonth;
 
-    return [fom, deductMonthsIgnoreday(tom, 1)];
+    return [fom, lastDayOfMonth(deductMonthsIgnoreday(tom, 1))];
 };
 
 export const getEitherFirstDayOfFoedselsOrVirkingsdatoMonth = (
