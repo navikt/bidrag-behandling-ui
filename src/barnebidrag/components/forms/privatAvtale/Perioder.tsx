@@ -59,12 +59,12 @@ const Periode = ({
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.tom) && isAfterDate(periode?.fom, periode.tom);
 
         if (fomOgTomInvalid) {
-            setError(`${fieldName}.${field}`, {
+            setError(`${fieldName}.fom`, {
                 type: "notValid",
                 message: text.error.tomDatoKanIkkeVæreFørFomDato,
             });
         } else {
-            clearErrors(`${fieldName}.${field}`);
+            clearErrors(`${fieldName}.fom`);
         }
     };
 
@@ -389,9 +389,8 @@ export const Perioder = ({
             )}
             {controlledFields.length > 0 && (
                 <div
-                    className={`${
-                        updatePrivatAvtaleQuery.mutation.isPending ? "relative" : "inherit"
-                    } block overflow-x-auto whitespace-nowrap`}
+                    className={`${updatePrivatAvtaleQuery.mutation.isPending ? "relative" : "inherit"
+                        } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={updatePrivatAvtaleQuery.mutation.isPending} />
