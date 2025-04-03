@@ -9,7 +9,7 @@ import {
 const tekster = {
     alert: {
         løpendeBidragPerioder:
-            "Det løper bidrag i perioden {}. Du kan ikke legge inn privat avtale som overlapper med perioden hvor det løper bidrag.",
+            "Det løper bidrag i perioden {}. Du kan ikke legge inn privat avtale som overlapper med perioden hvor det løper bidrag",
         ansettelsesdetaljerEndret: "Ansettelsesdetaljer fra arbeidsgiver {} er endret",
         antallArbeidsforholdEndret: "Antall arbeidsforhold for {} har blitt endret",
         antallBarnetilleggPerioderEndret: "Antall barnetillegg perioder har blitt endret",

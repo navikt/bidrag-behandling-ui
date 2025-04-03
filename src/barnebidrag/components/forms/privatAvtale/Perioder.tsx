@@ -15,7 +15,13 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Table } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import {
+    addMonthsIgnoreDay,
+    dateOrNull,
+    DateToDDMMYYYYString,
+    DateToMMYYYYString,
+    isAfterDate,
+} from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useMemo, useState } from "react";
@@ -316,15 +322,6 @@ export const Perioder = ({
 
     const tableValideringsfeil = valideringsfeil?.harPeriodiseringsfeil;
 
-    function periodeRange() {
-        const førstePeriode = selectedPrivatAvtale.perioderLøperBidrag.sort(
-            (a, b) => new Date(a.fom).getTime() - new Date(b.fom).getTime()
-        )[0];
-        const sistePeriode = selectedPrivatAvtale.perioderLøperBidrag.sort(
-            (a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime()
-        )[0];
-        return `${DateToDDMMYYYYString(dateOrNull(førstePeriode.fom))} - ${DateToDDMMYYYYString(dateOrNull(sistePeriode.til)) ?? ""}`;
-    }
     return (
         <div className="grid gap-2">
             {selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
@@ -333,7 +330,16 @@ export const Perioder = ({
                         {text.alert.løpendeBidrag}.
                     </Heading>
                     <BodyShort size="small">
-                        {removePlaceholder(text.alert.løpendeBidragPerioder, periodeRange())}.
+                        {removePlaceholder(
+                            text.alert.løpendeBidragPerioder,
+                            selectedPrivatAvtale.perioderLøperBidrag
+                                .map(
+                                    (p) =>
+                                        `${DateToMMYYYYString(dateOrNull(p.fom))} - ${DateToMMYYYYString(dateOrNull(p.til)) ?? ""}`
+                                )
+                                .join(", ")
+                        )}
+                        .
                     </BodyShort>
                 </BehandlingAlert>
             )}
