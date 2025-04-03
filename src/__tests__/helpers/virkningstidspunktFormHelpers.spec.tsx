@@ -80,7 +80,7 @@ describe("VirkningstidspunktFormHelpers", () => {
         const [fom, tom] = getFomAndTomForMonthPicker(virkningsDato);
         expect(fom.toLocaleDateString()).equals(firstDayOfMonth(virkningsDato).toLocaleDateString());
         expect(tom.toLocaleDateString()).equals(
-            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
+            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 2)).toLocaleDateString()
         );
     });
 
@@ -89,7 +89,7 @@ describe("VirkningstidspunktFormHelpers", () => {
         const [fom, tom] = getFomAndTomForMonthPicker(virkningsDato);
         expect(fom.toLocaleDateString()).equals(firstDayOfMonth(virkningsDato).toLocaleDateString());
         expect(tom.toLocaleDateString()).equals(
-            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
+            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 2)).toLocaleDateString()
         );
     });
 });
