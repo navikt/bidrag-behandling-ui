@@ -22,6 +22,7 @@ import {
     gyldigBostatus18ÅrsBidragSøknadsbarn,
     gyldigBostatusOver18År,
     isOver18YearsOld,
+    skalViseOver18Statuser as skalViseOver18BoforholdStatuser,
 } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
@@ -119,7 +120,7 @@ const Status = ({
         const visningsnavn = hentVisningsnavn(bostsatus);
         // Ønsker ikke å vise 18 år prefiks for 18 åring i 18års bidrag
         const bosstatus18År = bidrag18ÅrOgSøknadsbarn ? [] : gyldigBostatusOver18År[type];
-        if (bosstatus18År.includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
+        if (bosstatus18År.includes(bostsatus) && skalViseOver18BoforholdStatuser(barn)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
@@ -127,7 +128,7 @@ const Status = ({
 
     const boforholdStatusOptions = bidrag18ÅrOgSøknadsbarn
         ? boforholdOptions[type].bidrag18År
-        : isOver18YearsOld(barn.fødselsdato)
+        : skalViseOver18BoforholdStatuser(barn)
           ? boforholdOptions[type].likEllerOver18År
           : boforholdOptions[type].under18År;
 
@@ -218,7 +219,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
 
-        if (barnIsOver18) {
+        if (barnIsOver18 && !barn.medIBehandling) {
             const selectedStatusIsOver18 = bidrag18ÅrOgSøknadsbarn
                 ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                 : gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
