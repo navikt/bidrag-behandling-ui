@@ -19,7 +19,7 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
+import { getFirstDayOfMonthAfterEighteenYears, isOver18YearsOld } from "@common/helpers/boforholdFormHelpers";
 import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
@@ -133,8 +133,11 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
-    if (stønadstype === Stonadstype.BIDRAG18AAR) {
+const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype, fødselsdato: string) => {
+    if (
+        stønadstype === Stonadstype.BIDRAG18AAR ||
+        (stønadstype === Stonadstype.BIDRAG && isOver18YearsOld(fødselsdato))
+    ) {
         if (opphør?.eksisterendeOpphør) {
             return [OpphørsVarighet.VELG_OPPHØRSDATO, OpphørsVarighet.FORTSETTE_OPPHØR];
         } else {
@@ -377,7 +380,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
                     className="w-max"
                     onSelect={(value) => onSelectVarighet(value)}
                 >
-                    {getOpphørOptions(opphør, behandling.stønadstype).map((value) => (
+                    {getOpphørOptions(opphør, behandling.stønadstype, baRolle.fødselsdato).map((value) => (
                         <option key={value} value={value}>
                             {value}
                         </option>

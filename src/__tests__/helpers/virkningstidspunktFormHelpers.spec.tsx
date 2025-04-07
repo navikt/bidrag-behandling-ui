@@ -92,4 +92,14 @@ describe("VirkningstidspunktFormHelpers", () => {
             lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
         );
     });
+
+    it("getFomAndTomForMonthPicker should set tom to the last day of previous month if opphørsdato is in current month ", () => {
+        const virkningsDato = addMonthsIgnoreDay(new Date(), 3);
+        const opphørsdato = new Date();
+        const [fom, tom] = getFomAndTomForMonthPicker(virkningsDato, opphørsdato);
+        expect(fom.toLocaleDateString()).equals(firstDayOfMonth(virkningsDato).toLocaleDateString());
+        expect(tom.toLocaleDateString()).equals(
+            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
+        );
+    });
 });
