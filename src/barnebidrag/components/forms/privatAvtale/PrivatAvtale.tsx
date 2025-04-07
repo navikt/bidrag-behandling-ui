@@ -26,7 +26,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
-import { addMonths, firstDayOfMonth } from "@utils/date-utils";
+import { addMonths, firstDayOfMonth, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -44,10 +44,13 @@ import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
 
 export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: string) => {
+    const fomMin = new Date("2012-01-01");
     if (stønadstype === Stonadstype.BIDRAG18AAR) {
-        return getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
+        const firstMonthAfterEighteenBirthday = getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
+        return isBeforeDate(firstMonthAfterEighteenBirthday, fomMin) ? fomMin : firstMonthAfterEighteenBirthday;
     }
-    return addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    return isBeforeDate(birthMonth, fomMin) ? fomMin : birthMonth;
 };
 
 export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
