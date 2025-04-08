@@ -6,7 +6,7 @@ import {
     deductMonths,
     firstDayOfMonth,
     isAfterDate,
-    isBeforeDate,
+    isBeforeOrEqualsDate,
     minOfDates,
 } from "@utils/date-utils";
 import { addMonths } from "date-fns";
@@ -81,7 +81,7 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, op
     const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(deductMonths(firstDayOfMonth(opphørsdato), 1));
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
     const tom =
-        lastDayOfOpphørsdatoMonth && isBeforeDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
+        lastDayOfOpphørsdatoMonth && isBeforeOrEqualsDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
             ? lastDayOfOpphørsdatoMonth
             : opphørsdato
               ? lastDayOfMonth(addMonths(lastDayOfPreviousMonth, 1))
