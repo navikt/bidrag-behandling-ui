@@ -350,7 +350,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
-            const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+            const bidrag18ÅrOgSøknadsbarn = !skalViseOver18BoforholdStatuser(barn);
 
             barnPerioder.append({
                 datoFom: null,
