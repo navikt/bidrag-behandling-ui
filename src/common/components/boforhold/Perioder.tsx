@@ -201,7 +201,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 },
             },
         }));
-    }, [formState.errors, editableRow]);
+    }, [JSON.stringify(formState.errors), editableRow]);
 
     const onSaveRow = (index: number) => {
         const periodeValues = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);

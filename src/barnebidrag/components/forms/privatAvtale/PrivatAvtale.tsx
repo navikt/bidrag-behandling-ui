@@ -451,7 +451,7 @@ const PrivatAvtaleForm = () => {
                 error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
             },
         }));
-    }, [useFormMethods.formState.errors]);
+    }, [JSON.stringify(useFormMethods.formState.errors)]);
 
     return (
         <>
