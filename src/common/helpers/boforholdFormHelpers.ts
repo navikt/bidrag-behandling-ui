@@ -145,6 +145,9 @@ export function getFirstDayOfMonthAfterEighteenYears(dateOfBirth: Date): Date {
 
     return eighteenYearsLater;
 }
+export const skalViseOver18Statuser = (barn: HusstandsmedlemDtoV2): boolean => {
+    return isOver18YearsOld(barn.fødselsdato) && !barn.medIBehandling;
+};
 export const isOver18YearsOld = (dateOfBirth: Date | string): boolean => calculateAge(dateOfBirth) >= 18;
 export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonGrunnlagDto) => {
     const perioder: HusstandOpplysningPeriode[] = [];

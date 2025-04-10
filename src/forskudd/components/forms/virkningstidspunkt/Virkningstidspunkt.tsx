@@ -243,7 +243,7 @@ const VirkningstidspunktForm = () => {
                 error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
             },
         }));
-    }, [useFormMethods.formState.errors]);
+    }, [JSON.stringify(useFormMethods.formState.errors)]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {

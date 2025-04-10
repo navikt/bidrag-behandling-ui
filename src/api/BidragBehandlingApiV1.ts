@@ -124,6 +124,7 @@ export enum Grunnlagstype {
     DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE = "DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE",
     DELBEREGNING_ENDRING_SJEKK_GRENSE = "DELBEREGNING_ENDRING_SJEKK_GRENSE",
     DELBEREGNING_PRIVAT_AVTALE_PERIODE = "DELBEREGNING_PRIVAT_AVTALE_PERIODE",
+    DELBEREGNING_PRIVAT_AVTALE = "DELBEREGNING_PRIVAT_AVTALE",
     DELBEREGNING_INDEKSREGULERING_PERIODE = "DELBEREGNING_INDEKSREGULERING_PERIODE",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     SLUTTBEREGNING_BARNEBIDRAG_ALDERSJUSTERING = "SLUTTBEREGNING_BARNEBIDRAG_ALDERSJUSTERING",
@@ -281,6 +282,12 @@ export enum OpplysningerType {
     SUMMERTEARSINNTEKTER = "SUMMERTE_ÅRSINNTEKTER",
 }
 
+export enum PrivatAvtaleType {
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    DOM_RETTSFORLIK = "DOM_RETTSFORLIK",
+    VEDTAK_FRA_NAV = "VEDTAK_FRA_NAV",
+}
+
 export enum Resultatkode {
     OPPHOR = "OPPHØR",
     GEBYR_FRITATT = "GEBYR_FRITATT",
@@ -341,7 +348,6 @@ export enum Rolletype {
 
 export interface SamvaerskalkulatorDetaljer {
     ferier: SamvaerskalkulatorFerie[];
-    /** @max 15 */
     regelmessigSamværNetter: number;
 }
 
@@ -436,26 +442,33 @@ export type TypeArManedsperiode = UtilRequiredKeys<PeriodeLocalDate, "fom"> & {
 };
 
 export enum TypeArsakstype {
-    ANNET = "ANNET",
-    ENDRING3MANEDERTILBAKE = "ENDRING_3_MÅNEDER_TILBAKE",
-    ENDRING3ARSREGELEN = "ENDRING_3_ÅRS_REGELEN",
     FRABARNETSFODSEL = "FRA_BARNETS_FØDSEL",
-    FRABARNETSFLYTTEMANED = "FRA_BARNETS_FLYTTEMÅNED",
-    FRA_KRAVFREMSETTELSE = "FRA_KRAVFREMSETTELSE",
-    FRAMANEDETTERINNTEKTENOKTE = "FRA_MÅNED_ETTER_INNTEKTEN_ØKTE",
-    FRA_OPPHOLDSTILLATELSE = "FRA_OPPHOLDSTILLATELSE",
-    FRASOKNADSTIDSPUNKT = "FRA_SØKNADSTIDSPUNKT",
     FRA_SAMLIVSBRUDD = "FRA_SAMLIVSBRUDD",
-    FRASAMMEMANEDSOMINNTEKTENBLEREDUSERT = "FRA_SAMME_MÅNED_SOM_INNTEKTEN_BLE_REDUSERT",
-    PRIVAT_AVTALE = "PRIVAT_AVTALE",
-    REVURDERINGMANEDENETTER = "REVURDERING_MÅNEDEN_ETTER",
-    SOKNADSTIDSPUNKTENDRING = "SØKNADSTIDSPUNKT_ENDRING",
-    TIDLIGERE_FEILAKTIG_AVSLAG = "TIDLIGERE_FEILAKTIG_AVSLAG",
+    FRABARNETSFLYTTEMANED = "FRA_BARNETS_FLYTTEMÅNED",
+    FRAMANEDENETTERFYLTE18AR = "FRA_MÅNEDEN_ETTER_FYLTE_18_ÅR",
+    FRA_KRAVFREMSETTELSE = "FRA_KRAVFREMSETTELSE",
     TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
+    FRASOKNADSTIDSPUNKT = "FRA_SØKNADSTIDSPUNKT",
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
+    FRA_OPPHOLDSTILLATELSE = "FRA_OPPHOLDSTILLATELSE",
+    AUTOMATISK_JUSTERING = "AUTOMATISK_JUSTERING",
+    FRASAMMEMANEDSOMINNTEKTENBLEREDUSERT = "FRA_SAMME_MÅNED_SOM_INNTEKTEN_BLE_REDUSERT",
+    FRAMANEDETTERENDRETSOKNAD = "FRA_MÅNED_ETTER_ENDRET_SØKNAD",
+    FORHOYELSETILBAKEITID = "FORHØYELSE_TILBAKE_I_TID",
+    FRAMANEDETTERINNTEKTENOKTE = "FRA_MÅNED_ETTER_INNTEKTEN_ØKTE",
+    SOKNADSTIDSPUNKTENDRING = "SØKNADSTIDSPUNKT_ENDRING",
+    NEDSETTELSE_TILBAKE_I_TID = "NEDSETTELSE_TILBAKE_I_TID",
+    ENDRING3MANEDERTILBAKE = "ENDRING_3_MÅNEDER_TILBAKE",
+    AVSLAGFORHOYELSETILBAKE = "AVSLAG_FORHØYELSE_TILBAKE",
+    ENDRING3ARSREGELEN = "ENDRING_3_ÅRS_REGELEN",
+    AVSLAG_NEDSETTELSE_TILBAKE = "AVSLAG_NEDSETTELSE_TILBAKE",
+    TIDLIGERE_FEILAKTIG_AVSLAG = "TIDLIGERE_FEILAKTIG_AVSLAG",
+    REVURDERINGMANEDENETTER = "REVURDERING_MÅNEDEN_ETTER",
+    ANNET = "ANNET",
+    OMREGNING = "OMREGNING",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
     FRAMANEDENETTERPRIVATAVTALE = "FRA_MÅNEDEN_ETTER_PRIVAT_AVTALE",
-    FRAMANEDENETTERFYLTE18AR = "FRA_MÅNEDEN_ETTER_FYLTE_18_ÅR",
     FRA_ENDRINGSTIDSPUNKT = "FRA_ENDRINGSTIDSPUNKT",
     BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE = "BIDRAGSPLIKTIG_HAR_IKKE_BIDRATT_TIL_FORSØRGELSE",
     MANEDETTERBETALTFORFALTBIDRAG = "MÅNED_ETTER_BETALT_FORFALT_BIDRAG",
@@ -1190,8 +1203,10 @@ export interface PrivatAvtaleDto {
     /** @format int64 */
     id: number;
     gjelderBarn: PersoninfoDto;
+    perioderLøperBidrag: TypeArManedsperiode[];
     /** @format date */
     avtaleDato?: string;
+    avtaleType?: PrivatAvtaleType;
     skalIndeksreguleres: boolean;
     begrunnelse?: string;
     begrunnelseFraOpprinneligVedtak?: string;
@@ -1210,8 +1225,11 @@ export interface PrivatAvtalePeriodeDto {
 export interface PrivatAvtaleValideringsfeilDto {
     /** @format int64 */
     privatAvtaleId: number;
+    /** @uniqueItems true */
+    perioderOverlapperMedLøpendeBidrag: Datoperiode[];
     manglerBegrunnelse: boolean;
     manglerAvtaledato: boolean;
+    manglerAvtaletype: boolean;
     ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
@@ -1506,7 +1524,6 @@ export interface UnderholdskostnadPeriodeBeregningsdetaljer {
     erBegrensetAvMaksTilsyn: boolean;
     fordelingFaktor: number;
     skattefradragPerBarn: number;
-    maksfradragAndel: number;
     skattefradrag: number;
     skattefradragMaksFradrag: number;
     skattefradragTotalTilsynsutgift: number;
@@ -1792,6 +1809,7 @@ export interface OppdaterePrivatAvtaleRequest {
     skalIndeksreguleres?: boolean;
     /** Oppdater begrunnelse */
     begrunnelse?: string;
+    avtaleType?: PrivatAvtaleType;
     oppdaterPeriode?: OppdaterePrivatAvtalePeriodeDto;
     /** @format int64 */
     slettePeriodeId?: number;
@@ -2291,10 +2309,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2460,6 +2478,8 @@ export interface ResultatBidragberegningDto {
 
 export interface ResultatBidragsberegningBarnDto {
     barn: ResultatRolle;
+    /** @format int32 */
+    indeksår?: number;
     ugyldigBeregning?: UgyldigBeregningDto;
     perioder: ResultatBarnebidragsberegningPeriodeDto[];
 }
@@ -2596,6 +2616,8 @@ export enum BehandlingsrefKilde {
     BEHANDLING_ID = "BEHANDLING_ID",
     BISYSSOKNAD = "BISYS_SØKNAD",
     BISYSKLAGEREFSOKNAD = "BISYS_KLAGE_REF_SØKNAD",
+    ALDERSJUSTERING_BIDRAG = "ALDERSJUSTERING_BIDRAG",
+    ALDERSJUSTERING_FORSKUDD = "ALDERSJUSTERING_FORSKUDD",
 }
 
 export interface BehandlingsreferanseDto {
@@ -2622,13 +2644,10 @@ export interface EngangsbelopDto {
     kravhaver: string;
     /** Personidenten til den som mottar engangsbeløpet */
     mottaker: string;
-    /**
-     * Beregnet engangsbeløp
-     * @min 0
-     */
+    /** Beregnet engangsbeløp */
     beløp?: number;
     /** Valutakoden tilhørende engangsbeløpet */
-    valutakode: string;
+    valutakode?: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
     /** Angir om engangsbeløpet skal innkreves */
@@ -2648,10 +2667,7 @@ export interface EngangsbelopDto {
     eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i beregningen */
     grunnlagReferanseListe: string[];
-    /**
-     * Beløp BP allerede har betalt. Kan være 0 eller høyere.
-     * @min 0
-     */
+    /** Beløp BP allerede har betalt. Kan være 0 eller høyere. */
     betaltBeløp?: number;
 }
 
@@ -2694,6 +2710,8 @@ export interface StonadsendringDto {
 }
 
 export interface VedtakDto {
+    /** @format int64 */
+    vedtaksid: number;
     /** Hva er kilden til vedtaket. Automatisk eller manuelt */
     kilde: VedtakDtoKildeEnum;
     /** Type vedtak */
@@ -2738,10 +2756,7 @@ export interface VedtakDto {
 export interface VedtakPeriodeDto {
     /** Periode med fra-og-med-dato og til-dato med format ÅÅÅÅ-MM */
     periode: TypeArManedsperiode;
-    /**
-     * Beregnet stønadsbeløp
-     * @min 0
-     */
+    /** Beregnet stønadsbeløp */
     beløp?: number;
     /** Valutakoden tilhørende stønadsbeløpet */
     valutakode?: string;
@@ -2878,10 +2893,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2976,9 +2991,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3048,11 +3063,13 @@ export interface NotatPrivatAvtaleDto {
     gjelderBarn: NotatPersonDto;
     /** @format date */
     avtaleDato?: string;
+    avtaleType?: PrivatAvtaleType;
     skalIndeksreguleres: boolean;
     /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse?: NotatBegrunnelseDto;
     perioder: NotatPrivatAvtalePeriodeDto[];
     beregnetPrivatAvtalePerioder: NotatBeregnetPrivatAvtalePeriodeDto[];
+    avtaleTypeVisningsnavn?: string;
 }
 
 export interface NotatPrivatAvtalePeriodeDto {
@@ -3065,14 +3082,16 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
     barn: NotatPersonDto;
+    /** @format int32 */
+    indeksår?: number;
     perioder: ResultatBarnebidragsberegningPeriodeDto[];
 };
 
@@ -3091,8 +3110,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3333,8 +3352,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
