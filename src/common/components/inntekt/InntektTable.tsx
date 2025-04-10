@@ -258,7 +258,7 @@ export const InntektTabel = ({
                 },
             },
         }));
-    }, [formState.errors, JSON.stringify(controlledFields)]);
+    }, [JSON.stringify(formState.errors), JSON.stringify(controlledFields)]);
 
     const handleOnSelect = (taMed: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);

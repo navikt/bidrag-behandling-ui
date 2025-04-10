@@ -392,7 +392,7 @@ const UtgifterListe = () => {
                 openFields: { utgifterList: controlledFields.some((utgift) => utgift.erRedigerbart) },
             },
         }));
-    }, [formState.errors, JSON.stringify(controlledFields)]);
+    }, [JSON.stringify(formState.errors), JSON.stringify(controlledFields)]);
 
     const addUtgift = (utgift: Utgiftspost) => {
         utgifter.append(utgift);
