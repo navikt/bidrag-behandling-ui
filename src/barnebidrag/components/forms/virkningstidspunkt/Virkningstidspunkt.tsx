@@ -35,7 +35,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
@@ -293,7 +292,6 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 };
 
 const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
-    const { isOpphørsdatoEnabled } = useFeatureToogle();
     const behandling = useGetBehandlingV2();
     //TODO: Dette må tilpasses per barn i V3 av bidrag
     const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
@@ -359,7 +357,6 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     };
 
     if (behandling.virkningstidspunkt.avslag != null) return null;
-    if (!isOpphørsdatoEnabled) return null;
     return (
         <>
             {opphør?.eksisterendeOpphør && (

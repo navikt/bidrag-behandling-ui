@@ -41,6 +41,8 @@ export const mapÅrsakTilVirkningstidspunkt = (
         : treMaanederTilbakeFraMottatDato;
 
     switch (aarsak) {
+        case TypeArsakstype.MANEDETTERBETALTFORFALTBIDRAG:
+            return null;
         case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
             return firstDayOfMonth(addMonths(mottatOrSoktFraDato, 1));
         case TypeArsakstype.FRAMANEDENETTERFYLTE18AR:
