@@ -215,8 +215,15 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
-                    {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
-                    {!erTypeOpphør && (
+                    {lesemodus && (
+                        <option value={getValues("årsakAvslag")}>
+                            {hentVisningsnavnVedtakstype(getValues("årsakAvslag"), behandling.vedtakstype)}
+                        </option>
+                    )}
+                    {!lesemodus && erÅrsakAvslagIkkeValgt && (
+                        <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                    )}
+                    {!lesemodus && !erTypeOpphør && (
                         <optgroup label={text.label.årsak}>
                             {virkningsårsaker
                                 .filter((value) => {
@@ -231,7 +238,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         </optgroup>
                     )}
 
-                    {er18ÅrsBidrag ? (
+                    {!lesemodus && er18ÅrsBidrag ? (
                         <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
                             {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                                 <option key={value} value={value}>
