@@ -93,6 +93,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
 
 const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
     const behandling = useGetBehandlingV2();
+    const { lesemodus } = useBehandlingProvider();
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
@@ -143,8 +144,15 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
-                    {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
-                    {skalViseÅrsakstyper && (
+                    {lesemodus && (
+                        <option value={getValues("årsakAvslag")}>
+                            {hentVisningsnavnVedtakstype(getValues("årsakAvslag"), behandling.vedtakstype)}
+                        </option>
+                    )}
+                    {!lesemodus && erÅrsakAvslagIkkeValgt && (
+                        <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                    )}
+                    {!lesemodus && skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
                             {årsakListe
                                 .filter((value) => {
@@ -158,22 +166,24 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                                 ))}
                         </optgroup>
                     )}
-                    <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                        {avslagsOpphørsliste.map((value) => (
-                            <option key={value} value={value}>
-                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                            </option>
-                        ))}
-                        {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
-                            <>
-                                {avslagsListeDeprekert.map((value) => (
-                                    <option key={value} value={value} disabled>
-                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                    </option>
-                                ))}
-                            </>
-                        )}
-                    </optgroup>
+                    {!lesemodus && (
+                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
+                            {avslagsOpphørsliste.map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                </option>
+                            ))}
+                            {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
+                                <>
+                                    {avslagsListeDeprekert.map((value) => (
+                                        <option key={value} value={value} disabled>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    ))}
+                                </>
+                            )}
+                        </optgroup>
+                    )}
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
                     name="virkningstidspunkt"
