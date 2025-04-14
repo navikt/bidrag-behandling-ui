@@ -8,6 +8,8 @@ import {
 
 const tekster = {
     alert: {
+        løpendeBidragPerioder:
+            "Det løper bidrag i perioden {}. Du kan ikke legge inn privat avtale som overlapper med perioden hvor det løper bidrag",
         ansettelsesdetaljerEndret: "Ansettelsesdetaljer fra arbeidsgiver {} er endret",
         antallArbeidsforholdEndret: "Antall arbeidsforhold for {} har blitt endret",
         antallBarnetilleggPerioderEndret: "Antall barnetillegg perioder har blitt endret",
@@ -37,6 +39,7 @@ const tekster = {
         fullførRedigering: "Fullfør redigering",
         færreBarnRegistrertPåAdresse: "Det er færre barn registrert på samme adresse i offentlige registre.",
         ingenInntekt: "Ingen inntekt funnet",
+        løpendeBidrag: "Løpende bidrag",
         manglerPerioderForTilsynsordning: "Mangler perioder for tilsynsordning",
         manglerPerioderForTilsynsordningDescription: "Du må minst legge til en periode når barnet har tilsynsordning.",
         manglerPerioder: "Mangler perioder. Du må minst legge til en gyldig periode",
@@ -48,6 +51,9 @@ const tekster = {
         overlappendePerioderFiks: "Rediger eller slett periodene.",
         overlappendeLøpendePerioder: "To eller flere løpende perioder fra {} overlapper.",
         overlappendePerioder: "To eller flere perioder i perioden {} - {} overlapper.",
+        overlappendeLøpendeBidragPerioder: "En eller flere perioder i perioden {} - {} overlapper med løpende bidrag.",
+        overlappendeLøpendeBidragPerioderForLøpende:
+            "En eller flere løpende perioder fra {} overlapper med løpende bidrag.",
         periodeUnderRedigering: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
         sluttdatoForArbeidsforholdEndret: "Sluttdato for arbeidsforhold {} er endret fra {} til {}",
         startdatoForArbeidsforholdEndret: "Startdato for arbeidsforhold {} er endret",
@@ -126,7 +132,7 @@ const tekster = {
         avslag: "Avslag",
         avslagsGrunn: "Avslagsgrunn",
         avbryt: "Avbryt",
-        avtaleDato: "Avtaledato",
+        avtaleDato: "Avtalemåned",
         barn: "Barn",
         barnHarTilsysnsordning: "Barn har tilsynsordning",
         barnetillegg: "Barnetillegg",

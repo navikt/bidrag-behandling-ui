@@ -108,6 +108,7 @@ export const BarnebidragSideMenu = () => {
             {isBidragV2Enabled && (
                 <MenuButton
                     step={"2."}
+                    interactive={interactive}
                     title={text.title.privatAvtale}
                     onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
                     active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
@@ -568,7 +569,7 @@ export const BarnebidragSideMenu = () => {
                 step={isBidragV2Enabled ? "5." : "4"}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-                interactive={interactive && !!gebyr?.gebyrRoller.length}
+                interactive={!!gebyr?.gebyrRoller.length}
                 active={activeButton === BarnebidragStepper.GEBYR}
                 valideringsfeil={gebyrValideringsFeil}
             />

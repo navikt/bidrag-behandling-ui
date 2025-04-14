@@ -1,5 +1,6 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { MonthValidationT } from "@navikt/ds-react";
+import { Matcher } from "@navikt/ds-react/src/date/utils";
 import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "@utils/date-utils";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
@@ -19,6 +20,7 @@ interface FormControlledDatePickerProps {
     toDate?: Date;
     fromDate?: Date;
     lastDayOfMonthPicker?: boolean;
+    disabledMonths?: Matcher[];
 }
 
 export const FormControlledMonthPicker = ({
@@ -34,6 +36,7 @@ export const FormControlledMonthPicker = ({
     fromDate,
     lastDayOfMonthPicker,
     customValidation,
+    disabledMonths,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors, getValues } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
@@ -94,6 +97,7 @@ export const FormControlledMonthPicker = ({
             fromDate={fromDate}
             lastDayOfMonthPicker={lastDayOfMonthPicker}
             fieldValue={field.value}
+            disabledMonths={disabledMonths}
         />
     );
 };
