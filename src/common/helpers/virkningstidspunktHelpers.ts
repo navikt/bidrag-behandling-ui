@@ -6,7 +6,7 @@ import {
     deductMonths,
     firstDayOfMonth,
     isAfterDate,
-    isBeforeDate,
+    isBeforeOrEqualsDate,
     minOfDates,
 } from "@utils/date-utils";
 import { addMonths } from "date-fns";
@@ -41,6 +41,8 @@ export const mapÅrsakTilVirkningstidspunkt = (
         : treMaanederTilbakeFraMottatDato;
 
     switch (aarsak) {
+        case TypeArsakstype.MANEDETTERBETALTFORFALTBIDRAG:
+            return null;
         case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
             return firstDayOfMonth(addMonths(mottatOrSoktFraDato, 1));
         case TypeArsakstype.FRAMANEDENETTERFYLTE18AR:
@@ -81,9 +83,11 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, op
     const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(deductMonths(firstDayOfMonth(opphørsdato), 1));
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
     const tom =
-        lastDayOfOpphørsdatoMonth && isBeforeDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
+        lastDayOfOpphørsdatoMonth && isBeforeOrEqualsDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
             ? lastDayOfOpphørsdatoMonth
-            : lastDayOfPreviousMonth;
+            : opphørsdato
+              ? lastDayOfMonth(addMonths(lastDayOfPreviousMonth, 1))
+              : lastDayOfPreviousMonth;
 
     return [fom, tom];
 };

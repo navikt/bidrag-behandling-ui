@@ -87,7 +87,7 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">{item.dato && DateToDDMMYYYYString(dateOrNull(item.dato))}</div>
+        <div className="h-6 flex items-center">{item.dato && DateToDDMMYYYYString(dateOrNull(item.dato))}</div>
     );
 };
 const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
@@ -109,7 +109,7 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center justify-end">0</div>;
+        return <div className="h-6 flex items-center justify-end">0</div>;
     }
     return (
         <FormControlledTextField
@@ -134,7 +134,7 @@ const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
             hideLabel
         />
     ) : (
-        <div className="min-h-8 flex items-center">
+        <div className="min-h-6 flex items-center">
             <BodyLong size="small">{item.kommentar}</BodyLong>
         </div>
     );
@@ -159,7 +159,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
 
     if (readOnly || !item.erRedigerbart) {
         return (
-            <div className="h-8 flex items-center">{item.utgiftstypeVisningsnavn ?? hentVisningsnavn(item.type)}</div>
+            <div className="h-6 flex items-center">{item.utgiftstypeVisningsnavn ?? hentVisningsnavn(item.type)}</div>
         );
     }
     if (erKategoriAnnet) {
@@ -199,7 +199,7 @@ const DeleteButton = ({ onRemoveUtgift, index }: { onRemoveUtgift: (index) => vo
             onClick={() => onRemoveUtgift(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>
@@ -220,14 +220,14 @@ const EditOrSaveButton = ({
     const { lesemodus } = useBehandlingProvider();
 
     return (
-        <div className="h-8 flex items-center justify-center">
+        <div className="h-6 flex items-center justify-center">
             {!lesemodus && !item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onEditRow(index)}
                     icon={<PencilIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
             {!lesemodus && item.erRedigerbart && (
@@ -236,7 +236,7 @@ const EditOrSaveButton = ({
                     onClick={() => onSaveRow(index)}
                     icon={<FloppydiskIcon aria-hidden />}
                     variant="tertiary"
-                    size="small"
+                    size="xsmall"
                 />
             )}
         </div>
@@ -392,7 +392,7 @@ const UtgifterListe = () => {
                 openFields: { utgifterList: controlledFields.some((utgift) => utgift.erRedigerbart) },
             },
         }));
-    }, [formState.errors, JSON.stringify(controlledFields)]);
+    }, [JSON.stringify(formState.errors), JSON.stringify(controlledFields)]);
 
     const addUtgift = (utgift: Utgiftspost) => {
         utgifter.append(utgift);
@@ -629,7 +629,7 @@ const UtgifterListe = () => {
                                     })}
                                 >
                                     <Table.DataCell>
-                                        <div className="h-8 w-full flex items-center justify-center">
+                                        <div className="h-6 w-full flex items-center justify-center">
                                             <FormControlledCheckbox
                                                 name={`utgifter.${index}.betaltAvBp`}
                                                 legend=""

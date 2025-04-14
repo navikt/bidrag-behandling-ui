@@ -41,7 +41,7 @@ const TotalTilysnsutgift = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">
+                <div className="h-6 flex items-center justify-end">
                     <BodyShort size="small">{formatterBeløp(item.utgift)}</BodyShort>
                 </div>
             )}
@@ -71,7 +71,7 @@ const Kostpenger = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">
+                <div className="h-6 flex items-center justify-end">
                     <BodyShort size="small">{formatterBeløp(item.kostpenger)}</BodyShort>
                 </div>
             )}
@@ -81,7 +81,7 @@ const Kostpenger = ({
 
 const Totalt12Måned = ({ item }: { item: FaktiskTilsynsutgiftPeriode }) => {
     return (
-        <div className="h-8 flex items-center justify-end">
+        <div className="h-6 flex items-center justify-end">
             <BodyShort size="small">{formatterBeløpForBeregning(item.total)}</BodyShort>
         </div>
     );
@@ -99,7 +99,7 @@ const Kommentar = ({
     return item.erRedigerbart ? (
         <FormControlledTextarea name={`${fieldName}.kommentar`} label={text.label.kommentar} minRows={1} hideLabel />
     ) : (
-        <div className="min-h-8 flex items-center">
+        <div className="min-h-6 flex items-center">
             <BodyLong size="small">{item.kommentar}</BodyLong>
         </div>
     );

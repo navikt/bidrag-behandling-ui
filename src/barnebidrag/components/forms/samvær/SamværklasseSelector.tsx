@@ -89,7 +89,7 @@ export const SamværsklasseSelector = ({
                     />
                 </>
             ) : (
-                <div className="h-8 flex items-center">{hentVisningsnavn(item.samværsklasse)}</div>
+                <div className="h-6 flex items-center">{hentVisningsnavn(item.samværsklasse)}</div>
             )}
         </>
     );

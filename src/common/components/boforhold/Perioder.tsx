@@ -22,6 +22,7 @@ import {
     gyldigBostatus18ÅrsBidragSøknadsbarn,
     gyldigBostatusOver18År,
     isOver18YearsOld,
+    skalViseOver18Statuser as skalViseOver18BoforholdStatuser,
 } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
@@ -60,7 +61,7 @@ const DeleteButton = ({
             onClick={() => onRemovePeriode(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <div className="min-w-[40px]"></div>
@@ -88,7 +89,7 @@ const EditOrSaveButton = ({
             onClick={() => onSaveRow(index)}
             icon={<FloppydiskIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     ) : (
         <Button
@@ -96,7 +97,7 @@ const EditOrSaveButton = ({
             onClick={() => onEditRow(index)}
             icon={<PencilIcon aria-hidden />}
             variant="tertiary"
-            size="small"
+            size="xsmall"
         />
     );
 };
@@ -119,7 +120,7 @@ const Status = ({
         const visningsnavn = hentVisningsnavn(bostsatus);
         // Ønsker ikke å vise 18 år prefiks for 18 åring i 18års bidrag
         const bosstatus18År = bidrag18ÅrOgSøknadsbarn ? [] : gyldigBostatusOver18År[type];
-        if (bosstatus18År.includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
+        if (bosstatus18År.includes(bostsatus) && skalViseOver18BoforholdStatuser(barn)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
@@ -127,7 +128,7 @@ const Status = ({
 
     const boforholdStatusOptions = bidrag18ÅrOgSøknadsbarn
         ? boforholdOptions[type].bidrag18År
-        : isOver18YearsOld(barn.fødselsdato)
+        : skalViseOver18BoforholdStatuser(barn)
           ? boforholdOptions[type].likEllerOver18År
           : boforholdOptions[type].under18År;
 
@@ -144,7 +145,7 @@ const Status = ({
             onSelect={() => clearErrors(`${fieldName}.bostatus`)}
         />
     ) : (
-        <div className="h-8 flex items-center">{bosstatusToVisningsnavn(item.bostatus)}</div>
+        <div className="h-6 flex items-center">{bosstatusToVisningsnavn(item.bostatus)}</div>
     );
 };
 export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
@@ -200,7 +201,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 },
             },
         }));
-    }, [formState.errors, editableRow]);
+    }, [JSON.stringify(formState.errors), editableRow]);
 
     const onSaveRow = (index: number) => {
         const periodeValues = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
@@ -218,7 +219,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
 
-        if (barnIsOver18) {
+        if (barnIsOver18 && !barn.medIBehandling) {
             const selectedStatusIsOver18 = bidrag18ÅrOgSøknadsbarn
                 ? gyldigBostatus18ÅrsBidragSøknadsbarn[behandling.type]
                 : gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
@@ -349,7 +350,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
-            const bidrag18ÅrOgSøknadsbarn = behandling.stønadstype === Stonadstype.BIDRAG18AAR && barn.medIBehandling;
+            const bidrag18ÅrOgSøknadsbarn = !skalViseOver18BoforholdStatuser(barn);
 
             barnPerioder.append({
                 datoFom: null,
@@ -507,7 +508,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     variant="info"
                     size="small"
                     alertKey={"18åralert" + behandlingId + barn.ident}
-                    className="w-[708px] mb-2"
+                    className="w-[708px]"
                     closeButton
                 >
                     <Heading size="small" level="3">
@@ -517,7 +518,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </StatefulAlert>
             )}
             {feilVedInnhentingAvOffentligData && (
-                <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                <BehandlingAlert variant="info" className="w-[708px]">
                     <Heading size="small" level="3">
                         {text.alert.feilVedInnhentingAvOffentligData}
                     </Heading>
@@ -525,7 +526,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </BehandlingAlert>
             )}
             {valideringsfeilForBarn && (
-                <div className="mb-4">
+                <div>
                     <BehandlingAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}

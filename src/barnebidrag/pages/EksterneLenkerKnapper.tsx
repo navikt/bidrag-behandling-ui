@@ -35,6 +35,8 @@ function BrukerveiledningKnapp() {
                 return elementIds.brukerveildning.tittel_virkningstidspunkt;
             case BarnebidragStepper.BOFORHOLD:
                 return elementIds.brukerveildning.tittel_boforhold;
+            case BarnebidragStepper.PRIVAT_AVTALE:
+                return elementIds.brukerveildning.tittel_privat_avtale;
             case BarnebidragStepper.UNDERHOLDSKOSTNAD:
                 return elementIds.brukerveildning.tittel_underholdskostnad;
             case BarnebidragStepper.GEBYR:

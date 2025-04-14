@@ -26,13 +26,31 @@ const Header = () => (
     </BodyShort>
 );
 export const NyOpplysningerAlert = () => {
-    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const { ikkeAktiverteEndringerIGrunnlagsdata, type } = useGetBehandlingV2();
+    const isBidragBehandling = [TypeBehandling.BIDRAG, TypeBehandling.BIDRAG18AR].includes(type);
     const ikkeAktiverteEndringerBoforhold = ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn;
     const ikkeAktiverteEndringerSivilstand = ikkeAktiverteEndringerIGrunnlagsdata.sivilstand;
+    const ikkeAktiverteEndringerHusstandsmedlemBM = ikkeAktiverteEndringerIGrunnlagsdata.husstandsmedlemBM;
+    const isBidragAndNoIkkeAktiverteEndringerHusstandsmedlemBM = isBidragBehandling
+        ? ikkeAktiverteEndringerHusstandsmedlemBM.length === 0
+        : true;
 
-    if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand == null) return null;
-    const innhentetTidspunkt =
-        ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
+    if (
+        ikkeAktiverteEndringerBoforhold.length === 0 &&
+        ikkeAktiverteEndringerSivilstand == null &&
+        isBidragAndNoIkkeAktiverteEndringerHusstandsmedlemBM
+    )
+        return null;
+
+    const arrOfDates = [
+        dateOrNull(ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt),
+        dateOrNull(ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt),
+        isBidragBehandling ? dateOrNull(ikkeAktiverteEndringerHusstandsmedlemBM[0]?.innhentetTidspunkt) : null,
+    ]
+        .filter((date) => date)
+        .map((date) => date.getTime());
+
+    const innhentetTidspunkt = new Date(Math.max(...arrOfDates));
     return (
         <BehandlingAlert variant="info">
             <Heading size="xsmall" level="3">
@@ -40,7 +58,7 @@ export const NyOpplysningerAlert = () => {
             </Heading>
             <BodyShort size="small">
                 Nye opplysninger fra offentlige registre er tilgjengelig. Oppdatert{" "}
-                {DateToDDMMYYYYHHMMString(dateOrNull(innhentetTidspunkt))}
+                {DateToDDMMYYYYHHMMString(innhentetTidspunkt)}
             </BodyShort>
         </BehandlingAlert>
     );
@@ -152,6 +170,8 @@ export const BoforholdOpplysninger = ({
             }
         );
     };
+
+    if (!hasOpplysningerFraFolkeregistre) return null;
 
     return (
         <div className="grid gap-2">
