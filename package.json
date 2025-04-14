@@ -24,7 +24,7 @@
     "api:notat": "swagger-typescript-api -p http://localhost:8183/v3/api-docs --extract-enums --axios -n BidragDokumentProduksjonApi.ts -o src/api"
   },
   "dependencies": {
-    "@babel/runtime": "^7.26.10",
+    "@babel/runtime": "^7.27.0",
     "react-day-picker": "9.6.4",
     "@emotion/react": "11.14.0",
     "@grafana/faro-react": "^1.12.2",
