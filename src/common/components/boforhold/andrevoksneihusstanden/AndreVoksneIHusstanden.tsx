@@ -215,7 +215,7 @@ export const AndreVoksneIHusstanden = () => {
                 },
             },
         }));
-    }, [formState.errors, editableRow]);
+    }, [JSON.stringify(formState.errors), editableRow]);
 
     const onSaveRow = (index: number) => {
         const periodeValues = getValues(`andreVoksneIHusstanden.${index}`);

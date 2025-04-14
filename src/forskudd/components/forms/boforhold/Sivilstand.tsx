@@ -234,7 +234,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 },
             },
         }));
-    }, [errors, editableRow]);
+    }, [JSON.stringify(errors), editableRow]);
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`sivilstand`);

@@ -180,7 +180,7 @@ export const Periode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={addMonthsIgnoreDay(tom, 1)}
+            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={item.taMed && !fieldIsDatoTom}
             hideLabel
@@ -258,7 +258,7 @@ export const InntektTabel = ({
                 },
             },
         }));
-    }, [formState.errors, JSON.stringify(controlledFields)]);
+    }, [JSON.stringify(formState.errors), JSON.stringify(controlledFields)]);
 
     const handleOnSelect = (taMed: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
