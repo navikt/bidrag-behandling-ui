@@ -19,7 +19,7 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
+import { getFirstDayOfMonthAfterEighteenYears, isOver18YearsOld } from "@common/helpers/boforholdFormHelpers";
 import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
@@ -35,7 +35,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
@@ -133,8 +132,11 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
-    if (stønadstype === Stonadstype.BIDRAG18AAR) {
+const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype, fødselsdato: string) => {
+    if (
+        stønadstype === Stonadstype.BIDRAG18AAR ||
+        (stønadstype === Stonadstype.BIDRAG && isOver18YearsOld(fødselsdato))
+    ) {
         if (opphør?.eksisterendeOpphør) {
             return [OpphørsVarighet.VELG_OPPHØRSDATO, OpphørsVarighet.FORTSETTE_OPPHØR];
         } else {
@@ -213,8 +215,15 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
-                    {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
-                    {!erTypeOpphør && (
+                    {lesemodus && (
+                        <option value={getValues("årsakAvslag")}>
+                            {hentVisningsnavnVedtakstype(getValues("årsakAvslag"), behandling.vedtakstype)}
+                        </option>
+                    )}
+                    {!lesemodus && erÅrsakAvslagIkkeValgt && (
+                        <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                    )}
+                    {!lesemodus && !erTypeOpphør && (
                         <optgroup label={text.label.årsak}>
                             {virkningsårsaker
                                 .filter((value) => {
@@ -229,7 +238,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                         </optgroup>
                     )}
 
-                    {er18ÅrsBidrag ? (
+                    {!lesemodus && er18ÅrsBidrag ? (
                         <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
                             {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                                 <option key={value} value={value}>
@@ -290,7 +299,6 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 };
 
 const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
-    const { isOpphørsdatoEnabled } = useFeatureToogle();
     const behandling = useGetBehandlingV2();
     //TODO: Dette må tilpasses per barn i V3 av bidrag
     const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
@@ -356,7 +364,6 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     };
 
     if (behandling.virkningstidspunkt.avslag != null) return null;
-    if (!isOpphørsdatoEnabled) return null;
     return (
         <>
             {opphør?.eksisterendeOpphør && (
@@ -377,7 +384,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
                     className="w-max"
                     onSelect={(value) => onSelectVarighet(value)}
                 >
-                    {getOpphørOptions(opphør, behandling.stønadstype).map((value) => (
+                    {getOpphørOptions(opphør, behandling.stønadstype, baRolle.fødselsdato).map((value) => (
                         <option key={value} value={value}>
                             {value}
                         </option>
@@ -454,7 +461,7 @@ const VirkningstidspunktForm = () => {
                 error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
             },
         }));
-    }, [useFormMethods.formState.errors]);
+    }, [JSON.stringify(useFormMethods.formState.errors)]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
