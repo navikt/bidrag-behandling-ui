@@ -11,6 +11,7 @@ export const BeregningEndringUnderGrense = () => {
 
     if (!erEndringUnderGrense) return null;
 
+    if (!endringUnderGrense) return null;
     return (
         <ResultatDescription
             title="Endring under grense"
