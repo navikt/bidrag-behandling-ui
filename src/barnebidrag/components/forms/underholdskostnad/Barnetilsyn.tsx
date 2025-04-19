@@ -212,7 +212,7 @@ export const RolleInfoBox = ({
 export const Barnetilsyn = ({ index }: { index: number }) => {
     const { setSaveErrorState } = useBehandlingProvider();
     const { aktiveOpplysninger } = useGetOpplysningerBarnetilsyn();
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { underholdskostnader, erBisysVedtak } = useGetBehandlingV2();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
@@ -299,7 +299,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                     )}
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-                    <TilleggstønadTabel underholdFieldName={underholdFieldName} />
+                    {!erBisysVedtak && <TilleggstønadTabel underholdFieldName={underholdFieldName} />}
                 </>
             )}
             <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
