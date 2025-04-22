@@ -210,7 +210,7 @@ export const RolleInfoBox = ({
 };
 
 export const Barnetilsyn = ({ index }: { index: number }) => {
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const { aktiveOpplysninger } = useGetOpplysningerBarnetilsyn();
     const { underholdskostnader, erBisysVedtak } = useGetBehandlingV2();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
@@ -269,7 +269,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                 checked={underhold.harTilsynsordning || hasAtLeastOnePeriodOrActiveOpplysninger}
                 onChange={onToggle}
                 size="small"
-                readOnly={hasAtLeastOnePeriodOrActiveOpplysninger}
+                readOnly={lesemodus || hasAtLeastOnePeriodOrActiveOpplysninger}
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
