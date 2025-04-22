@@ -305,7 +305,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     const opphør = behandling.virkningstidspunkt.opphør.opphørRoller.find(
         (opphørRolle) => opphørRolle.rolle.ident === baRolle.ident
     );
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
     const { getValues, reset, setValue } = useFormContext();
     const [opphørsvarighet, setOpphørsvarighet] = useState(getValues("opphørsvarighet"));
@@ -366,7 +366,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     if (behandling.virkningstidspunkt.avslag != null) return null;
     return (
         <>
-            {opphør?.eksisterendeOpphør && (
+            {!lesemodus && opphør?.eksisterendeOpphør && (
                 <BehandlingAlert variant="info" className="!w-[520px]">
                     <BodyShort>
                         {removePlaceholder(

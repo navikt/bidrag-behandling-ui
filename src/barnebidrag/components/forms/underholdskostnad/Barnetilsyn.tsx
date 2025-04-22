@@ -273,17 +273,19 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
-            {underhold.harTilsynsordning && underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
-                <BehandlingAlert variant="warning">
-                    <Heading size="xsmall" level="6">
-                        {text.alert.manglerPerioderForTilsynsordning}
-                    </Heading>
-                    <BodyShort size="small">{text.alert.manglerPerioderForTilsynsordningDescription}</BodyShort>
-                </BehandlingAlert>
-            )}
+            {!lesemodus &&
+                underhold.harTilsynsordning &&
+                underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
+                    <BehandlingAlert variant="warning">
+                        <Heading size="xsmall" level="6">
+                            {text.alert.manglerPerioderForTilsynsordning}
+                        </Heading>
+                        <BodyShort size="small">{text.alert.manglerPerioderForTilsynsordningDescription}</BodyShort>
+                    </BehandlingAlert>
+                )}
             {(underhold.harTilsynsordning || hasAtLeastOnePeriod) && (
                 <>
-                    {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                    {!lesemodus && displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
                         <StatefulAlert
                             variant="info"
                             size="small"

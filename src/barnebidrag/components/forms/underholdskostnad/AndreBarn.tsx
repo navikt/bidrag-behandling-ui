@@ -116,7 +116,7 @@ export const AndreBarn = () => {
                     underhold?.gjelderBarn && (
                         <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
                             <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
-                            {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                            {!lesemodus && displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
                                 <StatefulAlert
                                     variant="info"
                                     size="small"
