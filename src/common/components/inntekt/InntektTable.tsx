@@ -132,11 +132,11 @@ export const Periode = ({
 }: {
     index: number;
     fieldName:
-        | `småbarnstillegg.${string}`
-        | `utvidetBarnetrygd.${string}`
-        | `årsinntekter.${string}`
-        | `barnetillegg.${string}.${string}`
-        | `kontantstøtte.${string}.${string}`;
+    | `småbarnstillegg.${string}`
+    | `utvidetBarnetrygd.${string}`
+    | `årsinntekter.${string}`
+    | `barnetillegg.${string}.${string}`
+    | `kontantstøtte.${string}.${string}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: InntektFormPeriode;
@@ -220,6 +220,7 @@ export const InntektTabel = ({
     const {
         inntekter,
         søktFomDato,
+        erBisysVedtak,
         virkningstidspunkt: { virkningstidspunkt, opphør },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
@@ -282,7 +283,7 @@ export const InntektTabel = ({
     };
 
     const onSaveSuccess = (response: OppdatereInntektResponse) => {
-        const transformFn = transformInntekt(virkningsdato);
+        const transformFn = transformInntekt(virkningsdato, erBisysVedtak);
         const isBarnetilleggOrKontantstøtteTable = ["barnetillegg", "kontantstøtte"].includes(inntektType);
 
         resetField(fieldName, {
@@ -401,11 +402,11 @@ export const InntektTabel = ({
     )
         ? valideringsfeil[inntektType]
         : valideringsfeil[inntektType]?.find((feil) => {
-              if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                  return feil.gjelderBarn === barnIdent && feil.ident === ident;
-              }
-              return feil.ident === ident;
-          });
+            if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
+                return feil.gjelderBarn === barnIdent && feil.ident === ident;
+            }
+            return feil.ident === ident;
+        });
 
     return (
         <>

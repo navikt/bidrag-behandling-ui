@@ -152,7 +152,7 @@ export const manuelleInntekterValg = {
     ],
 };
 export const transformInntekt =
-    (virkningsdato: Date) =>
+    (virkningsdato: Date, erBisysVedtak: boolean = false) =>
     (inntekt: InntektDtoV2): InntektFormPeriode => {
         return {
             ...inntekt,
@@ -174,7 +174,7 @@ export const transformInntekt =
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
             beløpMnd:
                 inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG
-                    ? inntekt.kilde === Kilde.OFFENTLIG
+                    ? inntekt.kilde === Kilde.OFFENTLIG || erBisysVedtak
                         ? Number(inntekt.beløp / 12)
                         : Number(inntekt.månedsbeløp)
                     : undefined,
@@ -203,10 +203,11 @@ export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => 
 export const createInitialValues = (
     roller: RolleDto[],
     inntekter: InntekterDtoV2,
-    virkningsdato: Date
+    virkningsdato: Date,
+    erBisysVedtak: boolean = false
 ): InntektFormValues => {
     const barnListe = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const transformFn = transformInntekt(virkningsdato);
+    const transformFn = transformInntekt(virkningsdato, erBisysVedtak);
 
     return {
         årsinntekter: roller.reduce(

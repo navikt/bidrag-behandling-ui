@@ -64,13 +64,13 @@ const FeilVedInnhentingAvOffentligData = ({ fieldName }: { fieldName: FieldName 
 
 export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName }) => {
     const { ident } = useInntektTableProvider();
-    const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
+    const { ikkeAktiverteEndringerIGrunnlagsdata, roller, erBisysVedtak } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { resetField } = useFormContext<InntektFormValues>();
     const [inntektType] = fieldName.split(".");
-    const transformFn = transformInntekt(virkningsdato);
+    const transformFn = transformInntekt(virkningsdato, erBisysVedtak);
 
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
@@ -213,8 +213,8 @@ export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName 
                                                     style={
                                                         index === inntektsposterSomErEndret.length - 1
                                                             ? {
-                                                                  borderBottom: "1px solid black",
-                                                              }
+                                                                borderBottom: "1px solid black",
+                                                            }
                                                             : {}
                                                     }
                                                 >

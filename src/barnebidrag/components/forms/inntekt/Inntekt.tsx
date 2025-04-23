@@ -170,8 +170,8 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-              ? text.description.inntektBegrunnelseBP
-              : undefined;
+                ? text.description.inntektBegrunnelseBP
+                : undefined;
 
     return (
         <Fragment key={selectedRolleId}>
@@ -196,10 +196,10 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { inntekter, roller } = useGetBehandlingV2();
+    const { inntekter, roller, erBisysVedtak } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const initialValues = useMemo(
-        () => createInitialValues(roller, inntekter, virkningsdato),
+        () => createInitialValues(roller, inntekter, virkningsdato, erBisysVedtak),
         [roller, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({
