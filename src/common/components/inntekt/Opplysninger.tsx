@@ -213,8 +213,8 @@ export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName 
                                                     style={
                                                         index === inntektsposterSomErEndret.length - 1
                                                             ? {
-                                                                borderBottom: "1px solid black",
-                                                            }
+                                                                  borderBottom: "1px solid black",
+                                                              }
                                                             : {}
                                                     }
                                                 >
