@@ -669,6 +669,8 @@ export interface BehandlingDtoV2 {
     id: number;
     type: TypeBehandling;
     erBisysVedtak: boolean;
+    /** @format int64 */
+    grunnlagFraVedtaksid?: number;
     medInnkreving: boolean;
     innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;

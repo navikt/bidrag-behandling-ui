@@ -6,8 +6,9 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, Link, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Fragment, useEffect } from "react";
 
@@ -22,6 +23,7 @@ import {
 import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
+import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
@@ -51,9 +53,12 @@ const Vedtak = () => {
             </div>
             <div className="grid gap-y-2">
                 {!beregning?.feil && (
-                    <Heading level="3" size="small">
-                        {text.title.oppsummering}
-                    </Heading>
+                    <div className="flex flex-row">
+                        <Heading level="3" size="small">
+                            {text.title.oppsummering}
+                        </Heading>
+                        <GrunnlagFraVedtakButton />
+                    </div>
                 )}
 
                 <VedtakResultat />
@@ -70,6 +75,23 @@ const Vedtak = () => {
     );
 };
 
+const GrunnlagFraVedtakButton = () => {
+    const { grunnlagFraVedtaksid, saksnummer } = useGetBehandlingV2();
+    const enhet = useQueryParams().get("enhet");
+    const sessionState = useQueryParams().get("sessionState");
+
+    if (!grunnlagFraVedtaksid) return null;
+    return (
+        <Link
+            className="ml-auto"
+            href={`/sak/${saksnummer}/vedtak/${grunnlagFraVedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+            target="_blank"
+            rel="noreferrer"
+        >
+            Grunnlag fra vedtak <ExternalLinkIcon aria-hidden />
+        </Link>
+    );
+};
 const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
     if (!resultat.ugyldigBeregning) return null;
     return (

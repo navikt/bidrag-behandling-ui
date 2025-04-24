@@ -21,7 +21,7 @@ export const EndeligBidragTable = () => {
                     label: "Avrundet beløp",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering.resultatBeløp ?? sluttberegning.resultatBeløp)}`,
+                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.resultatBeløp ?? sluttberegning.resultatBeløp)}`,
                 },
             ].filter((d) => d)}
         />
