@@ -20,6 +20,7 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
     return (
         <>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
+
             <Table size="small" zebraStripes className="table-fixed table bg-white w-full">
                 <Table.Header>
                     <Table.Row className="align-baseline">
