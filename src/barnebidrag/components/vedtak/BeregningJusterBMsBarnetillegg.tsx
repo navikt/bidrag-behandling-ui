@@ -1,12 +1,14 @@
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
-import { formatterBeløpForBeregning } from "../../../utils/number-utils";
+import { useGetBehandlingV2 } from "../../../common/hooks/useApiData";
+import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const BeregningJusterBMsBarnetillegg = () => {
     const {
         beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad, barnetilleggBM },
     } = useBidragBeregningPeriode();
-
+    const { erBisysVedtak } = useGetBehandlingV2();
+    const barnetilleggSkattesats = barnetilleggBM.delberegningSkattesats;
     function renderResult() {
         if (sluttberegning.bidragJustertForNettoBarnetilleggBM) {
             return ` (justert til U - BMs netto barnetillegg + samværsfradrag)`;
@@ -17,6 +19,12 @@ export const BeregningJusterBMsBarnetillegg = () => {
     return (
         <ResultatDescription
             data={[
+                erBisysVedtak && {
+                    label: "Manuelt beregnet skatteprosent",
+                    textRight: false,
+                    labelBold: true,
+                    value: formatterProsent(barnetilleggSkattesats.skattFaktor),
+                },
                 {
                     label: "U - BMs netto barnetillegg",
                     textRight: false,
