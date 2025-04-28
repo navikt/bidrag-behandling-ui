@@ -21,6 +21,8 @@ import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./Inn
 import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
+const ignorerBarnetilleggTyper = [Inntektstype.BARNETILLEGG_SUMMERT, Inntektstype.BARNETILLEGG_TILTAKSPENGER];
+const ignorerBarnetilleggBidragTyper = [Inntektstype.BARNETILLEGG_SUMMERT];
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
     const { type } = useBehandlingProvider();
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
@@ -29,9 +31,12 @@ const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string 
             label={text.label.beskrivelse}
             options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
                 Object.entries(Inntektstype)
+
                     .filter(([, text]) => text.includes("BARNETILLEGG"))
                     .filter(([value]) =>
-                        type !== TypeBehandling.BIDRAG ? value !== Inntektstype.BARNETILLEGG_TILTAKSPENGER : true
+                        type !== TypeBehandling.BIDRAG
+                            ? !ignorerBarnetilleggTyper.includes(value as Inntektstype)
+                            : !ignorerBarnetilleggBidragTyper.includes(value as Inntektstype)
                     )
                     .map(([value, text]) => ({
                         value: Inntektstype[value],
