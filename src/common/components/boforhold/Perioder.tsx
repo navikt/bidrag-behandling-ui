@@ -525,7 +525,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     {text.feilVedInnhentingAvOffentligData}
                 </BehandlingAlert>
             )}
-            {valideringsfeilForBarn && (
+            {valideringsfeilForBarn && !lesemodus && (
                 <div>
                     <BehandlingAlert variant="warning">
                         <Heading spacing size="small" level="3">
