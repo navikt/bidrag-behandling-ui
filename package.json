@@ -86,7 +86,7 @@
     "core-js": "^3.35.0",
     "cross-env": "^7.0.3",
     "cross-fetch": "^4.1.0",
-    "css-loader": "^6.8.1",
+    "css-loader": "^7.1.2",
     "dotenv-webpack": "^8.0.1",
     "esbuild-loader": "4.0.2",
     "esbuild-register": "^3.6.0",
