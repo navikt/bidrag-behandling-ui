@@ -6,8 +6,9 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, Link, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Fragment, useEffect } from "react";
 
@@ -22,6 +23,7 @@ import {
 import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
+import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
@@ -51,9 +53,12 @@ const Vedtak = () => {
             </div>
             <div className="grid gap-y-2">
                 {!beregning?.feil && (
-                    <Heading level="3" size="small">
-                        {text.title.oppsummering}
-                    </Heading>
+                    <div className="flex flex-row">
+                        <Heading level="3" size="small">
+                            {text.title.oppsummering}
+                        </Heading>
+                        <GrunnlagFraVedtakButton />
+                    </div>
                 )}
 
                 <VedtakResultat />
@@ -70,6 +75,23 @@ const Vedtak = () => {
     );
 };
 
+const GrunnlagFraVedtakButton = () => {
+    const { grunnlagFraVedtaksid, saksnummer } = useGetBehandlingV2();
+    const enhet = useQueryParams().get("enhet");
+    const sessionState = useQueryParams().get("sessionState");
+
+    if (!grunnlagFraVedtaksid) return null;
+    return (
+        <Link
+            className="ml-auto"
+            href={`/sak/${saksnummer}/vedtak/${grunnlagFraVedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+            target="_blank"
+            rel="noreferrer"
+        >
+            Grunnlag fra vedtak <ExternalLinkIcon aria-hidden />
+        </Link>
+    );
+};
 const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
     if (!resultat.ugyldigBeregning) return null;
     return (
@@ -142,39 +164,45 @@ const VedtakTableBody = ({
     avslag: boolean;
     opphør: boolean;
 }) => {
+    const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
+
     return (
         <Table.Body>
-            {resultatBarn.perioder.map((periode, index) => (
-                <Fragment key={periode.periode.fom + index}>
-                    {avslag ? (
-                        <Table.Row>
-                            <Table.DataCell textSize="small">
-                                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                                {periode.periode.til
-                                    ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
-                                    : ""}
-                            </Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                {opphør ? text.label.opphør : text.label.avslag}
-                            </Table.DataCell>
-                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
-                        </Table.Row>
-                    ) : (
-                        <Table.ExpandableRow
-                            togglePlacement="right"
-                            expandOnRowClick
-                            expansionDisabled={periode.erBeregnetAvslag}
-                            content={<DetaljertBeregningBidrag periode={periode} />}
-                        >
-                            {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
-                                <TableRowResultatAvslag periode={periode} />
-                            ) : (
-                                <TableRowResultat periode={periode} />
-                            )}
-                        </Table.ExpandableRow>
-                    )}
-                </Fragment>
-            ))}
+            {resultatBarn.perioder.map((periode, index) => {
+                const skjulBeregning =
+                    periode.erBeregnetAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
+                return (
+                    <Fragment key={periode.periode.fom + index}>
+                        {avslag ? (
+                            <Table.Row>
+                                <Table.DataCell textSize="small">
+                                    {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                                    {periode.periode.til
+                                        ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
+                                        : ""}
+                                </Table.DataCell>
+                                <Table.DataCell textSize="small">
+                                    {opphør ? text.label.opphør : text.label.avslag}
+                                </Table.DataCell>
+                                <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                            </Table.Row>
+                        ) : (
+                            <Table.ExpandableRow
+                                togglePlacement="right"
+                                expandOnRowClick
+                                expansionDisabled={skjulBeregning}
+                                content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
+                            >
+                                {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
+                                    <TableRowResultatAvslag periode={periode} />
+                                ) : (
+                                    <TableRowResultat periode={periode} />
+                                )}
+                            </Table.ExpandableRow>
+                        )}
+                    </Fragment>
+                );
+            })}
         </Table.Body>
     );
 };
@@ -195,6 +223,8 @@ const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidragsbere
     );
 };
 const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningPeriodeDto }) => {
+    const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
+    const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     return (
         <>
             <Table.DataCell textSize="small">
@@ -238,25 +268,27 @@ const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningP
                     </tbody>
                 </table>
             </Table.DataCell>
-            <Table.DataCell textSize="small">
-                <table>
-                    <tbody>
-                        <tr>
-                            <td className="w-[45px]" align="right">
-                                {formatterBeløpForBeregning(
-                                    periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
-                                )}
-                            </td>
-                            <td className="w-[10px]">/</td>
-                            <td>
-                                {formatterBeløpForBeregning(
-                                    periode.beregningsdetaljer.delberegningBidragsevne?.sumInntekt25Prosent
-                                )}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </Table.DataCell>
+            {visEvne && (
+                <Table.DataCell textSize="small">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td className="w-[45px]" align="right">
+                                    {formatterBeløpForBeregning(
+                                        periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
+                                    )}
+                                </td>
+                                <td className="w-[10px]">/</td>
+                                <td>
+                                    {formatterBeløpForBeregning(
+                                        periode.beregningsdetaljer.delberegningBidragsevne?.sumInntekt25Prosent
+                                    )}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </Table.DataCell>
+            )}
 
             <Table.DataCell textSize="small">{formatterBeløpForBeregning(periode.beregnetBidrag)}</Table.DataCell>
 
@@ -275,51 +307,57 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
         </BodyShort>
     </div>
 );
-const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
-    <Table.Header>
-        {avslag ? (
-            <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col">
-                    {text.label.periode}
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col">
-                    {text.label.resultat}
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col">
-                    {text.label.årsak}
-                </Table.HeaderCell>
-            </Table.Row>
-        ) : (
-            <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
-                    {text.label.periode}
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
-                    U
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
-                    BPs andel U
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
-                    Samvær
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
-                    Evne / 25%
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
-                    Beregnet bidrag
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
-                    Endelig bidrag
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "390px" }}>
-                    Resultat
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
-            </Table.Row>
-        )}
-    </Table.Header>
-);
+const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => {
+    const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
+    const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
+    return (
+        <Table.Header>
+            {avslag ? (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.resultat}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.årsak}
+                    </Table.HeaderCell>
+                </Table.Row>
+            ) : (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
+                        U
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
+                        BPs andel U
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
+                        Samvær
+                    </Table.HeaderCell>
+                    {visEvne && (
+                        <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
+                            Evne / 25%
+                        </Table.HeaderCell>
+                    )}
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
+                        Beregnet bidrag
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
+                        Endelig bidrag
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "390px" }}>
+                        Resultat
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
+                </Table.Row>
+            )}
+        </Table.Header>
+    );
+};
 export default () => {
     return (
         <QueryErrorWrapper>

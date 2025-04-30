@@ -5,11 +5,12 @@ import { InntektFormValues } from "@common/types/inntektFormValues";
 export const createInitialForskuddInntektValues = (
     roller: RolleDto[],
     inntekter: InntekterDtoV2,
-    virkningsdato: Date
+    virkningsdato: Date,
+    erBisysVedtak: boolean
 ): InntektFormValues => {
     const barnListe = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
-    const transformFn = transformInntekt(virkningsdato);
+    const transformFn = transformInntekt(virkningsdato, erBisysVedtak);
 
     return {
         årsinntekter: roller.reduce(

@@ -4,6 +4,7 @@ import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { CalculationTabell } from "../../../common/components/vedtak/CalculationTable";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
+import { useGetBehandlingV2 } from "../../../common/hooks/useApiData";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { barnetilleggTiltakspengerVisningsnavn } from "../../constants/beregning";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
@@ -14,10 +15,13 @@ type NettoBarnetilleggTableProps = {
 
 export const BarnetilleggSkatteprosent = ({ rolle }: NettoBarnetilleggTableProps) => {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
+    const { erBisysVedtak } = useGetBehandlingV2();
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
     const barnetilleggSkattesats = barnetillegg.delberegningSkattesats;
     if (!barnetilleggSkattesats) return null;
     if (barnetillegg.barnetillegg.every((bt) => bt.visningsnavn === barnetilleggTiltakspengerVisningsnavn)) return null;
+
+    if (erBisysVedtak) return null;
     return (
         <div>
             <Heading size="xsmall">Beregning av skatteprosent på barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>

@@ -324,7 +324,7 @@ export const Perioder = ({
 
     return (
         <div className="grid gap-2">
-            {selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
+            {!lesemodus && selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
                 <BehandlingAlert variant="info" className="mb-4">
                     <Heading size="xsmall" level="6">
                         {text.alert.løpendeBidrag}.
@@ -368,7 +368,7 @@ export const Perioder = ({
                             <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
                         </>
                     )}
-                    {valideringsfeil?.overlappendePerioder?.length > 0 && (
+                    {!lesemodus && valideringsfeil?.overlappendePerioder?.length > 0 && (
                         <>
                             {valideringsfeil?.overlappendePerioder?.map(({ periode }, index) => (
                                 <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
@@ -388,7 +388,7 @@ export const Perioder = ({
                             <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
                         </>
                     )}
-                    {valideringsfeil?.ingenLøpendePeriode && (
+                    {!lesemodus && valideringsfeil?.ingenLøpendePeriode && (
                         <BodyShort size="small">{text.error.ingenLøpendePeriode}</BodyShort>
                     )}
                 </BehandlingAlert>

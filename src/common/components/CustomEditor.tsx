@@ -38,6 +38,7 @@ export function CustomTextareaEditor({
     const broadcastChannelUUID = useMemo(() => crypto.randomUUID(), []);
     const channel = useMemo(() => new BroadcastChannel(broadcastChannelUUID), [broadcastChannelUUID]);
     const reformattedValue = useMemo(() => reformatText(value), [value]);
+    const disabled = lesemodus || readOnly;
 
     useEffect(() => {
         channel.onmessage = (event) => {
@@ -80,7 +81,7 @@ export function CustomTextareaEditor({
             <BodyLong size="small" as="div" className={className}>
                 {label && (
                     <Label className="flex items-center gap-2" spacing size="small" htmlFor={name}>
-                        {(lesemodus || readOnly) && <PadlockLockedFillIcon />} {label}{" "}
+                        {disabled && <PadlockLockedFillIcon />} {label}{" "}
                         {!withOpenInNewWindow && (
                             <Button
                                 size="xsmall"
@@ -101,12 +102,12 @@ export function CustomTextareaEditor({
                 <CustomQuillEditor
                     ref={quillRef}
                     resize={resize}
-                    readOnly={lesemodus || readOnly}
+                    readOnly={disabled}
                     defaultValue={reformattedValue}
                     onTextChange={onTextChange}
-                    error={!!error}
+                    error={!disabled}
                 />
-                {error && (
+                {!disabled && error && (
                     <ErrorMessage showIcon size="small" className="mt-2">
                         {error}
                     </ErrorMessage>

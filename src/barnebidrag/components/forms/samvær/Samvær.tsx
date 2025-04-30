@@ -457,7 +457,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                         <span>{DateToDDMMYYYYString(dateOrNull())}</span>
                     </BodyShort>
                 </div>
-                {valideringsfeil?.harPeriodiseringsfeil && (
+                {!lesemodus && valideringsfeil?.harPeriodiseringsfeil && (
                     <div className="mb-4">
                         <BehandlingAlert variant="warning">
                             <Heading size="xsmall" level="6">

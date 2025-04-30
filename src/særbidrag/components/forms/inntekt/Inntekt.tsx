@@ -190,10 +190,10 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { inntekter, roller } = useGetBehandlingV2();
+    const { inntekter, roller, erBisysVedtak } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const initialValues = useMemo(
-        () => createInitialValues(roller, inntekter, virkningsdato),
+        () => createInitialValues(roller, inntekter, virkningsdato, erBisysVedtak),
         [roller, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({

@@ -4,7 +4,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const EndeligBidragTable = () => {
     const {
-        beregningsdetaljer: { deltBosted, sluttberegning, samværsfradrag: beregning },
+        beregningsdetaljer: { deltBosted, sluttberegning, sluttberegningAldersjustering, samværsfradrag: beregning },
     } = useBidragBeregningPeriode();
 
     return (
@@ -15,13 +15,13 @@ export const EndeligBidragTable = () => {
                     label: "Etter samværsfradraget",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
+                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.bruttoBidragEtterBarnetilleggBP)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.nettoBidragEtterSamværsfradrag)}`,
                 },
                 {
                     label: "Avrundet beløp",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegning.resultatBeløp)}`,
+                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.resultatBeløp ?? sluttberegning.resultatBeløp)}`,
                 },
             ].filter((d) => d)}
         />

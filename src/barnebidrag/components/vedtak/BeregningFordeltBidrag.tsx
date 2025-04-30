@@ -4,7 +4,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const BeregningFordeltBidrag = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne },
+        beregningsdetaljer: { sluttberegning, sluttberegningAldersjustering, delberegningBidragsevne: evne },
     } = useBidragBeregningPeriode();
 
     if (!evne) return null;
@@ -30,7 +30,7 @@ export const BeregningFordeltBidrag = () => {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent)}${renderResult()}`,
+                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.bruttoBidragJustertForEvneOg25Prosent)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />

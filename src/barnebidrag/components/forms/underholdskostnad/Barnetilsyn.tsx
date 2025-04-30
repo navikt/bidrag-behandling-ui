@@ -210,9 +210,9 @@ export const RolleInfoBox = ({
 };
 
 export const Barnetilsyn = ({ index }: { index: number }) => {
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const { aktiveOpplysninger } = useGetOpplysningerBarnetilsyn();
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { underholdskostnader, erBisysVedtak } = useGetBehandlingV2();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
@@ -269,21 +269,23 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                 checked={underhold.harTilsynsordning || hasAtLeastOnePeriodOrActiveOpplysninger}
                 onChange={onToggle}
                 size="small"
-                readOnly={hasAtLeastOnePeriodOrActiveOpplysninger}
+                readOnly={lesemodus || hasAtLeastOnePeriodOrActiveOpplysninger}
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
-            {underhold.harTilsynsordning && underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
-                <BehandlingAlert variant="warning">
-                    <Heading size="xsmall" level="6">
-                        {text.alert.manglerPerioderForTilsynsordning}
-                    </Heading>
-                    <BodyShort size="small">{text.alert.manglerPerioderForTilsynsordningDescription}</BodyShort>
-                </BehandlingAlert>
-            )}
+            {!lesemodus &&
+                underhold.harTilsynsordning &&
+                underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
+                    <BehandlingAlert variant="warning">
+                        <Heading size="xsmall" level="6">
+                            {text.alert.manglerPerioderForTilsynsordning}
+                        </Heading>
+                        <BodyShort size="small">{text.alert.manglerPerioderForTilsynsordningDescription}</BodyShort>
+                    </BehandlingAlert>
+                )}
             {(underhold.harTilsynsordning || hasAtLeastOnePeriod) && (
                 <>
-                    {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                    {!lesemodus && displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
                         <StatefulAlert
                             variant="info"
                             size="small"
@@ -299,7 +301,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                     )}
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-                    <TilleggstønadTabel underholdFieldName={underholdFieldName} />
+                    {!erBisysVedtak && <TilleggstønadTabel underholdFieldName={underholdFieldName} />}
                 </>
             )}
             <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />

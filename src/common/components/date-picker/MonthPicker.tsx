@@ -1,5 +1,5 @@
 import { MonthPicker as NavMonthPicker, MonthValidationT, useMonthpicker } from "@navikt/ds-react";
-import { Matcher } from "@navikt/ds-react/src/date/utils";
+import { Matcher } from "@navikt/ds-react/esm/date/Date.typeutils";
 import { dateOrNull, isValidDate, lastDayOfMonth } from "@utils/date-utils";
 import React, { useEffect } from "react";
 
