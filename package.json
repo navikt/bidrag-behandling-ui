@@ -11,6 +11,7 @@
     "serve": "npx serve -l 5253 ./dist",
     "env:export:local": "export $(cat env/.env.local.private | xargs)",
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
+    "dev:q1": "cross-env-shell NODE_ENV=development webpack serve --env envfile=.env.local.q1 --config webpack.dev.config.mjs",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
     "dev:local": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --env envfile=.env.local.private --config webpack.dev.config.mjs",
     "dev:localq1": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --env envfile=.env.localq1.private --config webpack.dev.config.mjs",
