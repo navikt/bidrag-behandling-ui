@@ -161,6 +161,7 @@ const tekster = {
         forskudd: "Forskudd",
         fraDato: "Fra dato",
         fraOgMed: "Fra og med",
+        forpleining: "Forpleining",
         fødselsdato: "Fødselsdato",
         fødselsnummerDnummer: "Fødselsnummer/d-nummer",
         gebyr: "Gebyr",

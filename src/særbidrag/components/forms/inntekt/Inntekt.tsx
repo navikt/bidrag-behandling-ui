@@ -95,7 +95,7 @@ const Main = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { roller, inntekter } = useGetBehandlingV2();
+    const { erBisysVedtak, roller, inntekter } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -169,13 +169,15 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledCustomTextareaEditor
-                description={descriptionText}
-                label={text.title.begrunnelse}
-                name={`begrunnelser.${selectedRolleId}`}
-                resize
-            />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor
+                    description={descriptionText}
+                    label={text.title.begrunnelse}
+                    name={`begrunnelser.${selectedRolleId}`}
+                    resize
+                />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

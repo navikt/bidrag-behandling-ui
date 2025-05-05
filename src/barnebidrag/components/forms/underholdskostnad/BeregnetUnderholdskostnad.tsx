@@ -15,7 +15,7 @@ export const BeregnetUnderholdskostnad = ({
 }: {
     underholdFieldName: `underholdskostnaderMedIBehandling.${number}`;
 }) => {
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { underholdskostnader, erBisysVedtak } = useGetBehandlingV2();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
     const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).beregnetUnderholdskostnad;
@@ -52,15 +52,22 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
                                 {text.label.barnetrygd}
                             </Table.HeaderCell>
+                            {erBisysVedtak && (
+                                <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
+                                    {text.label.forpleining}
+                                </Table.HeaderCell>
+                            )}
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[145px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
-                            <Table.HeaderCell
-                                textSize="small"
-                                scope="col"
-                                align="right"
-                                className="w-[50px]"
-                            ></Table.HeaderCell>
+                            {beregnetUnderholdskostnad.some((u) => u.beregningsdetaljer) && (
+                                <Table.HeaderCell
+                                    textSize="small"
+                                    scope="col"
+                                    align="right"
+                                    className="w-[50px]"
+                                ></Table.HeaderCell>
+                            )}
                         </Table.Row>
                     </Table.Header>
                     <Table.Body className="[&_.navds-table\_\_toggle-expand-cell]:p-0">
@@ -111,6 +118,13 @@ export const BeregnetUnderholdskostnad = ({
                                         {formatterBeløpForBeregning(underholdskostnad.barnetrygd)}
                                     </BodyShort>
                                 </Table.DataCell>
+                                {erBisysVedtak && (
+                                    <Table.DataCell align="right">
+                                        <BodyShort size="small">
+                                            {formatterBeløpForBeregning(underholdskostnad.forpleining)}
+                                        </BodyShort>
+                                    </Table.DataCell>
+                                )}
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
                                         {formatterBeløpForBeregning(underholdskostnad.total)}

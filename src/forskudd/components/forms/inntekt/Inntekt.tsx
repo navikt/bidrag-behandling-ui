@@ -97,7 +97,7 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { roller, inntekter } = useGetBehandlingV2();
+    const { erBisysVedtak, roller, inntekter } = useGetBehandlingV2();
     const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -157,8 +157,14 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
-            {begrunnelseFraOpprinneligVedtak && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor
+                    name={`begrunnelser.${bm.id}`}
+                    label={text.title.begrunnelse}
+                    resize
+                />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     name={`begrunnelseFraOpprinneligVedtak.${bm.id}`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}

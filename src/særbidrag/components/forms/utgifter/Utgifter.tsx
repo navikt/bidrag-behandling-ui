@@ -760,6 +760,7 @@ const BeregnetUtgifter = () => {
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
+        erBisysVedtak,
         utgift: { avslag, begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const onNext = () =>
@@ -769,8 +770,10 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}
