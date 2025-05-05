@@ -13,7 +13,11 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { PersonIdent } from "@common/components/PersonIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import urlSearchParams from "@common/constants/behandlingQueryKeys";
+import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -25,10 +29,12 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Label } from "@navikt/ds-react";
+import { BodyShort, Label, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { getSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
@@ -91,18 +97,16 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
+const Main = ({ rolleId, initialValues, showChangedVirkningsDatoAlert }) => {
     const behandling = useGetBehandlingV2();
     const { lesemodus } = useBehandlingProvider();
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
+    const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.id === rolleId);
 
     const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
     const onAarsakSelect = (value: string) => {
-        const barnsFødselsdato = kunEtBarnIBehandlingen
-            ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
-            : undefined;
-        const date = aarsakToVirkningstidspunktMapper(value, behandling, barnsFødselsdato);
+        const date = aarsakToVirkningstidspunktMapper(value, behandling, selectedVirkningstidspunkt);
         setValue("virkningstidspunkt", date ? toISODateString(date) : null);
         clearErrors("virkningstidspunkt");
     };
@@ -111,7 +115,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
     const tom = useMemo(
-        () => dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
+        () => dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
         [fom]
     );
 
@@ -233,8 +237,9 @@ const Side = () => {
     );
 };
 
-const VirkningstidspunktForm = () => {
-    const { virkningstidspunkt } = useGetBehandlingV2();
+const VirkningstidspunktForm = ({ rolleId }) => {
+    const { virkningstidspunktV2 } = useGetBehandlingV2();
+    const virkningstidspunkt = virkningstidspunktV2.find(({ rolle }) => rolle.id === rolleId);
     const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
@@ -306,7 +311,9 @@ const VirkningstidspunktForm = () => {
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
-                setPreviousValues(createInitialValues(response.virkningstidspunkt));
+                setPreviousValues(
+                    createInitialValues(response.virkningstidspunktV2.find(({ rolle }) => rolle.id === rolleId))
+                );
             },
             onError: () => {
                 setSaveErrorState({
@@ -334,6 +341,7 @@ const VirkningstidspunktForm = () => {
                         title={text.label.virkningstidspunkt}
                         main={
                             <Main
+                                rolleId={rolleId}
                                 initialValues={initialValues}
                                 showChangedVirkningsDatoAlert={showChangedVirkningsDatoAlert}
                             />
@@ -347,9 +355,62 @@ const VirkningstidspunktForm = () => {
 };
 
 export default () => {
+    const { virkningstidspunktV2: virkingsTestArray } = useGetBehandlingV2();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
+
+    // TODO: delete
+    const virkningstidspunktV2Roller = virkingsTestArray
+        .concat({
+            ...virkingsTestArray[0],
+            rolle: { ...virkingsTestArray[0].rolle, id: 1234, ident: "1234567" },
+            virkningstidspunkt: "01.12.2024",
+        })
+        .concat({
+            ...virkingsTestArray[0],
+            rolle: { ...virkingsTestArray[0].rolle, id: 4321, ident: "7654321" },
+            virkningstidspunkt: "01.12.2023",
+        });
+
+    const defaultTab = useMemo(() => {
+        const roleId = virkningstidspunktV2Roller
+            .find(({ rolle }) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
+            ?.rolle?.id?.toString();
+        return roleId ?? virkningstidspunktV2Roller[0].rolle.id.toString();
+    }, []);
+
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
+
     return (
         <QueryErrorWrapper>
-            <VirkningstidspunktForm />
+            <Tabs
+                defaultValue={defaultTab}
+                value={selectedTab}
+                onChange={onNavigateToTab}
+                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
+            >
+                <Tabs.List>
+                    {virkningstidspunktV2Roller.map(({ rolle }) => (
+                        <Tabs.Tab
+                            key={rolle.ident}
+                            value={rolle.id.toString()}
+                            label={
+                                <div className="flex flex-row gap-1">
+                                    {ROLE_FORKORTELSER[rolle.rolletype]}
+                                    {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                                </div>
+                            }
+                        />
+                    ))}
+                </Tabs.List>
+                {virkningstidspunktV2Roller.map(({ rolle }) => {
+                    return (
+                        <Tabs.Panel value={rolle.id.toString()} key={rolle.id.toString()} className="grid gap-y-4">
+                            <VirkningstidspunktForm rolleId={rolle.id} />
+                        </Tabs.Panel>
+                    );
+                })}
+            </Tabs>
         </QueryErrorWrapper>
     );
 };
