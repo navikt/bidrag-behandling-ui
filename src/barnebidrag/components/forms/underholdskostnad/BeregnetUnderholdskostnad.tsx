@@ -19,6 +19,17 @@ export const BeregnetUnderholdskostnad = ({
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
     const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).beregnetUnderholdskostnad;
+    const hasBeregningsdetaljer = beregnetUnderholdskostnad.some((u) => u.beregningsdetaljer);
+    const calculateStønadTilBarnetilsynWidth = () => {
+        let width = 250;
+        if (erBisysVedtak) {
+            width -= 95;
+        }
+        if (hasBeregningsdetaljer) {
+            width -= 50;
+        }
+        return width;
+    };
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
@@ -43,7 +54,12 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[90px]">
                                 {text.label.boutgifter}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[115px]">
+                            <Table.HeaderCell
+                                textSize="small"
+                                scope="col"
+                                align="right"
+                                className={`w-[${calculateStønadTilBarnetilsynWidth()}px]`}
+                            >
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[100px]">
@@ -57,10 +73,10 @@ export const BeregnetUnderholdskostnad = ({
                                     {text.label.forpleining}
                                 </Table.HeaderCell>
                             )}
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[145px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[70px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
-                            {beregnetUnderholdskostnad.some((u) => u.beregningsdetaljer) && (
+                            {hasBeregningsdetaljer && (
                                 <Table.HeaderCell
                                     textSize="small"
                                     scope="col"

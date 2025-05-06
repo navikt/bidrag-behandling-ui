@@ -229,7 +229,7 @@ const tekster = {
         totalt12Måned: "Totalt (12 mnd)",
         totalTilsysnsutgift: "Total tilsynsutgift",
         type: "Type",
-        underholdskostnad: "Underholdskostnad",
+        underholdskostnad: "U",
         utvidetBarnetrygd: "Utvidet barnetrygd",
         utgift: "Utgift",
         utgiftskategori: "Utgiftskategori",
