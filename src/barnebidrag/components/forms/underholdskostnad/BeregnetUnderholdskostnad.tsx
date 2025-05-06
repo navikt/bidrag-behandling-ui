@@ -3,12 +3,23 @@ import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { formatterBeløpForBeregning } from "../../../../utils/number-utils";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import BeregningsdetaljerUnderholdskostnad from "./BeregningsdetaljerUnderholdskostnad";
+
+const calculateStønadTilBarnetilsynWidth = (erBisysVedtak: boolean, hasBeregningsdetaljer: boolean) => {
+    let width = 250;
+    if (erBisysVedtak) {
+        width -= 95;
+    }
+    if (hasBeregningsdetaljer) {
+        width -= 50;
+    }
+    return width;
+};
 
 export const BeregnetUnderholdskostnad = ({
     underholdFieldName,
@@ -20,16 +31,7 @@ export const BeregnetUnderholdskostnad = ({
     const underhold = getValues(underholdFieldName);
     const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).beregnetUnderholdskostnad;
     const hasBeregningsdetaljer = beregnetUnderholdskostnad.some((u) => u.beregningsdetaljer);
-    const calculateStønadTilBarnetilsynWidth = () => {
-        let width = 250;
-        if (erBisysVedtak) {
-            width -= 95;
-        }
-        if (hasBeregningsdetaljer) {
-            width -= 50;
-        }
-        return width;
-    };
+    const stønadTilBarnetilsynWidth = calculateStønadTilBarnetilsynWidth(erBisysVedtak, hasBeregningsdetaljer);
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
@@ -58,7 +60,7 @@ export const BeregnetUnderholdskostnad = ({
                                 textSize="small"
                                 scope="col"
                                 align="right"
-                                className={`w-[${calculateStønadTilBarnetilsynWidth()}px]`}
+                                className={`w-[${stønadTilBarnetilsynWidth}px]`}
                             >
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
