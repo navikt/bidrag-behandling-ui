@@ -60,7 +60,7 @@ export const BeregnetUnderholdskostnad = ({
                                 textSize="small"
                                 scope="col"
                                 align="right"
-                                className={`w-[${stønadTilBarnetilsynWidth}px]`}
+                                style={{ width: `${stønadTilBarnetilsynWidth}px` }}
                             >
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
