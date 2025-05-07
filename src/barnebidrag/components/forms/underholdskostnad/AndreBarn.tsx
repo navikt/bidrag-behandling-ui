@@ -4,7 +4,7 @@ import StatefulAlert from "@common/components/StatefulAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { PlusIcon } from "@navikt/aksel-icons";
-import { Button, Heading } from "@navikt/ds-react";
+import { BodyShort, Button, Heading } from "@navikt/ds-react";
 import { calculateAge } from "@utils/date-utils";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -109,13 +109,14 @@ export const AndreBarn = () => {
                 </Button>
             )}
             {openForm && <AddBarnForm setOpenAddBarnForm={setOpenForm} onSave={onCreateBarn} />}
+            {andreBarnFieldArray.length < 1 && <BodyShort>{text.description.ingenBarn}</BodyShort>}
             {andreBarnFieldArray.map((underhold, index) => {
                 const underholdFieldName = `underholdskostnaderAndreBarn.${index}` as const;
                 return (
                     underhold?.gjelderBarn && (
                         <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
                             <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
-                            {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                            {!lesemodus && displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
                                 <StatefulAlert
                                     variant="info"
                                     size="small"

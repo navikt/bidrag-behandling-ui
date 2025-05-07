@@ -69,6 +69,7 @@ const tekster = {
     description: {
         samværBegrunnelse:
             "Du skal vurdere partenes samværsopplysninger, samværsavtaler og begrunne samværet som legges til grunn ut ifra relevante momenter i saken",
+        ingenBarn: "Ingen barn",
         inntektBegrunnelseBM:
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette. Husk å vurdere forskuddet.",
         inntektBegrunnelseBP:

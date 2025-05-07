@@ -173,11 +173,11 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { inntekter, roller } = useGetBehandlingV2();
+    const { inntekter, roller, erBisysVedtak } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialForskuddInntektValues(bmOgBarn, inntekter, virkningsdato),
+        () => createInitialForskuddInntektValues(bmOgBarn, inntekter, virkningsdato, erBisysVedtak),
         [bmOgBarn, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({

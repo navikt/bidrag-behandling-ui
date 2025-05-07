@@ -18,16 +18,17 @@ export const BoforholdBM = () => {
         aktiveGrunnlagsdata: { husstandsmedlemBM },
         ikkeAktiverteEndringerIGrunnlagsdata: { husstandsmedlemBM: ikkeAktiverteEndringerHusstandsmedlemBM },
     } = useGetBehandlingV2();
+    const { lesemodus } = useBehandlingProvider();
     const harNyeOpplysninger = ikkeAktiverteEndringerHusstandsmedlemBM.some(
         (husstandsmedlem) => !!husstandsmedlem.perioder.length
     );
 
     return (
-        <ExpansionCard size="small" aria-label="Small-variant" defaultOpen={harNyeOpplysninger}>
+        <ExpansionCard size="small" aria-label="Small-variant" defaultOpen={!lesemodus && harNyeOpplysninger}>
             <ExpansionCard.Header>
                 <ExpansionCard.Title size="small">
                     {text.title.opplysningerFraFolkeregistret}{" "}
-                    {harNyeOpplysninger && (
+                    {!lesemodus && harNyeOpplysninger && (
                         <Tag size="xsmall" variant="success" className="ml-2">
                             {text.label.nytt}
                         </Tag>
@@ -35,7 +36,7 @@ export const BoforholdBM = () => {
                 </ExpansionCard.Title>
             </ExpansionCard.Header>
             <ExpansionCard.Content>
-                {harNyeOpplysninger && <NyOpplysningerFraFolkeregistreTabell />}
+                {!lesemodus && harNyeOpplysninger && <NyOpplysningerFraFolkeregistreTabell />}
                 {husstandsmedlemBM.map((husstandsmedlem) => (
                     <Fragment key={husstandsmedlem.ident}>
                         <Box

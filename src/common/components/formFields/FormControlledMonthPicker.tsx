@@ -1,6 +1,6 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { MonthValidationT } from "@navikt/ds-react";
-import { Matcher } from "@navikt/ds-react/src/date/utils";
+import { Matcher } from "@navikt/ds-react/esm/date/Date.typeutils";
 import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "@utils/date-utils";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";

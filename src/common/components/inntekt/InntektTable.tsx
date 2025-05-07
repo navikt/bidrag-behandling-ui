@@ -220,6 +220,7 @@ export const InntektTabel = ({
     const {
         inntekter,
         søktFomDato,
+        erBisysVedtak,
         virkningstidspunkt: { virkningstidspunkt, opphør },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
@@ -282,7 +283,7 @@ export const InntektTabel = ({
     };
 
     const onSaveSuccess = (response: OppdatereInntektResponse) => {
-        const transformFn = transformInntekt(virkningsdato);
+        const transformFn = transformInntekt(virkningsdato, erBisysVedtak);
         const isBarnetilleggOrKontantstøtteTable = ["barnetillegg", "kontantstøtte"].includes(inntektType);
 
         resetField(fieldName, {
