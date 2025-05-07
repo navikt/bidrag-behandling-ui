@@ -397,7 +397,7 @@ const PrivatAvtalePerioder = ({
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { privatAvtale } = useGetBehandlingV2();
+    const { erBisysVedtak, privatAvtale } = useGetBehandlingV2();
     const { onStepChange } = useBehandlingProvider();
     const { getValues } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
@@ -412,12 +412,14 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor
-                name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
-                label={text.title.begrunnelse}
-                resize
-            />
-            {begrunnelseFraOpprinneligVedtak && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor
+                    name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
+                    label={text.title.begrunnelse}
+                    resize
+                />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

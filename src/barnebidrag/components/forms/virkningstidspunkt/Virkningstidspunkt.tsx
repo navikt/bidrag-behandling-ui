@@ -410,6 +410,7 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
+        erBisysVedtak,
         gebyr,
         virkningstidspunkt: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
@@ -426,8 +427,10 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

@@ -18,6 +18,7 @@ export const Notat = () => {
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const {
+        erBisysVedtak,
         boforhold: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const [previousValues, setPreviousValues] = useState<string>(getValues("begrunnelse"));
@@ -64,8 +65,10 @@ export const Notat = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

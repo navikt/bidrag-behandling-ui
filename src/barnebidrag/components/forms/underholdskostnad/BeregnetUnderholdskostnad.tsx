@@ -3,22 +3,35 @@ import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { formatterBeløpForBeregning } from "../../../../utils/number-utils";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import BeregningsdetaljerUnderholdskostnad from "./BeregningsdetaljerUnderholdskostnad";
+
+const calculateStønadTilBarnetilsynWidth = (erBisysVedtak: boolean, hasBeregningsdetaljer: boolean) => {
+    let width = 250;
+    if (erBisysVedtak) {
+        width -= 95;
+    }
+    if (hasBeregningsdetaljer) {
+        width -= 50;
+    }
+    return width;
+};
 
 export const BeregnetUnderholdskostnad = ({
     underholdFieldName,
 }: {
     underholdFieldName: `underholdskostnaderMedIBehandling.${number}`;
 }) => {
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { underholdskostnader, erBisysVedtak } = useGetBehandlingV2();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
     const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).beregnetUnderholdskostnad;
+    const hasBeregningsdetaljer = beregnetUnderholdskostnad.some((u) => u.beregningsdetaljer);
+    const stønadTilBarnetilsynWidth = calculateStønadTilBarnetilsynWidth(erBisysVedtak, hasBeregningsdetaljer);
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
@@ -43,7 +56,12 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[90px]">
                                 {text.label.boutgifter}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[115px]">
+                            <Table.HeaderCell
+                                textSize="small"
+                                scope="col"
+                                align="right"
+                                style={{ width: `${stønadTilBarnetilsynWidth}px` }}
+                            >
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[100px]">
@@ -52,15 +70,22 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
                                 {text.label.barnetrygd}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[145px]">
+                            {erBisysVedtak && (
+                                <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
+                                    {text.label.forpleining}
+                                </Table.HeaderCell>
+                            )}
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[70px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
-                            <Table.HeaderCell
-                                textSize="small"
-                                scope="col"
-                                align="right"
-                                className="w-[50px]"
-                            ></Table.HeaderCell>
+                            {hasBeregningsdetaljer && (
+                                <Table.HeaderCell
+                                    textSize="small"
+                                    scope="col"
+                                    align="right"
+                                    className="w-[50px]"
+                                ></Table.HeaderCell>
+                            )}
                         </Table.Row>
                     </Table.Header>
                     <Table.Body className="[&_.navds-table\_\_toggle-expand-cell]:p-0">
@@ -111,6 +136,13 @@ export const BeregnetUnderholdskostnad = ({
                                         {formatterBeløpForBeregning(underholdskostnad.barnetrygd)}
                                     </BodyShort>
                                 </Table.DataCell>
+                                {erBisysVedtak && (
+                                    <Table.DataCell align="right">
+                                        <BodyShort size="small">
+                                            {formatterBeløpForBeregning(underholdskostnad.forpleining)}
+                                        </BodyShort>
+                                    </Table.DataCell>
+                                )}
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
                                         {formatterBeløpForBeregning(underholdskostnad.total)}

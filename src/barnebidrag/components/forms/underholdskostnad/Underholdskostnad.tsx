@@ -90,7 +90,7 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { erBisysVedtak, underholdskostnader } = useGetBehandlingV2();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [field, _, underholdskostnadId] = activeTab.split("-");
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
@@ -170,7 +170,7 @@ const Side = () => {
 
     return (
         <Fragment key={activeTab}>
-            {underholdId && (
+            {!erBisysVedtak && underholdId && (
                 <FormControlledCustomTextareaEditor
                     key={fieldName}
                     name={fieldName}
@@ -178,8 +178,10 @@ const Side = () => {
                     resize
                 />
             )}
-            {!underholdId && <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} readOnly resize />}
-            {begrunnelseFraOpprinneligVedtak && (
+            {!erBisysVedtak && !underholdId && (
+                <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} readOnly resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     key={fieldName}
                     name="begrunnelseFraOpprinneligVedtak"

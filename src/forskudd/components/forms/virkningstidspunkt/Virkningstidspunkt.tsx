@@ -207,6 +207,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
+        erBisysVedtak,
         virkningstidspunkt: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const useFormMethods = useFormContext();
@@ -218,8 +219,10 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

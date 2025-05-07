@@ -16,6 +16,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 export const Begrunnelse = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const {
+        erBisysVedtak,
         boforhold: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
@@ -67,8 +68,10 @@ export const Begrunnelse = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}
