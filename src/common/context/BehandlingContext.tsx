@@ -29,6 +29,7 @@ import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
 import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særbidrag/context/SærligeugifterProviderWrapper";
 import { SærligeutgifterStepper } from "../../særbidrag/enum/SærligeutgifterStepper";
 import behandlingQueryKeys from "../constants/behandlingQueryKeys";
+import useFeatureToogle from "../hooks/useFeatureToggle";
 
 interface SaveErrorState {
     error: boolean;
@@ -110,6 +111,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         pageErrorsOrUnsavedState,
         setPageErrorsOrUnsavedState,
     } = props;
+    const { vedtaksperre } = useFeatureToogle();
     const { behandlingId, saksnummer, vedtakId } = useParams<{
         behandlingId?: string;
         saksnummer?: string;
@@ -221,6 +223,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             beregnetGebyrErEndret,
             type: behandling.type,
             lesemodus:
+                vedtaksperre ||
                 vedtakId != null ||
                 behandling.erVedtakFattet ||
                 queryLesemodus ||
