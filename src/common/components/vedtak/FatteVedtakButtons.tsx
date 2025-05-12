@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
-import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
+import { TypeBehandling, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
@@ -41,7 +41,7 @@ export const FatteVedtakButtons = ({
         erBarnebidrag ? 3 : null
     );
     const isMutating = Boolean(useIsMutating({ mutationKey: fatteVedtakMutationKey }));
-    const { engangsbeløptype, stønadstype } = useGetBehandlingV2();
+    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
@@ -73,7 +73,7 @@ export const FatteVedtakButtons = ({
     return (
         <div>
             {showConfetti && <Confetti />}
-            {erBarnebidrag && (
+            {erBarnebidrag && vedtakstype !== Vedtakstype.OPPHOR && (
                 <Select
                     size="small"
                     onChange={(e) =>

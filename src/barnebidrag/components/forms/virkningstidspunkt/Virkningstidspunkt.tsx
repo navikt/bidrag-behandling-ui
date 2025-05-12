@@ -1,21 +1,23 @@
 import {
+    EksisterendeOpphorsvedtakDto,
     OppdatereVirkningstidspunkt,
-    OpphorsdetaljerRolleDto,
     Resultatkode,
-    Rolletype,
     Stonadstype,
     TypeArsakstype,
     Vedtakstype,
-    VirkningstidspunktDto,
+    VirkningstidspunktDtoV2,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import urlSearchParams from "@common/constants/behandlingQueryKeys";
+import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -27,19 +29,24 @@ import {
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
+import {
+    OpphørsVarighet,
+    VirkningstidspunktFormValues,
+    VirkningstidspunktFormValuesPerBarn,
+} from "@common/types/virkningstidspunktFormValues";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Label } from "@navikt/ds-react";
+import { BodyShort, Label, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
-import React, { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
+import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
-import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
+import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
-import { OpphørsVarighet, VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -86,36 +93,47 @@ const avslaglisteAlle = Array.from(
 const årsakslisteAlle = Array.from(new Set([...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe]));
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
-    const opphørsdatoSameAsEkisterende = opphør?.opphørsdato === opphør?.eksisterendeOpphør?.opphørsdato;
+const getDefaultOpphørsvarighet = (opphørsdato: string, eksisterendeOpphør: string, stønadstype: Stonadstype) => {
+    const opphørsdatoSameAsEkisterende = opphørsdato === eksisterendeOpphør;
     const varighet = opphørsdatoSameAsEkisterende ? OpphørsVarighet.FORTSETTE_OPPHØR : OpphørsVarighet.VELG_OPPHØRSDATO;
 
     if (stønadstype === Stonadstype.BIDRAG18AAR) {
         return varighet;
     }
-    if (!opphør?.opphørsdato) {
+    if (!opphørsdato) {
         return OpphørsVarighet.LØPENDE;
     }
     return varighet;
 };
 
 const createInitialValues = (
-    response: VirkningstidspunktDto,
+    response: VirkningstidspunktDtoV2[],
     stønadstype: Stonadstype
 ): VirkningstidspunktFormValues => {
-    const opphørBA = response.opphør.opphørRoller.find((opphørRolle) => opphørRolle.rolle.rolletype === Rolletype.BA);
-    const opphørsvarighet = getDefaultOpphørsvarighet(opphørBA, stønadstype);
-
     return {
-        opphørsvarighet,
-        virkningstidspunkt: response.virkningstidspunkt,
-        årsakAvslag: response.årsak ?? response.avslag ?? "",
-        begrunnelse: response.begrunnelse?.innhold,
-        opphørsdato: response.opphør?.opphørsdato ?? null,
+        roller: response.map((virkningstidspunkt) => {
+            const opphørsvarighet = getDefaultOpphørsvarighet(
+                virkningstidspunkt?.opphørsdato,
+                virkningstidspunkt?.eksisterendeOpphør?.opphørsdato,
+                stønadstype
+            );
+
+            return {
+                opphørsvarighet,
+                rolle: virkningstidspunkt.rolle,
+                virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
+                årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
+                begrunnelse: virkningstidspunkt.begrunnelse?.innhold,
+                opphørsdato: virkningstidspunkt.opphørsdato ?? null,
+            };
+        }),
     };
 };
 
-const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
+const createPayload = (
+    values: VirkningstidspunktFormValuesPerBarn,
+    barnRolleId?: number
+): OppdatereVirkningstidspunkt => {
     const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
         (value) => value === values.årsakAvslag
     );
@@ -123,6 +141,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
         (value) => value === values.årsakAvslag
     );
     return {
+        barnRolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
         avslag,
@@ -132,61 +151,311 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype, fødselsdato: string) => {
+const getOpphørOptions = (
+    eksisterendeOpphør: EksisterendeOpphorsvedtakDto,
+    stønadstype: Stonadstype,
+    fødselsdato: string
+) => {
     if (
         stønadstype === Stonadstype.BIDRAG18AAR ||
         (stønadstype === Stonadstype.BIDRAG && isOver18YearsOld(fødselsdato))
     ) {
-        if (opphør?.eksisterendeOpphør) {
+        if (eksisterendeOpphør) {
             return [OpphørsVarighet.VELG_OPPHØRSDATO, OpphørsVarighet.FORTSETTE_OPPHØR];
         } else {
             return [OpphørsVarighet.VELG_OPPHØRSDATO];
         }
     }
 
-    if (opphør?.eksisterendeOpphør) {
+    if (eksisterendeOpphør) {
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO, OpphørsVarighet.FORTSETTE_OPPHØR];
     } else {
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO];
     }
 };
 
-const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVirkningsDatoAlert }) => {
-    const { lesemodus } = useBehandlingProvider();
+const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
-    const { setValue, clearErrors, getValues } = useFormContext();
-    const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
+    const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
+    const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
+    const { getValues, reset, setValue } = useFormContext();
+    const [opphørsvarighet, setOpphørsvarighet] = useState(getValues(`roller.${barnIndex}.opphørsvarighet`));
+    const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
+    const tom = useMemo(() => {
+        if (behandling.stønadstype === Stonadstype.BIDRAG)
+            return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
+        return addMonths(new Date(), 50 * 12);
+    }, []);
+
+    const updateOpphørsdato = () => {
+        const values = getValues(`roller.${barnIndex}`);
+        oppdaterOpphørsdato.mutation.mutate(
+            { idRolle: selectedBarn.rolle.id, opphørsdato: values.opphørsdato },
+            {
+                onSuccess: (response) => {
+                    oppdaterOpphørsdato.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            ...response,
+                        };
+                    });
+                    setPreviousValues(createInitialValues(response.virkningstidspunktV2, response.stønadstype));
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateOpphørsdato(),
+                        rollbackFn: () => {
+                            reset(previousValues, {
+                                keepIsSubmitSuccessful: true,
+                                keepDirty: true,
+                                keepIsSubmitted: true,
+                            });
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    const onMonthChange = (date) => {
+        const currentDate = getValues(`roller.${barnIndex}.opphørsdato`);
+        if (date && date !== currentDate) {
+            setValue(`roller.${barnIndex}.opphørsdato`, date);
+            updateOpphørsdato();
+        }
+    };
+
+    const onSelectVarighet = (value) => {
+        setOpphørsvarighet(value);
+        if (value === OpphørsVarighet.LØPENDE) {
+            setValue(`roller.${barnIndex}.opphørsdato`, null);
+            updateOpphørsdato();
+        }
+    };
+
+    if (behandling.virkningstidspunkt.avslag != null) return null;
+    return (
+        <>
+            {!lesemodus && selectedBarn.eksisterendeOpphør?.opphørsdato && (
+                <BehandlingAlert variant="info" className="!w-[520px]">
+                    <BodyShort>
+                        {removePlaceholder(
+                            text.alert.bidragOpphørt,
+                            DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.opphørsdato)),
+                            DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.vedtaksdato))
+                        )}
+                    </BodyShort>
+                </BehandlingAlert>
+            )}
+            <FlexRow className="gap-x-8">
+                <FormControlledSelectField
+                    name={`roller.${barnIndex}.opphørsvarighet`}
+                    label={text.label.varighet}
+                    className="w-max"
+                    onSelect={(value) => onSelectVarighet(value)}
+                >
+                    {getOpphørOptions(
+                        selectedBarn.eksisterendeOpphør,
+                        behandling.stønadstype,
+                        selectedBarn.rolle.fødselsdato
+                    ).map((value) => (
+                        <option key={value} value={value}>
+                            {value}
+                        </option>
+                    ))}
+                </FormControlledSelectField>
+                {!opphørsvarighetIsLøpende && (
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.opphørsdato`}
+                        onChange={(date) => onMonthChange(date)}
+                        label={text.label.opphørsdato}
+                        defaultValue={initialValues.virkningstidspunkt}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        fromDate={addMonths(initialValues.virkningstidspunkt, 1)}
+                        toDate={tom}
+                        required
+                    />
+                )}
+            </FlexRow>
+        </>
+    );
+};
+
+const Side = () => {
+    const { onStepChange } = useBehandlingProvider();
+    const { erBisysVedtak, gebyr, virkningstidspunktV2 } = useGetBehandlingV2();
+    const { getValues } = useFormContext<VirkningstidspunktFormValues>();
+    const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
+    const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
+    const values = getValues(`roller.${fieldIndex}`);
+    const årsakAvslag = values.årsakAvslag;
+    const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
+        ({ rolle }) => rolle.ident === values.rolle.ident
+    ).begrunnelseFraOpprinneligVedtak;
+
+    const onNext = () =>
+        onStepChange(
+            avslaglisteAlle.includes(årsakAvslag as Resultatkode)
+                ? gebyr !== undefined
+                    ? STEPS[BarnebidragStepper.GEBYR]
+                    : STEPS[BarnebidragStepper.VEDTAK]
+                : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]
+        );
+
+    return (
+        <Fragment key={activeTab}>
+            {!erBisysVedtak && (
+                <FormControlledCustomTextareaEditor
+                    name={`roller.${fieldIndex}.begrunnelse`}
+                    label={text.title.begrunnelse}
+                    resize
+                />
+            )}
+            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
+                <CustomTextareaEditor
+                    name={`roller.${fieldIndex}.begrunnelseFraOpprinneligVedtak`}
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
+                    resize
+                    readOnly
+                />
+            )}
+            <ActionButtons onNext={onNext} />
+        </Fragment>
+    );
+};
+
+const VirkningstidspunktBarn = ({
+    item,
+    barnIndex,
+    initialValues,
+}: {
+    item: VirkningstidspunktFormValuesPerBarn;
+    barnIndex: number;
+    initialValues: VirkningstidspunktFormValuesPerBarn;
+}) => {
+    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const behandling = useGetBehandlingV2();
+    const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
+    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
+    const kunEtBarnIBehandlingen = behandling.virkningstidspunktV2.length === 1;
+    const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(
+        ({ rolle }) => rolle.ident === item.rolle.ident
+    );
+    const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
+    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
+
+    useEffect(() => {
+        if (
+            initialVirkningsdato &&
+            selectedVirkningstidspunkt.virkningstidspunkt &&
+            initialVirkningsdato !== selectedVirkningstidspunkt.virkningstidspunkt &&
+            selectedVirkningstidspunkt.avslag == null
+        ) {
+            setShowChangedVirkningsDatoAlert(true);
+        }
+
+        if (
+            initialVirkningsdato &&
+            showChangedVirkningsDatoAlert &&
+            initialVirkningsdato === selectedVirkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(false);
+        }
+
+        if (!initialVirkningsdato && selectedVirkningstidspunkt.virkningstidspunkt) {
+            setInitialVirkningsdato(selectedVirkningstidspunkt.virkningstidspunkt);
+        }
+    }, [selectedVirkningstidspunkt.virkningstidspunkt]);
+
+    useEffect(() => {
+        const subscription = watch((value, { name, type }) => {
+            if (
+                (name === `roller.${barnIndex}.virkningstidspunkt` && !value.roller[barnIndex].virkningstidspunkt) ||
+                (name !== `roller.${barnIndex}.begrunnelse` && type === undefined) ||
+                name === `roller.${barnIndex}.opphørsvarighet` ||
+                name === `roller.${barnIndex}.opphørsdato`
+            ) {
+                return;
+            }
+            debouncedOnSave();
+        });
+        return () => subscription.unsubscribe();
+    }, []);
 
     const onAarsakSelect = (value: string) => {
-        const barnsFødselsdato = kunEtBarnIBehandlingen
-            ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
-            : undefined;
-        const date = aarsakToVirkningstidspunktMapper(value, behandling, barnsFødselsdato);
-        setValue("virkningstidspunkt", date ? toISODateString(date) : null);
-        clearErrors("virkningstidspunkt");
+        const date = aarsakToVirkningstidspunktMapper(value, behandling, selectedVirkningstidspunkt);
+        setValue(`roller.${barnIndex}.virkningstidspunkt`, date ? toISODateString(date) : null);
+        clearErrors(`roller.${barnIndex}.virkningstidspunkt`);
     };
-    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") === "";
+    const erÅrsakAvslagIkkeValgt = getValues(`roller.${barnIndex}.årsakAvslag`) === "";
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
     const tom = useMemo(() => {
-        const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
-        const opphørsdato = dateOrNull(behandling.virkningstidspunkt.opphør.opphørsdato);
+        const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
+        const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
         if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
         if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
-    }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
+    }, [selectedVirkningstidspunkt.opprinneligVirkningstidspunkt, selectedVirkningstidspunkt.opphørsdato]);
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
-    const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || behandling.virkningstidspunkt.harLøpendeBidrag;
+    const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || selectedVirkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
           ? årsakListe18årsBidrag
-          : behandling.virkningstidspunkt.harLøpendeBidrag
+          : selectedVirkningstidspunkt.harLøpendeBidrag
             ? harLøpendeBidragÅrsakListe
             : årsakListe;
+
+    const onSave = () => {
+        const values = getValues(`roller.${barnIndex}`);
+        oppdaterBehandling.mutation.mutate(createPayload(values, selectedVirkningstidspunkt.rolle.id), {
+            onSuccess: (response) => {
+                oppdaterBehandling.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        virkningstidspunktV2: response.virkningstidspunktV2,
+                        boforhold: response.boforhold,
+                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                        inntekter: response.inntekter,
+                        samvær: response.samvær,
+                        underholdskostnader: response.underholdskostnader,
+                        gebyr: response.gebyr,
+                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                    };
+                });
+                const updatedValues = createInitialValues(response.virkningstidspunktV2, response.stønadstype);
+                const selectedBarn = Object.values(updatedValues.roller).find(
+                    ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
+                );
+                setValue(`roller.${barnIndex}.opphørsdato`, selectedBarn.opphørsdato);
+                setValue(`roller.${barnIndex}.opphørsvarighet`, selectedBarn.opphørsvarighet);
+                setPreviousValues(selectedBarn);
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onSave(),
+                    rollbackFn: () => {
+                        reset(previousValues, {
+                            keepIsSubmitSuccessful: true,
+                            keepDirty: true,
+                            keepIsSubmitted: true,
+                        });
+                    },
+                });
+            },
+        });
+    };
+
+    const debouncedOnSave = useDebounce(onSave);
 
     return (
         <>
@@ -210,14 +479,17 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
             </FlexRow>
             <FlexRow className="gap-x-8">
                 <FormControlledSelectField
-                    name="årsakAvslag"
+                    name={`roller.${barnIndex}.årsakAvslag`}
                     label={text.label.årsak}
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
                     {lesemodus && (
-                        <option value={getValues("årsakAvslag")}>
-                            {hentVisningsnavnVedtakstype(getValues("årsakAvslag"), behandling.vedtakstype)}
+                        <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
+                            {hentVisningsnavnVedtakstype(
+                                getValues(`roller.${barnIndex}.årsakAvslag`),
+                                behandling.vedtakstype
+                            )}
                         </option>
                     )}
                     {!lesemodus && erÅrsakAvslagIkkeValgt && (
@@ -262,7 +534,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
                             ))}
-                            {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
+                            {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
                                 <>
                                     {avslagsListeDeprekert.map((value) => (
                                         <option key={value} value={value} disabled>
@@ -275,7 +547,7 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                     )}
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
-                    name="virkningstidspunkt"
+                    name={`roller.${barnIndex}.virkningstidspunkt`}
                     label={text.label.virkningstidspunkt}
                     placeholder="DD.MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningstidspunkt}
@@ -290,6 +562,8 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
                 </BehandlingAlert>
             )}
             <Opphør
+                item={item}
+                barnIndex={barnIndex}
                 initialValues={initialValues}
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
@@ -298,160 +572,75 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
     );
 };
 
-const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
-    const behandling = useGetBehandlingV2();
-    //TODO: Dette må tilpasses per barn i V3 av bidrag
-    const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
-    const opphør = behandling.virkningstidspunkt.opphør.opphørRoller.find(
-        (opphørRolle) => opphørRolle.rolle.ident === baRolle.ident
-    );
-    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
-    const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
-    const { getValues, reset, setValue } = useFormContext();
-    const [opphørsvarighet, setOpphørsvarighet] = useState(getValues("opphørsvarighet"));
-    const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
-    const tom = useMemo(() => {
-        if (behandling.stønadstype === Stonadstype.BIDRAG)
-            return getFirstDayOfMonthAfterEighteenYears(new Date(baRolle.fødselsdato));
-        return addMonths(new Date(), 50 * 12);
+const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }) => {
+    const { control } = useFormContext<VirkningstidspunktFormValues>();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
+    const roller = useFieldArray({
+        control,
+        name: "roller",
+    });
+    const watchFieldArray = useWatch({ control, name: "roller" });
+    const controlledFields = roller.fields.map((field, index) => ({
+        ...field,
+        ...watchFieldArray?.[index],
+    }));
+
+    const defaultTab = useMemo(() => {
+        const barnIdent = controlledFields.find(({ rolle }) => rolle.ident === searchParams.get(urlSearchParams.tab))
+            ?.rolle?.ident;
+        return barnIdent ?? controlledFields[0].rolle.ident;
     }, []);
+    const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
-    const updateOpphørsdato = () => {
-        const values = getValues();
-        oppdaterOpphørsdato.mutation.mutate(
-            { idRolle: baRolle.id, opphørsdato: values.opphørsdato },
-            {
-                onSuccess: (response) => {
-                    oppdaterOpphørsdato.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            ...response,
-                        };
-                    });
-                    setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => updateOpphørsdato(),
-                        rollbackFn: () => {
-                            reset(previousValues, {
-                                keepIsSubmitSuccessful: true,
-                                keepDirty: true,
-                                keepIsSubmitted: true,
-                            });
-                        },
-                    });
-                },
-            }
-        );
-    };
-
-    const onMonthChange = (date) => {
-        const currentDate = getValues("opphørsdato");
-        if (date && date !== currentDate) {
-            setValue("opphørsdato", date);
-            updateOpphørsdato();
-        }
-    };
-
-    const onSelectVarighet = (value) => {
-        setOpphørsvarighet(value);
-        if (value === OpphørsVarighet.LØPENDE) {
-            setValue("opphørsdato", null);
-            updateOpphørsdato();
-        }
-    };
-
-    if (behandling.virkningstidspunkt.avslag != null) return null;
-    return (
-        <>
-            {!lesemodus && opphør?.eksisterendeOpphør && (
-                <BehandlingAlert variant="info" className="!w-[520px]">
-                    <BodyShort>
-                        {removePlaceholder(
-                            text.alert.bidragOpphørt,
-                            DateToDDMMYYYYString(dateOrNull(opphør.eksisterendeOpphør.opphørsdato)),
-                            DateToDDMMYYYYString(dateOrNull(opphør.eksisterendeOpphør.vedtaksdato))
-                        )}
-                    </BodyShort>
-                </BehandlingAlert>
-            )}
-            <FlexRow className="gap-x-8">
-                <FormControlledSelectField
-                    name="opphørsvarighet"
-                    label={text.label.varighet}
-                    className="w-max"
-                    onSelect={(value) => onSelectVarighet(value)}
-                >
-                    {getOpphørOptions(opphør, behandling.stønadstype, baRolle.fødselsdato).map((value) => (
-                        <option key={value} value={value}>
-                            {value}
-                        </option>
+    if (controlledFields.length > 1) {
+        return (
+            <Tabs
+                defaultValue={defaultTab}
+                value={selectedTab}
+                onChange={onNavigateToTab}
+                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
+            >
+                <Tabs.List>
+                    {controlledFields.map(({ rolle }) => (
+                        <Tabs.Tab
+                            key={rolle.ident}
+                            value={rolle.ident}
+                            label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
+                        />
                     ))}
-                </FormControlledSelectField>
-                {!opphørsvarighetIsLøpende && (
-                    <FormControlledMonthPicker
-                        name="opphørsdato"
-                        onChange={(date) => onMonthChange(date)}
-                        label={text.label.opphørsdato}
-                        defaultValue={initialValues.virkningstidspunkt}
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        fromDate={addMonths(initialValues.virkningstidspunkt, 1)}
-                        toDate={tom}
-                        required
-                    />
-                )}
-            </FlexRow>
-        </>
-    );
-};
-
-const Side = () => {
-    const { onStepChange } = useBehandlingProvider();
-    const {
-        erBisysVedtak,
-        gebyr,
-        virkningstidspunkt: { begrunnelseFraOpprinneligVedtak },
-    } = useGetBehandlingV2();
-    const useFormMethods = useFormContext();
-    const årsakAvslag = useFormMethods.getValues("årsakAvslag");
-    const onNext = () =>
-        onStepChange(
-            avslaglisteAlle.includes(årsakAvslag)
-                ? gebyr !== undefined
-                    ? STEPS[BarnebidragStepper.GEBYR]
-                    : STEPS[BarnebidragStepper.VEDTAK]
-                : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]
+                </Tabs.List>
+                {controlledFields.map((item, index) => {
+                    return (
+                        <Tabs.Panel key={item.rolle.ident} value={item.rolle.ident} className="grid gap-y-4 py-4">
+                            <VirkningstidspunktBarn
+                                item={item}
+                                barnIndex={index}
+                                initialValues={initialValues.roller[index]}
+                            />
+                        </Tabs.Panel>
+                    );
+                })}
+            </Tabs>
         );
+    }
 
     return (
-        <>
-            {!erBisysVedtak && (
-                <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
-            )}
-            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
-                <CustomTextareaEditor
-                    name="begrunnelseFraOpprinneligVedtak"
-                    label={text.label.begrunnelseFraOpprinneligVedtak}
-                    value={begrunnelseFraOpprinneligVedtak.innhold}
-                    resize
-                    readOnly
-                />
-            )}
-            <ActionButtons onNext={onNext} />
-        </>
+        <div className="grid gap-y-4 py-4">
+            <VirkningstidspunktBarn
+                key={controlledFields[0].id}
+                item={controlledFields[0]}
+                barnIndex={0}
+                initialValues={initialValues.roller[0]}
+            />
+        </div>
     );
 };
 
 const VirkningstidspunktForm = () => {
-    const { virkningstidspunkt, stønadstype } = useGetBehandlingV2();
-    const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
-    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
-    const initialValues = createInitialValues(virkningstidspunkt, stønadstype);
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
-    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
-    const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValues>(initialValues);
+    const { virkningstidspunktV2, stønadstype } = useGetBehandlingV2();
+    const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
+    const initialValues = createInitialValues(virkningstidspunktV2, stønadstype);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -466,99 +655,13 @@ const VirkningstidspunktForm = () => {
         }));
     }, [JSON.stringify(useFormMethods.formState.errors)]);
 
-    useEffect(() => {
-        const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (
-                (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
-                (name !== "begrunnelse" && type === undefined) ||
-                name === "opphørsvarighet" ||
-                name === "opphørsdato"
-            ) {
-                return;
-            }
-            debouncedOnSave();
-        });
-        return () => subscription.unsubscribe();
-    }, []);
-
-    useEffect(() => {
-        if (
-            initialVirkningsdato &&
-            virkningstidspunkt.virkningstidspunkt &&
-            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt &&
-            virkningstidspunkt.avslag == null
-        ) {
-            setShowChangedVirkningsDatoAlert(true);
-        }
-
-        if (
-            initialVirkningsdato &&
-            showChangedVirkningsDatoAlert &&
-            initialVirkningsdato === virkningstidspunkt.virkningstidspunkt
-        ) {
-            setShowChangedVirkningsDatoAlert(false);
-        }
-
-        if (!initialVirkningsdato && virkningstidspunkt.virkningstidspunkt) {
-            setInitialVirkningsdato(virkningstidspunkt.virkningstidspunkt);
-        }
-    }, [virkningstidspunkt.virkningstidspunkt]);
-
-    const onSave = () => {
-        const values = useFormMethods.getValues();
-        oppdaterBehandling.mutation.mutate(createPayload(values), {
-            onSuccess: (response) => {
-                oppdaterBehandling.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        virkningstidspunkt: response.virkningstidspunkt,
-                        boforhold: response.boforhold,
-                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
-                        inntekter: response.inntekter,
-                        samvær: response.samvær,
-                        underholdskostnader: response.underholdskostnader,
-                        gebyr: response.gebyr,
-                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
-                    };
-                });
-                //TODO: Dette må tilpasses per barn i V3 av bidrag
-                const initialValues = createInitialValues(response.virkningstidspunkt, response.stønadstype);
-                useFormMethods.setValue("opphørsdato", initialValues.opphørsdato);
-                useFormMethods.setValue("opphørsvarighet", initialValues.opphørsvarighet);
-                setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => onSave(),
-                    rollbackFn: () => {
-                        useFormMethods.reset(previousValues, {
-                            keepIsSubmitSuccessful: true,
-                            keepDirty: true,
-                            keepIsSubmitted: true,
-                        });
-                    },
-                });
-            },
-        });
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
-
     return (
         <>
             <FormProvider {...useFormMethods}>
-                <form onSubmit={useFormMethods.handleSubmit(onSave)}>
+                <form onSubmit={(e) => e.preventDefault()}>
                     <NewFormLayout
                         title={text.label.virkningstidspunkt}
-                        main={
-                            <Main
-                                initialValues={initialValues}
-                                previousValues={previousValues}
-                                setPreviousValues={setPreviousValues}
-                                showChangedVirkningsDatoAlert={showChangedVirkningsDatoAlert}
-                            />
-                        }
+                        main={<Main initialValues={initialValues} />}
                         side={<Side />}
                     />
                 </form>
