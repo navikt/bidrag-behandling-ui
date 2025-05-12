@@ -8,7 +8,11 @@ export const BeregningFordeltBidrag = () => {
     } = useBidragBeregningPeriode();
 
     if (!evne) return null;
+    const erFF =
+        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
+        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1;
     function renderResult() {
+        if (erFF) return "";
         if (sluttberegning.bidragJustertNedTilEvne) {
             return ` (redusert ned til evne)`;
         } else if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
@@ -26,7 +30,7 @@ export const BeregningFordeltBidrag = () => {
                     labelBold: true,
                     value: formatterBeløpForBeregning(evne.sumInntekt25Prosent),
                 },
-                {
+                !erFF && {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
