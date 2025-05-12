@@ -12,6 +12,7 @@ export default function useFeatureToogle() {
     const enableOpphørsdato = useFlag("behandling.opphorsdato");
     const enableBidragV2 = useFlag("behandling.v2_endring");
     const utvikler = useFlag("bidrag.utvikler");
+    const vedtaksperre = useFlag("Vedtakssperre");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
@@ -43,6 +44,7 @@ export default function useFeatureToogle() {
         );
     }, [enableFatteVedtak, enableAdmin]);
     return {
+        vedtaksperre: vedtaksperre,
         isAdminEnabled: enableAdmin,
         isDeveloper: utvikler,
         isFatteVedtakEnabled: enableFatteVedtak,

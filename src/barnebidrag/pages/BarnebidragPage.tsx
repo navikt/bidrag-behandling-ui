@@ -5,11 +5,13 @@ import { Alert, Heading, Provider } from "@navikt/ds-react";
 import React, { useLayoutEffect, useRef } from "react";
 
 import texts from "../../common/constants/texts";
+import useFeatureToogle from "../../common/hooks/useFeatureToggle";
 import FormWrapper from "../components/forms/FormWrapper";
 import { BarnebidragSideMenu } from "./BarnebidragSideMenu";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const BarnebidragPage = () => {
     const { erVedtakFattet, kanBehandlesINyLøsning, kanIkkeBehandlesBegrunnelse } = useGetBehandlingV2();
+    const { vedtaksperre } = useFeatureToogle();
     const ref = useRef<HTMLDivElement>(null);
     const [rootElement, setRootElement] = React.useState<HTMLDivElement | null>(null);
 
@@ -34,12 +36,20 @@ export const BarnebidragPage = () => {
                                 Vedtak er fattet for behandlingen og kan derfor ikke endres
                             </Alert>
                         )}
-                        {!kanBehandlesINyLøsning && (
+                        {!vedtaksperre && !kanBehandlesINyLøsning && (
                             <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                                 <Heading level="3" size="small">
                                     {texts.title.kanIkkeBehandlesGjennomNyLøsning}
                                 </Heading>
                                 {kanIkkeBehandlesBegrunnelse}
+                            </Alert>
+                        )}
+                        {vedtaksperre && (
+                            <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                                <Heading level="3" size="small">
+                                    Stengt for vedtak
+                                </Heading>
+                                {"Denne saken er midlertidig stengt for vedtak"}
                             </Alert>
                         )}
                         <NavigationLoaderWrapper>
