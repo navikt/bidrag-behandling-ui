@@ -379,7 +379,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const { erBisysVedtak, virkningstidspunktV2 } = useGetBehandlingV2();
+    const { erBisysVedtak, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
@@ -396,16 +396,18 @@ const Side = () => {
                 : STEPS[ForskuddStepper.BOFORHOLD]
         );
 
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
+
     return (
         <>
-            {!erBisysVedtak && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${fieldIndex}.begrunnelse`}
                     label={text.title.begrunnelse}
                     resize
                 />
             )}
-            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name={`roller.${fieldIndex}.begrunnelseFraOpprinneligVedtak`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}

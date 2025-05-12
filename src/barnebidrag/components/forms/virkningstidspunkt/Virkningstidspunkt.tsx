@@ -285,7 +285,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const { erBisysVedtak, gebyr, virkningstidspunktV2 } = useGetBehandlingV2();
+    const { erBisysVedtak, gebyr, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
@@ -294,6 +294,7 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
         ({ rolle }) => rolle.ident === values.rolle.ident
     ).begrunnelseFraOpprinneligVedtak;
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onNext = () =>
         onStepChange(
@@ -306,14 +307,14 @@ const Side = () => {
 
     return (
         <Fragment key={activeTab}>
-            {!erBisysVedtak && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${fieldIndex}.begrunnelse`}
                     label={text.title.begrunnelse}
                     resize
                 />
             )}
-            {!erBisysVedtak && begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name={`roller.${fieldIndex}.begrunnelseFraOpprinneligVedtak`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}
