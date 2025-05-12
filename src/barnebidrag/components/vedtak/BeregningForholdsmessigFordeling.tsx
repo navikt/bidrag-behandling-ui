@@ -40,7 +40,7 @@ export const BeregningForholdsmessigFordeling = () => {
                     label: "BPs evne etter forholdsmessig fordeling",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ?? 0)} x ${formatterBeløpForBeregning(delberegningBidragsevne.bidragsevne ?? 0)}`,
+                    value: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ?? 0)} x ${formatterBeløpForBeregning(Math.min(delberegningBidragsevne.bidragsevne, delberegningBidragsevne.sumInntekt25Prosent))}`,
                     result: `${formatterBeløpForBeregning(sluttberegning.bpEvneVedForholdsmessigFordeling)}`,
                 },
                 {
