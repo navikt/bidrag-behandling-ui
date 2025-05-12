@@ -4,7 +4,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const BeregningForholdsmessigFordeling = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad, delberegningBidragsevne },
+        beregningsdetaljer: { sluttberegning, bpsAndel, delberegningBidragsevne },
     } = useBidragBeregningPeriode();
 
     const erFF =
@@ -33,7 +33,7 @@ export const BeregningForholdsmessigFordeling = () => {
                     label: "Andel av underholdskostnad",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(delberegningUnderholdskostnad?.underholdskostnad ?? 0)} / ${formatterBeløpForBeregning(sluttberegning.bpSumAndelAvU ?? 0)}`,
+                    value: `${formatterBeløpForBeregning(bpsAndel?.andelBeløp ?? 0)} / ${formatterBeløpForBeregning(sluttberegning.bpSumAndelAvU ?? 0)}`,
                     result: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor)}`,
                 },
                 {
