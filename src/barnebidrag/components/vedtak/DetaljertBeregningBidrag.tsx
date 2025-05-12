@@ -13,6 +13,7 @@ import { BeregningBegrensetRevurdering } from "./BeregningBegrensetRevurdering";
 import { EndeligBidragTable } from "./BeregningEndeligBidrag";
 import { BeregningEndringUnderGrense } from "./BeregningEndringUnderGrense";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
+import { BeregningForholdsmessigFordeling } from "./BeregningForholdsmessigFordeling";
 import { BeregningJusterBMsBarnetillegg } from "./BeregningJusterBMsBarnetillegg";
 import { BeregningJusterBPsBarnetillegg } from "./BeregningJusterBPsBarnetillegg";
 import BeregningSamværsfradrag from "./BeregningSamværsfradrag";
@@ -51,6 +52,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                 }}
             >
                 <BPsAndelUnderholdskostnad />
+
                 {!beregningsdetaljer.deltBosted && <BeregningSamværsfradrag />}
                 {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBM.barnetillegg.length > 0 && (
                     <VStack gap="2">
@@ -59,12 +61,14 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                         <BeregningJusterBMsBarnetillegg />
                     </VStack>
                 )}
+
                 <VStack gap="2">
                     <BPsEvne
                         inntekter={beregningsdetaljer.inntekter}
                         bidragsevne={beregningsdetaljer.delberegningBidragsevne}
                     />
                     <BeregningFordeltBidrag />
+                    <BeregningForholdsmessigFordeling />
                 </VStack>
                 <BeregningBegrensetRevurdering />
                 {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBP.barnetillegg.length > 0 && (
