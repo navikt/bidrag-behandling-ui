@@ -12,7 +12,6 @@ export const BeregningForholdsmessigFordeling = () => {
         sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1;
     if (!erFF) return null;
     function renderResult() {
-        if (erFF) return "";
         if (sluttberegning.bidragJustertNedTilEvne) {
             return ` (redusert ned til evne)`;
         } else if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
