@@ -422,6 +422,7 @@ const VirkningstidspunktBarn = ({
                 oppdaterBehandling.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,
+                        virkningstidspunkt: response.virkningstidspunkt,
                         virkningstidspunktV2: response.virkningstidspunktV2,
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
