@@ -4,7 +4,6 @@ import {
     SamvaerDto,
     Samvaersklasse,
     SletteSamvaersperiodeElementDto,
-    Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -90,7 +89,7 @@ const SamværForm = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { erBisysVedtak, samvær, roller, vedtakstype } = useGetBehandlingV2();
+    const { samvær, roller } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
@@ -101,7 +100,6 @@ const Side = () => {
     const [previousValues, setPreviousValues] = useState<string>(
         getValues(`${oppdaterSamvær.gjelderBarn}.begrunnelse`)
     );
-    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onSave = () => {
         const begrunnelse = getValues(`${oppdaterSamvær.gjelderBarn}.begrunnelse`);
@@ -155,15 +153,13 @@ const Side = () => {
 
     return (
         <Fragment key={oppdaterSamvær.id}>
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    label={text.title.begrunnelse}
-                    name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
-                    description={text.description.samværBegrunnelse}
-                    resize
-                />
-            )}
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && oppdaterSamvær.begrunnelseFraOpprinneligVedtak && (
+            <FormControlledCustomTextareaEditor
+                label={text.title.begrunnelse}
+                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
+                description={text.description.samværBegrunnelse}
+                resize
+            />
+            {oppdaterSamvær.begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     name={`${oppdaterSamvær.gjelderBarn}.begrunnelseFraOpprinneligVedtak`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}

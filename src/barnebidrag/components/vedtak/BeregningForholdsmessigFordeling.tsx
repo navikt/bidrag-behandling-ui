@@ -12,10 +12,10 @@ export const BeregningForholdsmessigFordeling = () => {
         sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1;
     if (!erFF) return null;
     function renderResult() {
-        if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
-            return ` (redusert ned til 25% av inntekt)`;
-        } else if (sluttberegning.bidragJustertNedTilEvne) {
+        if (sluttberegning.bidragJustertNedTilEvne) {
             return ` (redusert ned til evne)`;
+        } else if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
+            return ` (redusert ned til 25% av inntekt)`;
         }
         return "";
     }
@@ -40,7 +40,7 @@ export const BeregningForholdsmessigFordeling = () => {
                     label: "BPs evne etter forholdsmessig fordeling",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ?? 0)} x ${formatterBeløpForBeregning(Math.min(delberegningBidragsevne.bidragsevne, delberegningBidragsevne.sumInntekt25Prosent))}`,
+                    value: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ?? 0)} x ${formatterBeløpForBeregning(delberegningBidragsevne.bidragsevne ?? 0)}`,
                     result: `${formatterBeløpForBeregning(sluttberegning.bpEvneVedForholdsmessigFordeling)}`,
                 },
                 {

@@ -4,7 +4,6 @@ import {
     PrivatAvtaleType,
     Rolletype,
     Stonadstype,
-    Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
@@ -398,7 +397,7 @@ const PrivatAvtalePerioder = ({
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { erBisysVedtak, privatAvtale, vedtakstype } = useGetBehandlingV2();
+    const { privatAvtale } = useGetBehandlingV2();
     const { onStepChange } = useBehandlingProvider();
     const { getValues } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
@@ -408,20 +407,17 @@ const Side = () => {
     const selectedBarnIdent = roller[rolleIndex].gjelderBarn.ident;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
-    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]);
 
     return (
         <>
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
-                    label={text.title.begrunnelse}
-                    resize
-                />
-            )}
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak && (
+            <FormControlledCustomTextareaEditor
+                name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
+                label={text.title.begrunnelse}
+                resize
+            />
+            {begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

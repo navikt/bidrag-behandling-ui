@@ -1,4 +1,4 @@
-import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -101,7 +101,7 @@ const Main = () => {
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { erBisysVedtak, roller, inntekter, vedtakstype } = useGetBehandlingV2();
+    const { roller, inntekter } = useGetBehandlingV2();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
     const rolleId = searchParams.get(urlSearchParams.tab);
@@ -113,7 +113,6 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = inntekter.begrunnelserFraOpprinneligVedtak.find(
         (begrunnelse) => begrunnelse.gjelder.ident === selectedRolle.ident
     );
-    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onSave = () => {
         const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
@@ -176,15 +175,13 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    description={descriptionText}
-                    label={text.title.begrunnelse}
-                    name={`begrunnelser.${selectedRolleId}`}
-                    resize
-                />
-            )}
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
+            <FormControlledCustomTextareaEditor
+                description={descriptionText}
+                label={text.title.begrunnelse}
+                name={`begrunnelser.${selectedRolleId}`}
+                resize
+            />
+            {begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

@@ -1,9 +1,10 @@
 import {
     OppdatereVirkningstidspunkt,
     Resultatkode,
+    Rolletype,
     TypeArsakstype,
     Vedtakstype,
-    VirkningstidspunktDtoV2,
+    VirkningstidspunktDto,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -13,8 +14,6 @@ import { FormControlledSelectField } from "@common/components/formFields/FormCon
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
-import urlSearchParams from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -25,22 +24,17 @@ import {
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
-import {
-    VirkningstidspunktFormValues,
-    VirkningstidspunktFormValuesPerBarn,
-} from "@common/types/virkningstidspunktFormValues";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Label, Tabs } from "@navikt/ds-react";
+import { BodyShort, Label } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect, useMemo, useState } from "react";
-import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../../barnebidrag/hooks/useGetActiveAndDefaultVirkningstidspunktTab";
-import { useOnSaveVirkningstidspunkt } from "../../../../barnebidrag/hooks/useOnSaveVirkningstidspunkt";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
+import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 
 const årsakListe = [
     TypeArsakstype.TREMANEDERTILBAKE,
@@ -78,27 +72,16 @@ const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const createInitialValues = (response: VirkningstidspunktDtoV2[]): VirkningstidspunktFormValues => {
-    return {
-        roller: response.map((virkningstidspunkt) => {
-            return {
-                rolle: virkningstidspunkt.rolle,
-                virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
-                årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
-                begrunnelse: virkningstidspunkt.begrunnelse?.innhold,
-            };
-        }),
-    };
-};
+const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues => ({
+    virkningstidspunkt: response.virkningstidspunkt,
+    årsakAvslag: response.årsak ?? response.avslag ?? "",
+    begrunnelse: response.begrunnelse?.innhold,
+});
 
-const createPayload = (
-    values: VirkningstidspunktFormValuesPerBarn,
-    barnRolleId?: number
-): OppdatereVirkningstidspunkt => {
+const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
     const årsak = årsakListe.find((value) => value === values.årsakAvslag);
     const avslag = opphørAvslagsListe.find((value) => value === values.årsakAvslag);
     return {
-        barnRolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
         avslag,
@@ -108,120 +91,32 @@ const createPayload = (
     };
 };
 
-const VirkningstidspunktBarn = ({
-    item,
-    barnIndex,
-    initialValues,
-}: {
-    item: VirkningstidspunktFormValuesPerBarn;
-    barnIndex: number;
-    initialValues: VirkningstidspunktFormValuesPerBarn;
-}) => {
-    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
     const behandling = useGetBehandlingV2();
-    const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
-    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
-    const kunEtBarnIBehandlingen = behandling.virkningstidspunktV2.length === 1;
-    const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(
-        ({ rolle }) => rolle.ident === item.rolle.ident
-    );
-    const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
-    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
+    const { lesemodus } = useBehandlingProvider();
+    const { setValue, clearErrors, getValues } = useFormContext();
+    const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
+
+    const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
+    const onAarsakSelect = (value: string) => {
+        const barnsFødselsdato = kunEtBarnIBehandlingen
+            ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
+            : undefined;
+        const date = aarsakToVirkningstidspunktMapper(value, behandling, barnsFødselsdato);
+        setValue("virkningstidspunkt", date ? toISODateString(date) : null);
+        clearErrors("virkningstidspunkt");
+    };
+    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") === "";
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
+
     const tom = useMemo(
-        () => dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
+        () => dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
         [fom]
     );
 
-    useEffect(() => {
-        if (
-            initialVirkningsdato &&
-            selectedVirkningstidspunkt.virkningstidspunkt &&
-            initialVirkningsdato !== selectedVirkningstidspunkt.virkningstidspunkt &&
-            selectedVirkningstidspunkt.avslag == null
-        ) {
-            setShowChangedVirkningsDatoAlert(true);
-        }
-
-        if (
-            initialVirkningsdato &&
-            showChangedVirkningsDatoAlert &&
-            initialVirkningsdato === selectedVirkningstidspunkt.virkningstidspunkt
-        ) {
-            setShowChangedVirkningsDatoAlert(false);
-        }
-
-        if (!initialVirkningsdato && selectedVirkningstidspunkt.virkningstidspunkt) {
-            setInitialVirkningsdato(selectedVirkningstidspunkt.virkningstidspunkt);
-        }
-    }, [selectedVirkningstidspunkt.virkningstidspunkt]);
-
-    useEffect(() => {
-        const subscription = watch((value, { name, type }) => {
-            if (
-                (name === `roller.${barnIndex}.virkningstidspunkt` && !value.roller[barnIndex].virkningstidspunkt) ||
-                (name !== `roller.${barnIndex}.begrunnelse` && type === undefined)
-            ) {
-                return;
-            }
-            debouncedOnSave();
-        });
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const onSave = () => {
-        const values = getValues(`roller.${barnIndex}`);
-        oppdaterBehandling.mutation.mutate(createPayload(values, selectedVirkningstidspunkt.rolle.id), {
-            onSuccess: (response) => {
-                oppdaterBehandling.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        virkningstidspunktV2: response.virkningstidspunktV2,
-                        boforhold: response.boforhold,
-                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
-                        inntekter: response.inntekter,
-                        samvær: response.samvær,
-                        underholdskostnader: response.underholdskostnader,
-                        gebyr: response.gebyr,
-                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
-                    };
-                });
-                const updatedValues = createInitialValues(response.virkningstidspunktV2);
-                const selectedBarn = Object.values(updatedValues.roller).find(
-                    ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
-                );
-                setPreviousValues(selectedBarn);
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => onSave(),
-                    rollbackFn: () => {
-                        reset(previousValues, {
-                            keepIsSubmitSuccessful: true,
-                            keepDirty: true,
-                            keepIsSubmitted: true,
-                        });
-                    },
-                });
-            },
-        });
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
-
-    const onAarsakSelect = (value: string) => {
-        const date = aarsakToVirkningstidspunktMapper(value, behandling, selectedVirkningstidspunkt);
-        setValue(`roller.${barnIndex}.virkningstidspunkt`, date ? toISODateString(date) : null);
-        clearErrors(`roller.${barnIndex}.virkningstidspunkt`);
-    };
-
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     const avslagsOpphørsliste = erTypeOpphør ? opphørAvslagsListe : avslagsListe;
-    const erÅrsakAvslagIkkeValgt = getValues(`roller.${barnIndex}.årsakAvslag`) === "";
-
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -244,23 +139,20 @@ const VirkningstidspunktBarn = ({
             </FlexRow>
             <FlexRow className="gap-x-8">
                 <FormControlledSelectField
-                    name={`roller.${barnIndex}.årsakAvslag`}
+                    name="årsakAvslag"
                     label={text.label.årsak}
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
                     {lesemodus && (
-                        <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
-                            {hentVisningsnavnVedtakstype(
-                                getValues(`roller.${barnIndex}.årsakAvslag`),
-                                behandling.vedtakstype
-                            )}
+                        <option value={getValues("årsakAvslag")}>
+                            {hentVisningsnavnVedtakstype(getValues("årsakAvslag"), behandling.vedtakstype)}
                         </option>
                     )}
                     {!lesemodus && erÅrsakAvslagIkkeValgt && (
                         <option value="">{text.select.årsakAvslagPlaceholder}</option>
                     )}
-                    {!lesemodus && !erTypeOpphør && (
+                    {!lesemodus && skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
                             {årsakListe
                                 .filter((value) => {
@@ -312,104 +204,24 @@ const VirkningstidspunktBarn = ({
     );
 };
 
-const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }) => {
-    const { control } = useFormContext<VirkningstidspunktFormValues>();
-    const { onNavigateToTab } = useBehandlingProvider();
-    const [searchParams] = useSearchParams();
-    const roller = useFieldArray({
-        control,
-        name: "roller",
-    });
-    const watchFieldArray = useWatch({ control, name: "roller" });
-    const controlledFields = roller.fields.map((field, index) => ({
-        ...field,
-        ...watchFieldArray?.[index],
-    }));
-
-    const defaultTab = useMemo(() => {
-        const barnIdent = controlledFields.find(({ rolle }) => rolle.ident === searchParams.get(urlSearchParams.tab))
-            ?.rolle?.ident;
-        return barnIdent ?? controlledFields[0].rolle.ident;
-    }, []);
-    const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
-
-    if (controlledFields.length > 1) {
-        return (
-            <Tabs
-                defaultValue={defaultTab}
-                value={selectedTab}
-                onChange={onNavigateToTab}
-                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
-            >
-                <Tabs.List>
-                    {controlledFields.map(({ rolle }) => (
-                        <Tabs.Tab
-                            key={rolle.ident}
-                            value={rolle.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
-                        />
-                    ))}
-                </Tabs.List>
-                {controlledFields.map((item, index) => {
-                    return (
-                        <Tabs.Panel key={item.rolle.ident} value={item.rolle.ident} className="grid gap-y-4 py-4">
-                            <VirkningstidspunktBarn
-                                item={item}
-                                barnIndex={index}
-                                initialValues={initialValues.roller[index]}
-                            />
-                        </Tabs.Panel>
-                    );
-                })}
-            </Tabs>
-        );
-    }
-
-    return (
-        <div className="grid gap-y-4 py-4">
-            <VirkningstidspunktBarn
-                key={controlledFields[0].id}
-                item={controlledFields[0]}
-                barnIndex={0}
-                initialValues={initialValues.roller[0]}
-            />
-        </div>
-    );
-};
-
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const { erBisysVedtak, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
-    const { getValues } = useFormContext<VirkningstidspunktFormValues>();
-    const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
-    const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
-    const values = getValues(`roller.${fieldIndex}`);
-    const årsakAvslag = values.årsakAvslag;
-    const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
-        ({ rolle }) => rolle.ident === values.rolle.ident
-    ).begrunnelseFraOpprinneligVedtak;
-
+    const {
+        virkningstidspunkt: { begrunnelseFraOpprinneligVedtak },
+    } = useGetBehandlingV2();
+    const useFormMethods = useFormContext();
+    const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
         onStepChange(
-            opphørAvslagsListe.includes(årsakAvslag as Resultatkode)
-                ? STEPS[ForskuddStepper.VEDTAK]
-                : STEPS[ForskuddStepper.BOFORHOLD]
+            opphørAvslagsListe.includes(årsakAvslag) ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]
         );
-
-    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     return (
         <>
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${fieldIndex}.begrunnelse`}
-                    label={text.title.begrunnelse}
-                    resize
-                />
-            )}
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
+            <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            {begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
-                    name={`roller.${fieldIndex}.begrunnelseFraOpprinneligVedtak`}
+                    name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}
                     value={begrunnelseFraOpprinneligVedtak.innhold}
                     resize
@@ -422,9 +234,13 @@ const Side = () => {
 };
 
 const VirkningstidspunktForm = () => {
-    const { virkningstidspunktV2 } = useGetBehandlingV2();
-    const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const initialValues = createInitialValues(virkningstidspunktV2);
+    const { virkningstidspunkt } = useGetBehandlingV2();
+    const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
+    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
+    const initialValues = createInitialValues(virkningstidspunkt);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
+    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
+    const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValues>(initialValues);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -439,13 +255,89 @@ const VirkningstidspunktForm = () => {
         }));
     }, [JSON.stringify(useFormMethods.formState.errors)]);
 
+    useEffect(() => {
+        const subscription = useFormMethods.watch((value, { name, type }) => {
+            if (
+                (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
+                (name !== "begrunnelse" && type === undefined)
+            ) {
+                return;
+            } else {
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (
+            initialVirkningsdato &&
+            virkningstidspunkt.virkningstidspunkt &&
+            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt &&
+            virkningstidspunkt.avslag == null
+        ) {
+            setShowChangedVirkningsDatoAlert(true);
+        }
+
+        if (
+            initialVirkningsdato &&
+            showChangedVirkningsDatoAlert &&
+            initialVirkningsdato === virkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(false);
+        }
+
+        if (!initialVirkningsdato && virkningstidspunkt.virkningstidspunkt) {
+            setInitialVirkningsdato(virkningstidspunkt.virkningstidspunkt);
+        }
+    }, [virkningstidspunkt.virkningstidspunkt]);
+
+    const onSave = () => {
+        const values = useFormMethods.getValues();
+        oppdaterBehandling.mutation.mutate(createPayload(values), {
+            onSuccess: (response) => {
+                oppdaterBehandling.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        virkningstidspunkt: response.virkningstidspunkt,
+                        boforhold: response.boforhold,
+                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                        inntekter: response.inntekter,
+                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                    };
+                });
+                setPreviousValues(createInitialValues(response.virkningstidspunkt));
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onSave(),
+                    rollbackFn: () => {
+                        useFormMethods.reset(previousValues, {
+                            keepIsSubmitSuccessful: true,
+                            keepDirty: true,
+                            keepIsSubmitted: true,
+                        });
+                    },
+                });
+            },
+        });
+    };
+
+    const debouncedOnSave = useDebounce(onSave);
+
     return (
         <>
             <FormProvider {...useFormMethods}>
-                <form onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <NewFormLayout
                         title={text.label.virkningstidspunkt}
-                        main={<Main initialValues={initialValues} />}
+                        main={
+                            <Main
+                                initialValues={initialValues}
+                                showChangedVirkningsDatoAlert={showChangedVirkningsDatoAlert}
+                            />
+                        }
                         side={<Side />}
                     />
                 </form>

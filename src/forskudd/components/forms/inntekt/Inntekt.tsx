@@ -1,4 +1,4 @@
-import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
@@ -97,7 +97,7 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { erBisysVedtak, roller, inntekter, vedtakstype } = useGetBehandlingV2();
+    const { roller, inntekter } = useGetBehandlingV2();
     const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -105,8 +105,6 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = inntekter.begrunnelserFraOpprinneligVedtak?.find(
         (begrunnelse) => begrunnelse?.gjelder?.ident === bm.ident
     );
-    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
-
     const onSave = () => {
         const begrunnelse = getValues(`begrunnelser.${bm.id}`);
         saveInntekt.mutation.mutate(
@@ -159,14 +157,8 @@ const Side = () => {
 
     return (
         <>
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    name={`begrunnelser.${bm.id}`}
-                    label={text.title.begrunnelse}
-                    resize
-                />
-            )}
-            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak && (
+            <FormControlledCustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
+            {begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     name={`begrunnelseFraOpprinneligVedtak.${bm.id}`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}
