@@ -1,4 +1,4 @@
-import { Rolletype, UnderholdDto } from "@api/BidragBehandlingApiV1";
+import { Rolletype, UnderholdDto, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -90,7 +90,7 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { underholdskostnader } = useGetBehandlingV2();
+    const { erBisysVedtak, underholdskostnader, vedtakstype } = useGetBehandlingV2();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [field, _, underholdskostnadId] = activeTab.split("-");
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
@@ -108,6 +108,7 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = underholdskostnader.find(
         (underhold) => underhold.id === Number(underholdId)
     )?.begrunnelseFraOpprinneligVedtak;
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
 
@@ -170,7 +171,7 @@ const Side = () => {
 
     return (
         <Fragment key={activeTab}>
-            {underholdId && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && underholdId && (
                 <FormControlledCustomTextareaEditor
                     key={fieldName}
                     name={fieldName}
@@ -178,8 +179,10 @@ const Side = () => {
                     resize
                 />
             )}
-            {!underholdId && <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} readOnly resize />}
-            {begrunnelseFraOpprinneligVedtak && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && !underholdId && (
+                <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} readOnly resize />
+            )}
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
                     key={fieldName}
                     name="begrunnelseFraOpprinneligVedtak"

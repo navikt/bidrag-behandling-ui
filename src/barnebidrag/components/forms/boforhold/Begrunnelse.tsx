@@ -1,3 +1,4 @@
+import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import text from "@common/constants/texts";
@@ -16,11 +17,14 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 export const Begrunnelse = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const {
+        erBisysVedtak,
+        vedtakstype,
         boforhold: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const [previousValue, setPreviousValues] = useState<string>(getValues("begrunnelse"));
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onSave = () =>
         saveBoforhold.mutation.mutate(
@@ -67,8 +71,10 @@ export const Begrunnelse = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
+                <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
+            )}
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}
