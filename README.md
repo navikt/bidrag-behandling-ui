@@ -16,6 +16,6 @@ Ved deployment så publiseres bygget til `gcp` cloud storage under bucket navn `
 Applikasjonen [bidrag-ui-static-files](https://github.com/navikt/bidrag-ui-static-files) er et proxy app som henter og cacher bygg filene som er publisert til cloud storage
 `Bidrag-ui` er konfigurert med module-federation til å hente mikrofrontend bygg filene fra denne applikasjonen og dermed rendre mikrofrontendene fra `remote` kilde.
 
-## Kjøre lokalt
+## Kjøre lokalt2
 Du kan starte applikasjonen lokalt ved å kjøre `yarn install` og deretter `yarn dev`. Dette vil eksponere applikasjonen på url `http://localhost:5173`.
 
