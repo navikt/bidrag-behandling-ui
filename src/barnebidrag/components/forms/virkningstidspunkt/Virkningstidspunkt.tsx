@@ -130,10 +130,7 @@ const createInitialValues = (
     };
 };
 
-const createPayload = (
-    values: VirkningstidspunktFormValuesPerBarn,
-    barnRolleId?: number
-): OppdatereVirkningstidspunkt => {
+const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: number): OppdatereVirkningstidspunkt => {
     const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
         (value) => value === values.årsakAvslag
     );
@@ -141,7 +138,7 @@ const createPayload = (
         (value) => value === values.årsakAvslag
     );
     return {
-        barnRolleId,
+        rolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
         avslag,

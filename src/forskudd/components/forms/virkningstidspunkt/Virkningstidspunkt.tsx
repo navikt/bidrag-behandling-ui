@@ -91,14 +91,11 @@ const createInitialValues = (response: VirkningstidspunktDtoV2[]): Virkningstids
     };
 };
 
-const createPayload = (
-    values: VirkningstidspunktFormValuesPerBarn,
-    barnRolleId?: number
-): OppdatereVirkningstidspunkt => {
+const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: number): OppdatereVirkningstidspunkt => {
     const årsak = årsakListe.find((value) => value === values.årsakAvslag);
     const avslag = opphørAvslagsListe.find((value) => value === values.årsakAvslag);
     return {
-        barnRolleId,
+        rolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
         avslag,
