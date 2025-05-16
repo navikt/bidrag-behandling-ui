@@ -1,4 +1,4 @@
-import { BehandlingDtoV2, TypeArsakstype } from "@api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, TypeArsakstype, VirkningstidspunktDtoV2 } from "@api/BidragBehandlingApiV1";
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     addMonthsIgnoreDay,
@@ -17,10 +17,10 @@ export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
 export const aarsakToVirkningstidspunktMapper = (
     aarsak: TypeArsakstype | string,
     behandling: BehandlingDtoV2,
-    barnsFødselsdato?: string
+    selectedVirkningstidspunkt: VirkningstidspunktDtoV2
 ) => {
-    const nyVirkningstidspunkt = mapÅrsakTilVirkningstidspunkt(aarsak, behandling, barnsFødselsdato);
-    const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
+    const nyVirkningstidspunkt = mapÅrsakTilVirkningstidspunkt(aarsak, behandling, selectedVirkningstidspunkt);
+    const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
 
     if (opprinneligVirkningstidspunkt != null && nyVirkningstidspunkt != null) {
         return minOfDates(opprinneligVirkningstidspunkt, nyVirkningstidspunkt);
@@ -30,10 +30,11 @@ export const aarsakToVirkningstidspunktMapper = (
 export const mapÅrsakTilVirkningstidspunkt = (
     aarsak: TypeArsakstype | string,
     behandling: BehandlingDtoV2,
-    barnsFødselsdato?: string
+    selectedVirkningstidspunkt: VirkningstidspunktDtoV2
 ) => {
     const soktFraDato = new Date(behandling.søktFomDato);
     const mottatDato = new Date(behandling.mottattdato);
+    const barnsFødselsdato = selectedVirkningstidspunkt.rolle.fødselsdato;
     const mottatOrSoktFraDato = getSoktFraOrMottatDato(soktFraDato, mottatDato);
     const treMaanederTilbakeFraMottatDato = deductMonths(firstDayOfMonth(mottatDato), 3);
     const treMaanederTilbake = isAfterDate(soktFraDato, treMaanederTilbakeFraMottatDato)

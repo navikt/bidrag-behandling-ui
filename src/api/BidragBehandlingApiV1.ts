@@ -491,7 +491,7 @@ export interface OppdatereBegrunnelse {
 
 export interface OppdatereVirkningstidspunkt {
     /** @format int64 */
-    barnRolleId?: number;
+    rolleId?: number;
     /** Oppdater årsak. Hvis verdien er satt til null så vil det ikke bli gjort noe endringer. Hvis verdien er satt så vil årsak settes til samme verdi fra forespørsel og avslag settes til null */
     årsak?: TypeArsakstype;
     /** Oppdater avslag. Hvis verdien er satt til null så vil det ikke bli gjort noe endringer. Hvis verdien er satt så vil avslag settes til samme verdi fra forespørsel og årsak settes til null */
@@ -1241,9 +1241,9 @@ export interface PrivatAvtaleValideringsfeilDto {
     ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1278,9 +1278,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendePeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2354,9 +2354,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2619,10 +2619,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
-    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-    gjelderBarn?: HusstandsmedlemDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+    gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2920,8 +2920,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3018,9 +3018,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3137,8 +3137,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3190,9 +3190,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3706,7 +3706,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3798,7 +3801,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

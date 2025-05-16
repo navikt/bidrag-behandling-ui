@@ -1,4 +1,4 @@
-import { Rolletype } from "@api/BidragBehandlingApiV1";
+import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
@@ -95,7 +95,7 @@ const Main = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { roller, inntekter } = useGetBehandlingV2();
+    const { erBisysVedtak, roller, inntekter, vedtakstype } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -108,6 +108,7 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = inntekter.begrunnelserFraOpprinneligVedtak.find(
         (begrunnelse) => begrunnelse.gjelder.ident === selectedRolle.ident
     );
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     const onSave = () => {
         const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
@@ -169,13 +170,15 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledCustomTextareaEditor
-                description={descriptionText}
-                label={text.title.begrunnelse}
-                name={`begrunnelser.${selectedRolleId}`}
-                resize
-            />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
+                <FormControlledCustomTextareaEditor
+                    description={descriptionText}
+                    label={text.title.begrunnelse}
+                    name={`begrunnelser.${selectedRolleId}`}
+                    resize
+                />
+            )}
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

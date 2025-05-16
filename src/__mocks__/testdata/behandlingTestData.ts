@@ -24,6 +24,10 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
     søktAv: SoktAvType.BIDRAGSMOTTAKER,
     erKlageEllerOmgjøring: false,
     opprettetTidspunkt: "2019-04-01",
+    erBisysVedtak: false,
+    medInnkreving: false,
+    kanBehandlesINyLøsning: true,
+    underholdskostnader: [],
     roller: [
         {
             id: 1,
@@ -60,6 +64,7 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
             innhold: "",
         },
         valideringsfeil: null,
+        beregnetBoforhold: [],
     },
     inntekter: {
         månedsinntekter: [],
@@ -75,6 +80,7 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
                 innhold: "",
             },
         ],
+        begrunnelserFraOpprinneligVedtak: [],
         notat: {
             kunINotat: "",
             innhold: "",
@@ -92,16 +98,39 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
             kunINotat: "",
             innhold: "",
         },
+        harLøpendeBidrag: false,
     },
+    virkningstidspunktV2: [
+        {
+            rolle: {
+                id: 1,
+                rolletype: Rolletype.BA,
+                ident: "03522150877",
+            },
+            virkningstidspunkt: "",
+            årsak: null,
+            begrunnelse: {
+                kunINotat: "",
+                innhold: "",
+            },
+            notat: {
+                kunINotat: "",
+                innhold: "",
+            },
+            harLøpendeBidrag: false,
+        },
+    ],
     aktiveGrunnlagsdata: {
         arbeidsforhold: [],
         husstandsbarn: [],
         husstandsmedlem: [],
+        husstandsmedlemBM: [],
     },
     ikkeAktiverteEndringerIGrunnlagsdata: {
         arbeidsforhold: [],
         inntekter: null,
         husstandsbarn: [],
         husstandsmedlem: [],
+        husstandsmedlemBM: [],
     },
 };

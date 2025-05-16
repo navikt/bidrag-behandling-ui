@@ -6,6 +6,7 @@ import {
     SaerbidragUtgifterDto,
     UtgiftspostDto,
     Utgiftstype,
+    Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
@@ -760,8 +761,11 @@ const BeregnetUtgifter = () => {
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
+        erBisysVedtak,
+        vedtakstype,
         utgift: { avslag, begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
+    const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const onNext = () =>
         onStepChange(
             avslag === undefined ? STEPS[SærligeutgifterStepper.INNTEKT] : STEPS[SærligeutgifterStepper.VEDTAK]
@@ -769,8 +773,10 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
-            {begrunnelseFraOpprinneligVedtak?.innhold && (
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
+                <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
+            )}
+            {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak?.innhold && (
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}

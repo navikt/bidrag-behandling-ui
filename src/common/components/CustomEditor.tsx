@@ -105,7 +105,7 @@ export function CustomTextareaEditor({
                     readOnly={disabled}
                     defaultValue={reformattedValue}
                     onTextChange={onTextChange}
-                    error={!disabled}
+                    error={!disabled && !!error}
                 />
                 {!disabled && error && (
                     <ErrorMessage showIcon size="small" className="mt-2">
