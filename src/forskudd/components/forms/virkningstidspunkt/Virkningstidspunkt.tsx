@@ -108,20 +108,20 @@ const createPayload = (
     };
 };
 
-const VirkningstidspunktBarn = ({
+const VirkningstidspunktRolle = ({
     item,
-    barnIndex,
+    rolleIndex,
     initialValues,
 }: {
     item: VirkningstidspunktFormValuesPerBarn;
-    barnIndex: number;
+    rolleIndex: number;
     initialValues: VirkningstidspunktFormValuesPerBarn;
 }) => {
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
-    const kunEtBarnIBehandlingen = behandling.virkningstidspunktV2.length === 1;
+    const kunEtRolleIBehandlingen = behandling.virkningstidspunktV2.length === 1;
     const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(
         ({ rolle }) => rolle.ident === item.rolle.ident
     );
@@ -161,8 +161,8 @@ const VirkningstidspunktBarn = ({
     useEffect(() => {
         const subscription = watch((value, { name, type }) => {
             if (
-                (name === `roller.${barnIndex}.virkningstidspunkt` && !value.roller[barnIndex].virkningstidspunkt) ||
-                (name !== `roller.${barnIndex}.begrunnelse` && type === undefined)
+                (name === `roller.${rolleIndex}.virkningstidspunkt` && !value.roller[rolleIndex].virkningstidspunkt) ||
+                (name !== `roller.${rolleIndex}.begrunnelse` && type === undefined)
             ) {
                 return;
             }
@@ -172,7 +172,7 @@ const VirkningstidspunktBarn = ({
     }, []);
 
     const onSave = () => {
-        const values = getValues(`roller.${barnIndex}`);
+        const values = getValues(`roller.${rolleIndex}`);
         oppdaterBehandling.mutation.mutate(createPayload(values, selectedVirkningstidspunkt.rolle.id), {
             onSuccess: (response) => {
                 oppdaterBehandling.queryClientUpdater((currentData) => {
@@ -214,13 +214,13 @@ const VirkningstidspunktBarn = ({
 
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling, selectedVirkningstidspunkt);
-        setValue(`roller.${barnIndex}.virkningstidspunkt`, date ? toISODateString(date) : null);
-        clearErrors(`roller.${barnIndex}.virkningstidspunkt`);
+        setValue(`roller.${rolleIndex}.virkningstidspunkt`, date ? toISODateString(date) : null);
+        clearErrors(`roller.${rolleIndex}.virkningstidspunkt`);
     };
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     const avslagsOpphørsliste = erTypeOpphør ? opphørAvslagsListe : avslagsListe;
-    const erÅrsakAvslagIkkeValgt = getValues(`roller.${barnIndex}.årsakAvslag`) === "";
+    const erÅrsakAvslagIkkeValgt = getValues(`roller.${rolleIndex}.årsakAvslag`) === "";
 
     return (
         <>
@@ -244,15 +244,15 @@ const VirkningstidspunktBarn = ({
             </FlexRow>
             <FlexRow className="gap-x-8">
                 <FormControlledSelectField
-                    name={`roller.${barnIndex}.årsakAvslag`}
+                    name={`roller.${rolleIndex}.årsakAvslag`}
                     label={text.label.årsak}
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
                     {lesemodus && (
-                        <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
+                        <option value={getValues(`roller.${rolleIndex}.årsakAvslag`)}>
                             {hentVisningsnavnVedtakstype(
-                                getValues(`roller.${barnIndex}.årsakAvslag`),
+                                getValues(`roller.${rolleIndex}.årsakAvslag`),
                                 behandling.vedtakstype
                             )}
                         </option>
@@ -264,7 +264,7 @@ const VirkningstidspunktBarn = ({
                         <optgroup label={text.label.årsak}>
                             {årsakListe
                                 .filter((value) => {
-                                    if (kunEtBarnIBehandlingen) return true;
+                                    if (kunEtRolleIBehandlingen) return true;
                                     return value !== TypeArsakstype.FRABARNETSFODSEL;
                                 })
                                 .map((value) => (
@@ -281,7 +281,7 @@ const VirkningstidspunktBarn = ({
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                 </option>
                             ))}
-                            {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
+                            {avslagsListeDeprekert.includes(getValues(`roller.${rolleIndex}.årsakAvslag`)) && (
                                 <>
                                     {avslagsListeDeprekert.map((value) => (
                                         <option key={value} value={value} disabled>
@@ -294,7 +294,7 @@ const VirkningstidspunktBarn = ({
                     )}
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
-                    name="virkningstidspunkt"
+                    name={`roller.${rolleIndex}.virkningstidspunkt`}
                     label={text.label.virkningstidspunkt}
                     placeholder="DD.MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningstidspunkt}
@@ -327,9 +327,9 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
     }));
 
     const defaultTab = useMemo(() => {
-        const barnIdent = controlledFields.find(({ rolle }) => rolle.ident === searchParams.get(urlSearchParams.tab))
+        const rolleIdent = controlledFields.find(({ rolle }) => rolle.ident === searchParams.get(urlSearchParams.tab))
             ?.rolle?.ident;
-        return barnIdent ?? controlledFields[0].rolle.ident;
+        return rolleIdent ?? controlledFields[0].rolle.ident;
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
@@ -346,16 +346,16 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                         <Tabs.Tab
                             key={rolle.ident}
                             value={rolle.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
+                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${rolle.ident}`}
                         />
                     ))}
                 </Tabs.List>
                 {controlledFields.map((item, index) => {
                     return (
                         <Tabs.Panel key={item.rolle.ident} value={item.rolle.ident} className="grid gap-y-4 py-4">
-                            <VirkningstidspunktBarn
+                            <VirkningstidspunktRolle
                                 item={item}
-                                barnIndex={index}
+                                rolleIndex={index}
                                 initialValues={initialValues.roller[index]}
                             />
                         </Tabs.Panel>
@@ -367,10 +367,10 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
 
     return (
         <div className="grid gap-y-4 py-4">
-            <VirkningstidspunktBarn
+            <VirkningstidspunktRolle
                 key={controlledFields[0].id}
                 item={controlledFields[0]}
-                barnIndex={0}
+                rolleIndex={0}
                 initialValues={initialValues.roller[0]}
             />
         </div>
