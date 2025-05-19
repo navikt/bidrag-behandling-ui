@@ -22,7 +22,8 @@ describe("VirkningstidspunktFormHelpers", () => {
     it("should set the date to mottatoDate if soktFraDato is earlier when årsak is fra kravfremsettelse", () => {
         const behandling = behandlingMockApiData;
         const aarsak = TypeArsakstype.FRA_KRAVFREMSETTELSE;
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(
             firstDayOfMonth(new Date(behandling.mottattdato)).toLocaleDateString()
         );
@@ -31,7 +32,8 @@ describe("VirkningstidspunktFormHelpers", () => {
     it("should set the date to soktFraDato if mottatoDato is later when årsak is fra kravfremsettelse", () => {
         const behandling = { ...behandlingMockApiData, mottattdato: "2019-04-03", søktFomDato: "2019-10-03" };
         const aarsak = TypeArsakstype.FRA_KRAVFREMSETTELSE;
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(
             firstDayOfMonth(new Date(behandling.søktFomDato)).toLocaleDateString()
         );
@@ -42,7 +44,8 @@ describe("VirkningstidspunktFormHelpers", () => {
         const behandling = { ...behandlingMockApiData, mottattdato, søktFomDato: "2019-02-03" };
         const aarsak = TypeArsakstype.TREMANEDERTILBAKE;
         const threeMonthsBackInTimeFromMottatDato = firstDayOfMonth(deductMonths(new Date(mottattdato), 3));
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(threeMonthsBackInTimeFromMottatDato.toLocaleDateString());
     });
 
@@ -50,7 +53,8 @@ describe("VirkningstidspunktFormHelpers", () => {
         const mottattdato = "2019-07-03";
         const behandling = { ...behandlingMockApiData, mottattdato, søktFomDato: "2019-05-03" };
         const aarsak = TypeArsakstype.TREMANEDERTILBAKE;
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(
             firstDayOfMonth(new Date(behandling.søktFomDato)).toLocaleDateString()
         );
@@ -60,7 +64,8 @@ describe("VirkningstidspunktFormHelpers", () => {
         const mottattdato = "2019-07-03";
         const behandling = { ...behandlingMockApiData, mottattdato, søktFomDato: "2019-08-03" };
         const aarsak = TypeArsakstype.TREMANEDERTILBAKE;
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(
             firstDayOfMonth(new Date(behandling.søktFomDato)).toLocaleDateString()
         );
@@ -69,7 +74,8 @@ describe("VirkningstidspunktFormHelpers", () => {
     it("should set the date to soktFraDato when årsak is fra søknadstidspunkt", () => {
         const behandling = { ...behandlingMockApiData };
         const aarsak = TypeArsakstype.FRASOKNADSTIDSPUNKT;
-        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling);
+        const selectedVirkningstidspunkt = behandling.virkningstidspunktV2[0];
+        const virkningsDato = aarsakToVirkningstidspunktMapper(aarsak, behandling, selectedVirkningstidspunkt);
         expect(virkningsDato.toLocaleDateString()).equals(
             firstDayOfMonth(new Date(behandling.søktFomDato)).toLocaleDateString()
         );
