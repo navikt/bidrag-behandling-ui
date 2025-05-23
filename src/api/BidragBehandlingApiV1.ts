@@ -166,6 +166,7 @@ export enum Grunnlagstype {
     KOPI_DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "KOPI_DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
     KOPIBARNETILSYNMEDSTONADPERIODE = "KOPI_BARNETILSYN_MED_STØNAD_PERIODE",
     KOPISAMVAeRSPERIODE = "KOPI_SAMVÆRSPERIODE",
+    ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
 }
 
 export enum Innkrevingstype {
@@ -251,7 +252,7 @@ export enum Inntektstype {
 }
 
 /** Grunnlagsinnhold (generisk) */
-export type JsonNode = object;
+export type JsonNode = any;
 
 export enum Kilde {
     MANUELL = "MANUELL",
@@ -339,6 +340,8 @@ export enum Resultatkode {
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
     GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
     INGEN_ENDRING_UNDER_GRENSE = "INGEN_ENDRING_UNDER_GRENSE",
+    INNVILGET_VEDTAK = "INNVILGET_VEDTAK",
+    SKJONNUTLANDET = "SKJØNN_UTLANDET",
 }
 
 export enum Rolletype {
@@ -560,23 +563,9 @@ export interface AndreVoksneIHusstandenPeriodeseringsfeil {
 
 export interface Ansettelsesdetaljer {
     /** Fradato for ansettelsesdetalj. År + måned */
-    periodeFra?: {
-        /** @format int32 */
-        year?: number;
-        month?: AnsettelsesdetaljerMonthEnum;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periodeFra?: string;
     /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
-    periodeTil?: {
-        /** @format int32 */
-        year?: number;
-        month?: AnsettelsesdetaljerMonthEnum1;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periodeTil?: string;
     /** Type arbeidsforhold, Ordinaer, Maritim, Forenklet, Frilanser' */
     arbeidsforholdType?: string;
     /** Beskrivelse av arbeidstidsordning. Eks: 'Ikke skift' */
@@ -1241,9 +1230,9 @@ export interface PrivatAvtaleValideringsfeilDto {
     ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
-    harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface RolleDto {
@@ -1278,9 +1267,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendePeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -2320,9 +2309,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2354,9 +2343,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2393,6 +2382,14 @@ export interface ResultatRolle {
     fødselsdato: string;
     innbetaltBeløp?: number;
     referanse: string;
+}
+
+export interface AldersjusteringDetaljerGrunnlag {
+    /** @format int64 */
+    grunnlagFraVedtak?: number;
+    aldersjustert: boolean;
+    aldersjusteresManuelt: boolean;
+    begrunnelser?: string[];
 }
 
 export interface BarnetilleggDetaljerDto {
@@ -2471,6 +2468,7 @@ export interface DelberegningUnderholdskostnad {
 export interface ResultatBarnebidragsberegningPeriodeDto {
     periode: TypeArManedsperiode;
     ugyldigBeregning?: UgyldigResultatPeriode;
+    aldersjusteringDetaljer?: AldersjusteringDetaljerGrunnlag;
     underholdskostnad: number;
     bpsAndelU: number;
     bpsAndelBeløp: number;
@@ -2619,10 +2617,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
-    /** @format int64 */
-    underholdskostnadId?: number;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
+    /** @format int64 */
+    underholdskostnadId?: number;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2907,22 +2905,15 @@ export interface NotatBehandlingDetaljerDto {
     søktAv?: SoktAvType;
     /** @format date */
     mottattDato?: string;
-    søktFraDato?: {
-        /** @format int32 */
-        year?: number;
-        month?: NotatBehandlingDetaljerDtoMonthEnum;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    søktFraDato?: string;
     /** @format date */
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3018,9 +3009,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
+    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
-    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3109,9 +3100,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -3137,8 +3128,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3190,9 +3181,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3379,8 +3370,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3475,36 +3466,6 @@ export enum AndreVoksneIHusstandenDetaljerDtoRelasjonEnum {
     EKTEFELLE = "EKTEFELLE",
     MOTPART_TIL_FELLES_BARN = "MOTPART_TIL_FELLES_BARN",
     UKJENT = "UKJENT",
-}
-
-export enum AnsettelsesdetaljerMonthEnum {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum AnsettelsesdetaljerMonthEnum1 {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
 }
 
 /** Angir om barnetilsynet er heltid eller deltid */
@@ -3627,21 +3588,6 @@ export enum NotatBarnetilsynOffentligeOpplysningerSkolealderEnum {
     IKKE_ANGITT = "IKKE_ANGITT",
 }
 
-export enum NotatBehandlingDetaljerDtoMonthEnum {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
 export enum NotatStonadTilBarnetilsynDtoSkolealderEnum {
     OVER = "OVER",
     UNDER = "UNDER",
@@ -3706,10 +3652,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3801,7 +3744,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
