@@ -115,7 +115,7 @@ const VedtakResultat = () => {
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
                 const avvistAldersjustering = r.perioder.every(
-                    (p) => p.aldersjusteringDetaljer?.aldersjustert === false
+                    (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
                 );
 
                 return (
@@ -277,7 +277,7 @@ const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningP
                                 <td className="w-[10px]">/</td>
                                 <td>
                                     {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                    Samvaersklasse.DELT_BOSTED
+                                        Samvaersklasse.DELT_BOSTED
                                         ? "D"
                                         : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag.samværsklasse)}
                                 </td>
