@@ -10,7 +10,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Link, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { Fragment, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import {
     ResultatBarnebidragsberegningPeriodeDto,
@@ -113,44 +113,50 @@ const VedtakResultat = () => {
     const erAvslag = avslag !== null && avslag !== undefined;
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
-            {beregning.resultat?.resultatBarn?.map((r, i) => (
-                <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
-                    <VedtakResultatBarn barn={r.barn} />
-                    <VedtakUgyldigBeregning resultat={r} />
-                    {r.indeksår && (
-                        <ResultatDescription
-                            data={[
-                                {
-                                    label: "Neste indeksår",
-                                    textRight: false,
-                                    labelBold: true,
-                                    value: r.indeksår,
-                                },
-                            ].filter((d) => d)}
-                        />
-                    )}
-                    {r.barn.innbetaltBeløp && (
-                        <ResultatDescription
-                            data={[
-                                {
-                                    label: "Innbetalt beløp",
-                                    textRight: false,
-                                    labelBold: true,
-                                    value: formatterBeløpForBeregning(r.barn.innbetaltBeløp),
-                                },
-                            ].filter((d) => d)}
-                        />
-                    )}
-                    <Table size="small">
-                        <VedtakTableHeader avslag={erAvslag} />
-                        <VedtakTableBody
-                            resultatBarn={r}
-                            avslag={erAvslag}
-                            opphør={vedtakstype === Vedtakstype.OPPHOR}
-                        />
-                    </Table>
-                </div>
-            ))}
+            {beregning.resultat?.resultatBarn?.map((r, i) => {
+                const avvistAldersjustering = r.perioder.every(
+                    (p) => p.aldersjusteringDetaljer?.aldersjustert === false
+                );
+
+                return (
+                    <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
+                        <VedtakResultatBarn barn={r.barn} />
+                        <VedtakUgyldigBeregning resultat={r} />
+                        {r.indeksår && (
+                            <ResultatDescription
+                                data={[
+                                    {
+                                        label: "Neste indeksår",
+                                        textRight: false,
+                                        labelBold: true,
+                                        value: r.indeksår,
+                                    },
+                                ].filter((d) => d)}
+                            />
+                        )}
+                        {r.barn.innbetaltBeløp && (
+                            <ResultatDescription
+                                data={[
+                                    {
+                                        label: "Innbetalt beløp",
+                                        textRight: false,
+                                        labelBold: true,
+                                        value: formatterBeløpForBeregning(r.barn.innbetaltBeløp),
+                                    },
+                                ].filter((d) => d)}
+                            />
+                        )}
+                        <Table size="small">
+                            <VedtakTableHeader avslag={erAvslag} avvistAldersjustering={avvistAldersjustering} />
+                            <VedtakTableBody
+                                resultatBarn={r}
+                                avslag={erAvslag}
+                                opphør={vedtakstype === Vedtakstype.OPPHOR}
+                            />
+                        </Table>
+                    </div>
+                );
+            })}
         </VedtakWrapper>
     );
 };
@@ -166,42 +172,56 @@ const VedtakTableBody = ({
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
 
+    function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
+        const skjulBeregning =
+            periode.erBeregnetAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
+
+        if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
+            return (
+                <Table.Row>
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">{"Avvist"}</Table.DataCell>
+                    <Table.DataCell textSize="small">
+                        {periode.aldersjusteringDetaljer?.aldersjusteresManuelt ? "Ja" : "Nei"}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                </Table.Row>
+            );
+        }
+        if (avslag) {
+            return (
+                <Table.Row>
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
+                    <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                </Table.Row>
+            );
+        }
+        return (
+            <Table.ExpandableRow
+                togglePlacement="right"
+                expandOnRowClick
+                expansionDisabled={skjulBeregning}
+                content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
+            >
+                {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
+                    <TableRowResultatAvslag periode={periode} />
+                ) : (
+                    <TableRowResultat periode={periode} />
+                )}
+            </Table.ExpandableRow>
+        );
+    }
     return (
         <Table.Body>
-            {resultatBarn.perioder.map((periode, index) => {
-                const skjulBeregning =
-                    periode.erBeregnetAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
-                return (
-                    <Fragment key={periode.periode.fom + index}>
-                        {avslag ? (
-                            <Table.Row>
-                                <Table.DataCell textSize="small">
-                                    {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                                    {periode.periode.til
-                                        ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
-                                        : ""}
-                                </Table.DataCell>
-                                <Table.DataCell textSize="small">
-                                    {opphør ? text.label.opphør : text.label.avslag}
-                                </Table.DataCell>
-                                <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
-                            </Table.Row>
-                        ) : (
-                            <Table.ExpandableRow
-                                togglePlacement="right"
-                                expandOnRowClick
-                                expansionDisabled={skjulBeregning}
-                                content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
-                            >
-                                {periode.erBeregnetAvslag && !periode.erEndringUnderGrense ? (
-                                    <TableRowResultatAvslag periode={periode} />
-                                ) : (
-                                    <TableRowResultat periode={periode} />
-                                )}
-                            </Table.ExpandableRow>
-                        )}
-                    </Fragment>
-                );
+            {resultatBarn.perioder.map((periode) => {
+                return renderTable(periode);
             })}
         </Table.Body>
     );
@@ -307,12 +327,33 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
         </BodyShort>
     </div>
 );
-const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => {
+const VedtakTableHeader = ({
+    avslag = false,
+    avvistAldersjustering = false,
+}: {
+    avslag: boolean;
+    avvistAldersjustering: boolean;
+}) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     return (
         <Table.Header>
-            {avslag ? (
+            {avvistAldersjustering ? (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.resultat}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {"Aldersjusteres manuelt"}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.årsak}
+                    </Table.HeaderCell>
+                </Table.Row>
+            ) : avslag ? (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
