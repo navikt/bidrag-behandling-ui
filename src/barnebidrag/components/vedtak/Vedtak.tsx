@@ -183,11 +183,13 @@ const VedtakTableBody = ({
                         {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                         {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
                     </Table.DataCell>
-                    <Table.DataCell textSize="small">{"Avvist"}</Table.DataCell>
+                    <Table.DataCell textSize="small">{"Avvist (Automatisk aldersjustering)"}</Table.DataCell>
                     <Table.DataCell textSize="small">
                         {periode.aldersjusteringDetaljer?.aldersjusteresManuelt ? "Ja" : "Nei"}
                     </Table.DataCell>
-                    <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                    <Table.DataCell textSize="small" width="500px">
+                        {periode.resultatkodeVisningsnavn}
+                    </Table.DataCell>
                 </Table.Row>
             );
         }
