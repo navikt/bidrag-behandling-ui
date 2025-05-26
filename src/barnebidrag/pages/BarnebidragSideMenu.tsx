@@ -673,7 +673,7 @@ export const BarnebidragSideMenu = () => {
         if (erAvvistAldersjustering) {
             return (
                 <SideMenu>
-                    <VedtakMenuButton activeButton={activeButton} step="2" />
+                    <VedtakMenuButton activeButton={activeButton} step="1" />
                 </SideMenu>
             );
         }
