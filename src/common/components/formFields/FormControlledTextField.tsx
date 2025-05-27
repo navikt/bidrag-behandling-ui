@@ -37,22 +37,29 @@ export const FormControlledTextField = ({
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         clearErrors(name);
+        if (["numeric", "decimal"].includes(inputMode) && e.target.value === "") {
+            field.onChange(0);
+            return;
+        }
         if (inputMode === "numeric") {
             field.onChange(Number(Number(e.target.value).toFixed()));
-        } else if (inputMode === "decimal") {
+            return;
+        }
+
+        if (inputMode === "decimal") {
             const fractionalPart = e.target.value.split(".")?.[1];
             const secondFractionalDigit = fractionalPart?.[1];
             const numberOfFractionalDigits = secondFractionalDigit ? 2 : 1;
             field.onChange(Number.parseFloat(e.target.value).toFixed(fractionalPart ? numberOfFractionalDigits : 0));
-        } else {
-            field.onChange(e.target.value);
+            return;
         }
+        field.onChange(e.target.value);
     };
 
     if (!editable) {
         const value = prefix ? `${prefix}${field.value ? `, ${field.value}` : ""}` : field.value;
         return (
-            <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>
+            <div className={`min-h-6 flex items-center ${type === "number" ? "justify-end" : ""}`}>
                 <BodyShort size="small">{value}</BodyShort>
             </div>
         );
