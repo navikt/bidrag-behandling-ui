@@ -368,7 +368,7 @@ const VedtakTableHeader = ({
                         {text.label.periode}
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
-                        Endelig bidrag
+                        Beløp
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.resultat}
