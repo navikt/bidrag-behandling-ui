@@ -368,10 +368,10 @@ const VedtakTableHeader = ({
                         {text.label.periode}
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.resultat}
+                        Endelig bidrag
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.årsak}
+                        {text.label.resultat}
                     </Table.HeaderCell>
                 </Table.Row>
             ) : avvistAldersjustering ? (
