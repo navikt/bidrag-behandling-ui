@@ -353,6 +353,12 @@ const BidragBehandlingWrapper = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { type } = useBehandlingV2(behandlingId);
 
+    useEffect(() => {
+        if (type) {
+            window.dispatchEvent(new CustomEvent("skjermbildeSet", { detail: type }));
+        }
+    }, [type]);
+
     const getBehandling = (type: TypeBehandling) => {
         switch (type) {
             case TypeBehandling.FORSKUDD:

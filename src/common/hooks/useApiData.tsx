@@ -446,6 +446,7 @@ export const useGetBeregningBidrag = () => {
                 const ugyldigBeregning = response.data.resultatBarn.some((barn) => barn.ugyldigBeregning);
                 return { resultat: response.data, ugyldigBeregning: ugyldigBeregning };
             } catch (error) {
+                console.log("error beregnBarnebidrag", error);
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
                 if (error instanceof AxiosError && error.response.status === 400) {
                     if (error.response?.data) {
