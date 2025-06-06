@@ -1,3 +1,4 @@
+import { EndringsloggTilhorerSkjermbilde } from "@api/BidragAdminApiV1";
 import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { BidragBehandlingHeader } from "@common/components/header/BidragBehandlingHeader";
 import { ErrorModal } from "@common/components/modal/ErrorModal";
@@ -108,6 +109,19 @@ const hasMultipleScreens = () => {
         return "unknown";
     }
 };
+
+const getSkjermbilde = (type: TypeBehandling) => {
+    switch (type) {
+        case TypeBehandling.FORSKUDD:
+            return EndringsloggTilhorerSkjermbilde.BEHANDLING_FORSKUDD;
+        case TypeBehandling.SAeRBIDRAG:
+            return EndringsloggTilhorerSkjermbilde.BEHANDLINGSAeRBIDRAG;
+        case TypeBehandling.BIDRAG:
+        case TypeBehandling.BIDRAG18AR:
+            return EndringsloggTilhorerSkjermbilde.BEHANDLING_BIDRAG;
+    }
+};
+
 export default function App() {
     // const { reset } = useQueryErrorResetBoundary();
 
@@ -304,6 +318,14 @@ const BehandlingPage = () => {
 };
 const ForskuddBehandling = () => {
     const { isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    useEffect(() => {
+        window.dispatchEvent(
+            new CustomEvent<EndringsloggTilhorerSkjermbilde>("skjermbildeSet", {
+                detail: EndringsloggTilhorerSkjermbilde.BEHANDLING_FORSKUDD,
+            })
+        );
+    }, []);
+
     return (
         <ForskuddBehandlingProviderWrapper>
             <BidragBehandlingHeader />
@@ -315,6 +337,14 @@ const ForskuddBehandling = () => {
 };
 const SærligeutgifterBehandling = () => {
     const { isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    useEffect(() => {
+        window.dispatchEvent(
+            new CustomEvent<EndringsloggTilhorerSkjermbilde>("skjermbildeSet", {
+                detail: EndringsloggTilhorerSkjermbilde.BEHANDLINGSAeRBIDRAG,
+            })
+        );
+    }, []);
+
     return (
         <SærligeugifterProviderWrapper>
             <BidragBehandlingHeader />
@@ -326,6 +356,18 @@ const SærligeutgifterBehandling = () => {
 };
 
 const BarnebidragBehandling = () => {
+    const { behandlingId, vedtakId } = useParams<{
+        behandlingId?: string;
+        vedtakId?: string;
+    }>();
+    const { type } = useBehandlingV2(behandlingId, vedtakId);
+    useEffect(() => {
+        if (type) {
+            window.dispatchEvent(
+                new CustomEvent<EndringsloggTilhorerSkjermbilde>("skjermbildeSet", { detail: getSkjermbilde(type) })
+            );
+        }
+    }, [type]);
     return (
         <BarnebidragProviderWrapper>
             <BidragBehandlingHeader />
@@ -352,12 +394,6 @@ const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
 const BidragBehandlingWrapper = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { type } = useBehandlingV2(behandlingId);
-
-    useEffect(() => {
-        if (type) {
-            window.dispatchEvent(new CustomEvent("skjermbildeSet", { detail: type }));
-        }
-    }, [type]);
 
     const getBehandling = (type: TypeBehandling) => {
         switch (type) {
