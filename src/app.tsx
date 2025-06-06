@@ -1,3 +1,4 @@
+import { EndringsloggTilhorerSkjermbilde } from "@api/BidragAdminApiV1";
 import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { BidragBehandlingHeader } from "@common/components/header/BidragBehandlingHeader";
 import { ErrorModal } from "@common/components/modal/ErrorModal";
@@ -353,9 +354,23 @@ const BidragBehandlingWrapper = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { type } = useBehandlingV2(behandlingId);
 
+    const getSkjermbilde = (type: TypeBehandling) => {
+        switch (type) {
+            case TypeBehandling.FORSKUDD:
+                return EndringsloggTilhorerSkjermbilde.BEHANDLING_FORSKUDD;
+            case TypeBehandling.SAeRBIDRAG:
+                return EndringsloggTilhorerSkjermbilde.BEHANDLINGSAeRBIDRAG;
+            case TypeBehandling.BIDRAG:
+            case TypeBehandling.BIDRAG18AR:
+                return EndringsloggTilhorerSkjermbilde.BEHANDLING_BIDRAG;
+        }
+    };
+
     useEffect(() => {
         if (type) {
-            window.dispatchEvent(new CustomEvent("skjermbildeSet", { detail: type }));
+            window.dispatchEvent(
+                new CustomEvent<EndringsloggTilhorerSkjermbilde>("skjermbildeSet", { detail: getSkjermbilde(type) })
+            );
         }
     }, [type]);
 

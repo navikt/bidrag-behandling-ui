@@ -22,7 +22,8 @@
     "api:bidragVedtak": "swagger-typescript-api -p https://bidrag-vedtak-q2.intern.dev.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
     "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-q2.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragBehandlingApiV1.ts -o src/api",
     "api:bidragBehandling:local": "swagger-typescript-api -p http://localhost:8990/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragBehandlingApiV1.ts -o src/api",
-    "api:notat": "swagger-typescript-api -p http://localhost:8183/v3/api-docs --extract-enums --axios -n BidragDokumentProduksjonApi.ts -o src/api"
+    "api:notat": "swagger-typescript-api -p http://localhost:8183/v3/api-docs --extract-enums --axios -n BidragDokumentProduksjonApi.ts -o src/api",
+    "api:bidragAdmin": "swagger-typescript-api -p https://bidrag-admin.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragAdminApiV1.ts -o src/api"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.0",
