@@ -654,7 +654,7 @@ const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step:
 
 export const BarnebidragSideMenu = () => {
     const { isBidragV2Enabled } = useFeatureToogle();
-    const { vedtakstype, erBisysVedtak, erAvvistAldersjustering } = useGetBehandlingV2();
+    const { vedtakstype, erBisysVedtak, erAvvistAldersjustering, erVedtakUtenBeregning } = useGetBehandlingV2();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -674,6 +674,15 @@ export const BarnebidragSideMenu = () => {
             return (
                 <SideMenu>
                     <VedtakMenuButton activeButton={activeButton} step="1" />
+                </SideMenu>
+            );
+        }
+
+        if (erVedtakUtenBeregning) {
+            return (
+                <SideMenu>
+                    <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
+                    <VedtakMenuButton activeButton={activeButton} step="2" />
                 </SideMenu>
             );
         }
