@@ -669,20 +669,20 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
+    if (erVedtakUtenBeregning) {
+        return (
+            <SideMenu>
+                <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
+                <VedtakMenuButton activeButton={activeButton} step="2" />
+            </SideMenu>
+        );
+    }
+
     if (vedtakstype === Vedtakstype.ALDERSJUSTERING) {
         if (erAvvistAldersjustering) {
             return (
                 <SideMenu>
                     <VedtakMenuButton activeButton={activeButton} step="1" />
-                </SideMenu>
-            );
-        }
-
-        if (erVedtakUtenBeregning) {
-            return (
-                <SideMenu>
-                    <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
-                    <VedtakMenuButton activeButton={activeButton} step="2" />
                 </SideMenu>
             );
         }
