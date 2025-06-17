@@ -180,22 +180,6 @@ const VedtakTableBody = ({
         const skjulBeregning =
             periode.erBeregnetAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 
-        if (resultatBarn.resultatUtenBeregning) {
-            return (
-                <Table.Row>
-                    <Table.DataCell textSize="small">
-                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
-                    </Table.DataCell>
-                    <Table.DataCell textSize="small">
-                        {formatterBeløpForBeregning(periode.beregnetBidrag)}
-                    </Table.DataCell>
-                    <Table.DataCell textSize="small" width="500px">
-                        {periode.resultatkodeVisningsnavn}
-                    </Table.DataCell>
-                </Table.Row>
-            );
-        }
         if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
             return (
                 <Table.Row>
@@ -213,6 +197,24 @@ const VedtakTableBody = ({
                 </Table.Row>
             );
         }
+
+        if (resultatBarn.resultatUtenBeregning) {
+            return (
+                <Table.Row>
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">
+                        {formatterBeløpForBeregning(periode.beregnetBidrag)}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small" width="500px">
+                        {periode.resultatkodeVisningsnavn}
+                    </Table.DataCell>
+                </Table.Row>
+            );
+        }
+
         if (avslag) {
             return (
                 <Table.Row>
@@ -362,19 +364,7 @@ const VedtakTableHeader = ({
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     return (
         <Table.Header>
-            {resultatUtenBeregning ? (
-                <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.periode}
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        Beløp
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.resultat}
-                    </Table.HeaderCell>
-                </Table.Row>
-            ) : avvistAldersjustering ? (
+            {avvistAldersjustering ? (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
@@ -387,6 +377,18 @@ const VedtakTableHeader = ({
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.årsak}
+                    </Table.HeaderCell>
+                </Table.Row>
+            ) : resultatUtenBeregning ? (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        Beløp
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.resultat}
                     </Table.HeaderCell>
                 </Table.Row>
             ) : avslag ? (
