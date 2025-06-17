@@ -364,19 +364,7 @@ const VedtakTableHeader = ({
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     return (
         <Table.Header>
-            {resultatUtenBeregning ? (
-                <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.periode}
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        Beløp
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.resultat}
-                    </Table.HeaderCell>
-                </Table.Row>
-            ) : avvistAldersjustering ? (
+            {avvistAldersjustering ? (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
@@ -389,6 +377,18 @@ const VedtakTableHeader = ({
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.årsak}
+                    </Table.HeaderCell>
+                </Table.Row>
+            ) : resultatUtenBeregning ? (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        Beløp
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.resultat}
                     </Table.HeaderCell>
                 </Table.Row>
             ) : avslag ? (
