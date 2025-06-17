@@ -180,22 +180,6 @@ const VedtakTableBody = ({
         const skjulBeregning =
             periode.erBeregnetAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 
-        if (resultatBarn.resultatUtenBeregning) {
-            return (
-                <Table.Row>
-                    <Table.DataCell textSize="small">
-                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
-                    </Table.DataCell>
-                    <Table.DataCell textSize="small">
-                        {formatterBeløpForBeregning(periode.beregnetBidrag)}
-                    </Table.DataCell>
-                    <Table.DataCell textSize="small" width="500px">
-                        {periode.resultatkodeVisningsnavn}
-                    </Table.DataCell>
-                </Table.Row>
-            );
-        }
         if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
             return (
                 <Table.Row>
@@ -213,6 +197,24 @@ const VedtakTableBody = ({
                 </Table.Row>
             );
         }
+
+        if (resultatBarn.resultatUtenBeregning) {
+            return (
+                <Table.Row>
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">
+                        {formatterBeløpForBeregning(periode.beregnetBidrag)}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small" width="500px">
+                        {periode.resultatkodeVisningsnavn}
+                    </Table.DataCell>
+                </Table.Row>
+            );
+        }
+
         if (avslag) {
             return (
                 <Table.Row>
@@ -299,7 +301,7 @@ const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningP
                                 <td className="w-[10px]">/</td>
                                 <td>
                                     {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                    Samvaersklasse.DELT_BOSTED
+                                        Samvaersklasse.DELT_BOSTED
                                         ? "D"
                                         : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag.samværsklasse)}
                                 </td>
