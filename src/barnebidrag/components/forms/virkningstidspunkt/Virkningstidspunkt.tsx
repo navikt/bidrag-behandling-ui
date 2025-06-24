@@ -581,8 +581,6 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
     const { mutate, isError: mutationError } = useOppdaterManuelleVedtak();
     const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
 
-    const vedtaksLista = data.manuelleVedtak.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
-
     if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
 
     if (isLoading) {
@@ -600,6 +598,8 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
             vedtaksid: vedtaksid,
         });
     };
+
+    const vedtaksLista = data.manuelleVedtak.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
 
     return (
         <div>
