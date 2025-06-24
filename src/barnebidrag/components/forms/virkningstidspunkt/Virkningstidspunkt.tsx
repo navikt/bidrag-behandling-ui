@@ -583,7 +583,7 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
 
     const vedtaksLista = data.manuelleVedtak.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
 
-    if (vedtakstype === Vedtakstype.ALDERSJUSTERING) return null;
+    if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
 
     if (isLoading) {
         return (
