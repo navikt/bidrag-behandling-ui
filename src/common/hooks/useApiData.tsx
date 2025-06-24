@@ -22,6 +22,7 @@ import {
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
     OppdaterGebyrDto,
+    OppdaterManuellVedtakRequest,
     OppdaterOpphorsdatoRequestDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
@@ -36,6 +37,7 @@ import {
     StonadTilBarnetilsynAktiveGrunnlagDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
+    Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -51,6 +53,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQ
 import { AxiosError } from "axios";
 
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
+
 export const MutationKeys = {
     opprettePrivatAvtale: (behandlingId: string) => ["mutation", "createPrivatavtale", behandlingId],
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
@@ -76,6 +79,7 @@ export const MutationKeys = {
     slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
     oppdaterePrivatAvtale: (behandlingId: string) => ["mutation", "oppdaterePrivatAvtale", behandlingId],
     slettePrivatAvtale: (behandlingId: string) => ["mutation", "slettePrivatAvtale", behandlingId],
+    oppdaterManuelleVedtak: (behandlingId: string) => ["mutation", "oppdaterManuelleVedtak", behandlingId],
 };
 
 export const QueryKeys = {
@@ -97,6 +101,7 @@ export const QueryKeys = {
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person2", ident],
+    manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
@@ -802,6 +807,49 @@ export const useDeletePrivatAvtale = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved sletting av privat avtale", error);
+        },
+    });
+};
+
+export const useHentManuelleVedtak = () => {
+    const { id: behandlingId, vedtakstype } = useGetBehandlingV2();
+    return useQuery({
+        queryKey: QueryKeys.manuelleVedtak(behandlingId.toString()),
+        queryFn: async () => {
+            const { data } = await BEHANDLING_API_V1.api.hentManuelleVedtak(behandlingId);
+            return data;
+        },
+        enabled: vedtakstype === Vedtakstype.ALDERSJUSTERING,
+    });
+};
+
+export const useOppdaterManuelleVedtak = () => {
+    const { id: behandlingId } = useGetBehandlingV2();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterManuelleVedtak(behandlingId.toString()),
+        mutationFn: async (payload: OppdaterManuellVedtakRequest) => {
+            await BEHANDLING_API_V1.api.oppdaterValgtManuellVedtak(behandlingId, payload);
+        },
+        onSuccess: async (_, payload) => {
+            queryClient.setQueryData<BehandlingDtoV2>(
+                QueryKeys.behandlingV2(behandlingId.toString()),
+                (currentData): BehandlingDtoV2 => {
+                    return {
+                        ...currentData,
+                        virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkingstidspunkt) => {
+                            if (virkingstidspunkt.rolle.id === payload.barnId) {
+                                return {
+                                    ...virkingstidspunkt,
+                                    grunnlagFraVedtak: payload.vedtaksid,
+                                };
+                            }
+                            return virkingstidspunkt;
+                        }),
+                    };
+                }
+            );
         },
     });
 };

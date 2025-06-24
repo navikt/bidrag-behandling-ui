@@ -26,7 +26,7 @@ import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
 } from "@common/helpers/virkningstidspunktHelpers";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useGetBehandlingV2, useHentManuelleVedtak, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
@@ -34,8 +34,9 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Label, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, Label, Link, Loader, Radio, RadioGroup, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -567,7 +568,92 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
+            <VedtaksListe item={item} />
         </>
+    );
+};
+
+const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) => {
+    const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
+    const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
+    const { lesemodus } = useBehandlingProvider();
+    const { data, isLoading, isError, isSuccess } = useHentManuelleVedtak();
+    const { mutate, isError: mutationError } = useOppdaterManuelleVedtak();
+    const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
+
+    const vedtaksLista = data.manuelleVedtak.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
+
+    if (vedtakstype === Vedtakstype.ALDERSJUSTERING) return null;
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center">
+                <Loader size="medium" title={text.loading} variant="interaction" />
+            </div>
+        );
+    }
+
+    const onSelect = (vedtaksid: number) => {
+        setVal(vedtaksid);
+        mutate({
+            barnId: selectedBarn.rolle.id,
+            vedtaksid: vedtaksid,
+        });
+    };
+
+    return (
+        <div>
+            <BodyShort size="small" weight="semibold" className="mb-2">
+                {text.description.velgVedtak}
+            </BodyShort>
+            <Label size="small">
+                <span className="grid grid-cols-[20px_100px_100px_200px_auto] gap-2">
+                    <span></span>
+                    <span>Virkingsdato</span>
+                    <span>Vedtaksdato</span>
+                    <span>Resultat siste periode</span>
+                    <span>Vedtak</span>
+                </span>
+            </Label>
+            {isError && <Alert variant="error">{text.error.hentingAvVedtak}</Alert>}
+            {isSuccess && (
+                <div className="grid grid-cols-[max-content_auto] gap-2">
+                    <RadioGroup
+                        readOnly={lesemodus}
+                        legend="Velg vedtak"
+                        size="small"
+                        onChange={onSelect}
+                        hideLegend
+                        value={val}
+                    >
+                        {vedtaksLista.map((vedtak) => (
+                            <Radio value={vedtak.vedtaksid} key={vedtak.vedtaksid}>
+                                <span className="grid grid-cols-[100px_100px_200px] gap-2">
+                                    <span>{DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}</span>
+                                    <span>{DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}</span>
+                                    <span>{vedtak.resultatSistePeriode}</span>
+                                </span>
+                            </Radio>
+                        ))}
+                    </RadioGroup>
+                    <div>
+                        {vedtaksLista.map((vedtak) => (
+                            <div className="h-[32px] flex items-center" key={vedtak.vedtaksid}>
+                                <Link
+                                    variant="action"
+                                    href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <ExternalLinkIcon title="vedtak lenken" />
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
+        </div>
     );
 };
 

@@ -74,6 +74,7 @@ const tekster = {
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette. Husk å vurdere forskuddet.",
         inntektBegrunnelseBP:
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette.",
+        velgVedtak: "Velg vedtak som beregning av aldersjustering skal hente grunnlag fra",
     },
     error: {
         dagsatsVerdi: "Dagsats kan ikke være 0 eller mindre",
@@ -92,7 +93,9 @@ const tekster = {
         beregning: "Det skjedde en feil ved beregning. Prøv å laste siden på nytt",
         fatteVedtak: "Det skjedde en feil ved fatting av vedtak. Vennligst prøv på nytt.",
         feilmelding: "Det har skjedd en feil",
+        feilVedOppdatering: "Det har skjedd en feil ved oppdatering",
         hentingAvNotat: "Det skjedde en feil ved henting av notat",
+        hentingAvVedtak: "Det skjedde en feil ved henting av vedtak",
         hullIPerioder: "Det er perioder uten status.",
         manglerBegrunnelse: "Begrunnelse må fylles ut",
         hullIPerioderInntekt: "Det er perioder uten inntekt",
