@@ -58,9 +58,9 @@ const PrivatAvtaleMenuButton = ({ activeButton, step }: { activeButton: string; 
 
 const UnderholdskostnadMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
-    const { vedtakstype, virkningstidspunkt, underholdskostnader, erAvvistAldersjustering } = useGetBehandlingV2();
+    const { vedtakstype, virkningstidspunkt, underholdskostnader, erVedtakUtenBeregning } = useGetBehandlingV2();
 
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR && !erAvvistAldersjustering;
+    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR && !erVedtakUtenBeregning;
     const underholdskostnadHasValideringsFeil = underholdskostnader
         .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
         .some(({ valideringsfeil }) => {
@@ -655,7 +655,7 @@ const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step:
 export const BarnebidragSideMenu = () => {
     const { isBidragV2Enabled } = useFeatureToogle();
     const { lesemodus } = useBehandlingProvider();
-    const { vedtakstype, erBisysVedtak, erAvvistAldersjustering, erVedtakUtenBeregning } = useGetBehandlingV2();
+    const { vedtakstype, erBisysVedtak, erVedtakUtenBeregning } = useGetBehandlingV2();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -680,7 +680,7 @@ export const BarnebidragSideMenu = () => {
     }
 
     if (vedtakstype === Vedtakstype.ALDERSJUSTERING) {
-        if (erAvvistAldersjustering && lesemodus) {
+        if (erVedtakUtenBeregning && lesemodus) {
             return (
                 <SideMenu>
                     <VedtakMenuButton activeButton={activeButton} step="1" />
