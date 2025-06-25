@@ -79,7 +79,6 @@ export const MutationKeys = {
     slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
     oppdaterePrivatAvtale: (behandlingId: string) => ["mutation", "oppdaterePrivatAvtale", behandlingId],
     slettePrivatAvtale: (behandlingId: string) => ["mutation", "slettePrivatAvtale", behandlingId],
-    oppdaterManuelleVedtak: (behandlingId: string) => ["mutation", "oppdaterManuelleVedtak", behandlingId],
 };
 
 export const QueryKeys = {
@@ -828,16 +827,18 @@ export const useOppdaterManuelleVedtak = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: MutationKeys.oppdaterManuelleVedtak(behandlingId.toString()),
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId.toString()),
         mutationFn: async (payload: OppdaterManuellVedtakRequest) => {
-            await BEHANDLING_API_V1.api.oppdaterValgtManuellVedtak(behandlingId, payload);
+            const { data } = await BEHANDLING_API_V1.api.oppdaterValgtManuellVedtak(behandlingId, payload);
+            return data;
         },
-        onSuccess: async (_, payload) => {
+        onSuccess: async (response, payload) => {
             queryClient.setQueryData<BehandlingDtoV2>(
                 QueryKeys.behandlingV2(behandlingId.toString()),
                 (currentData): BehandlingDtoV2 => {
                     return {
                         ...currentData,
+                        erVedtakUtenBeregning: response.erVedtakUtenBeregning,
                         virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkingstidspunkt) => {
                             if (virkingstidspunkt.rolle.id === payload.barnId) {
                                 return {
