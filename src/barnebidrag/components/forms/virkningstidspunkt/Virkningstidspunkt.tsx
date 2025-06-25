@@ -598,7 +598,7 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
         });
     };
 
-    const vedtaksLista = data.manuelleVedtak.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
+    const vedtaksLista = data?.manuelleVedtak?.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
 
     return (
         <div>
