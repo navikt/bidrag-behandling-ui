@@ -36,7 +36,7 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Label, Link, Loader, Radio, RadioGroup, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, Checkbox, Label, Link, Loader, Table, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -583,19 +583,12 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
 
     if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
 
-    if (isLoading) {
-        return (
-            <div className="flex justify-center">
-                <Loader size="medium" title={text.loading} variant="interaction" />
-            </div>
-        );
-    }
-
-    const onSelect = (vedtaksid: number) => {
-        setVal(vedtaksid);
+    const onSelect = (vedtaksid: number, checked: boolean) => {
+        const updatedValue = checked ? vedtaksid : null;
+        setVal(updatedValue);
         mutate({
             barnId: selectedBarn.rolle.id,
-            vedtaksid: vedtaksid,
+            vedtaksid: updatedValue,
         });
     };
 
@@ -606,52 +599,68 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
             <BodyShort size="small" weight="semibold" className="mb-2">
                 {text.description.velgVedtak}
             </BodyShort>
-            <Label size="small">
-                <span className="grid grid-cols-[20px_100px_100px_200px_auto] gap-2">
-                    <span></span>
-                    <span>Virkingsdato</span>
-                    <span>Vedtaksdato</span>
-                    <span>Resultat siste periode</span>
-                    <span>Vedtak</span>
-                </span>
-            </Label>
-            {isError && <Alert variant="error">{text.error.hentingAvVedtak}</Alert>}
-            {isSuccess && (
-                <div className="grid grid-cols-[max-content_auto] gap-2">
-                    <RadioGroup
-                        readOnly={lesemodus}
-                        legend="Velg vedtak"
-                        size="small"
-                        onChange={onSelect}
-                        hideLegend
-                        value={val}
-                    >
-                        {vedtaksLista.map((vedtak) => (
-                            <Radio value={vedtak.vedtaksid} key={vedtak.vedtaksid}>
-                                <span className="grid grid-cols-[100px_100px_200px] gap-2">
-                                    <span>{DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}</span>
-                                    <span>{DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}</span>
-                                    <span>{vedtak.resultatSistePeriode}</span>
-                                </span>
-                            </Radio>
-                        ))}
-                    </RadioGroup>
-                    <div>
-                        {vedtaksLista.map((vedtak) => (
-                            <div className="h-[32px] flex items-center" key={vedtak.vedtaksid}>
-                                <Link
-                                    variant="action"
-                                    href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <ExternalLinkIcon title="vedtak lenken" />
-                                </Link>
-                            </div>
-                        ))}
+            <Table size="small" zebraStripes>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell scope="col"></Table.HeaderCell>
+                        <Table.HeaderCell scope="col" textSize="small">
+                            Virkingsdato
+                        </Table.HeaderCell>
+                        <Table.HeaderCell scope="col" textSize="small">
+                            Vedtaksdato
+                        </Table.HeaderCell>
+                        <Table.HeaderCell scope="col" textSize="small">
+                            Resultat siste periode
+                        </Table.HeaderCell>
+                        <Table.HeaderCell scope="col" textSize="small">
+                            Vedtak
+                        </Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                {isError && <Alert variant="error">{text.error.hentingAvVedtak}</Alert>}
+                {isLoading && (
+                    <div className="flex justify-center">
+                        <Loader size="medium" title={text.loading} variant="interaction" />
                     </div>
-                </div>
-            )}
+                )}
+                {isSuccess && (
+                    <Table.Body>
+                        {vedtaksLista.map((vedtak) => (
+                            <Table.Row key={vedtak.vedtaksid}>
+                                <Table.HeaderCell scope="row">
+                                    <Checkbox
+                                        hideLabel
+                                        value={vedtak.vedtaksid}
+                                        checked={val === vedtak.vedtaksid}
+                                        onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
+                                        size="small"
+                                        readOnly={lesemodus}
+                                    >
+                                        {vedtak.vedtaksid}
+                                    </Checkbox>
+                                </Table.HeaderCell>
+                                <Table.DataCell>
+                                    {DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}
+                                </Table.DataCell>
+                                <Table.DataCell>
+                                    {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
+                                </Table.DataCell>
+                                <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
+                                <Table.DataCell>
+                                    <Link
+                                        variant="action"
+                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
+                                    </Link>
+                                </Table.DataCell>
+                            </Table.Row>
+                        ))}
+                    </Table.Body>
+                )}
+            </Table>
             {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
         </div>
     );
