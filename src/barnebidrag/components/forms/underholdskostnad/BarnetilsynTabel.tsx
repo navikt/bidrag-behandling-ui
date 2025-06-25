@@ -9,6 +9,7 @@ import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPerio
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
@@ -39,8 +40,9 @@ const Omfang = ({
     item: StønadTilBarnetilsynPeriode;
 }) => {
     const { clearErrors } = useFormContext<UnderholdskostnadFormValues>();
+    const { lesemodus } = useBehandlingProvider();
 
-    return item.erRedigerbart ? (
+    return !lesemodus && item.erRedigerbart ? (
         <FormControlledSelectField
             name={`${fieldName}.tilsynstype`}
             className="w-fit"
@@ -72,8 +74,9 @@ const StønadTilBarnetilsyn = ({
     item: StønadTilBarnetilsynPeriode;
 }) => {
     const { clearErrors } = useFormContext<UnderholdskostnadFormValues>();
+    const { lesemodus } = useBehandlingProvider();
 
-    return item.erRedigerbart ? (
+    return !lesemodus && item.erRedigerbart ? (
         <FormControlledSelectField
             name={`${fieldName}.skolealder`}
             className="w-fit"

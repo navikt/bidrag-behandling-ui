@@ -2,6 +2,7 @@ import { FormControlledTextField } from "@common/components/formFields/FormContr
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { formatterBeløp, formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
@@ -25,9 +26,11 @@ const Dagsats = ({
     item: TilleggsstonadPeriode;
     fieldName: `underholdskostnaderMedIBehandling.${number}.tilleggsstønad.${number}`;
 }) => {
+    const { lesemodus } = useBehandlingProvider();
+
     return (
         <>
-            {item.erRedigerbart ? (
+            {!lesemodus && item.erRedigerbart ? (
                 <FormControlledTextField
                     name={`${fieldName}.dagsats`}
                     label="Totalt"
