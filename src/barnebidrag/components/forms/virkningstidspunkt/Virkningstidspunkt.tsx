@@ -273,6 +273,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                         placeholder="DD.MM.ÅÅÅÅ"
                         fromDate={addMonths(initialValues.virkningstidspunkt, 1)}
                         toDate={tom}
+                        readonly={lesemodus}
                         required
                     />
                 )}
@@ -478,74 +479,78 @@ const VirkningstidspunktBarn = ({
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField
-                    name={`roller.${barnIndex}.årsakAvslag`}
-                    label={text.label.årsak}
-                    onSelect={onAarsakSelect}
-                    className="w-max"
-                >
-                    {lesemodus && (
-                        <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
-                            {hentVisningsnavnVedtakstype(
-                                getValues(`roller.${barnIndex}.årsakAvslag`),
-                                behandling.vedtakstype
-                            )}
-                        </option>
-                    )}
-                    {!lesemodus && erÅrsakAvslagIkkeValgt && (
-                        <option value="">{text.select.årsakAvslagPlaceholder}</option>
-                    )}
-                    {!lesemodus && !erTypeOpphør && (
-                        <optgroup label={text.label.årsak}>
-                            {virkningsårsaker
-                                .filter((value) => {
-                                    if (kunEtBarnIBehandlingen) return true;
-                                    return value !== TypeArsakstype.FRABARNETSFODSEL;
-                                })
-                                .map((value) => (
+                {behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
+                    <FormControlledSelectField
+                        name={`roller.${barnIndex}.årsakAvslag`}
+                        label={text.label.årsak}
+                        onSelect={onAarsakSelect}
+                        className="w-max"
+                    >
+                        {lesemodus && (
+                            <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
+                                {hentVisningsnavnVedtakstype(
+                                    getValues(`roller.${barnIndex}.årsakAvslag`),
+                                    behandling.vedtakstype
+                                )}
+                            </option>
+                        )}
+                        {!lesemodus && erÅrsakAvslagIkkeValgt && (
+                            <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                        )}
+                        {!lesemodus && !erTypeOpphør && (
+                            <optgroup label={text.label.årsak}>
+                                {virkningsårsaker
+                                    .filter((value) => {
+                                        if (kunEtBarnIBehandlingen) return true;
+                                        return value !== TypeArsakstype.FRABARNETSFODSEL;
+                                    })
+                                    .map((value) => (
+                                        <option key={value} value={value}>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    ))}
+                            </optgroup>
+                        )}
+
+                        {!lesemodus && er18ÅrsBidrag ? (
+                            <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                                {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map(
+                                    (value) => (
+                                        <option key={value} value={value}>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    )
+                                )}
+                            </optgroup>
+                        ) : (
+                            <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                                {(lesemodus
+                                    ? avslaglisteAlle
+                                    : erTypeOpphørOrLøpendeBidrag
+                                      ? avslagsListeOpphør.filter((value) =>
+                                            erTypeOpphør
+                                                ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
+                                                : true
+                                        )
+                                      : avslagsListe
+                                ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                                     </option>
                                 ))}
-                        </optgroup>
-                    )}
-
-                    {!lesemodus && er18ÅrsBidrag ? (
-                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
-                            {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
-                                <option key={value} value={value}>
-                                    {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                </option>
-                            ))}
-                        </optgroup>
-                    ) : (
-                        <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
-                            {(lesemodus
-                                ? avslaglisteAlle
-                                : erTypeOpphørOrLøpendeBidrag
-                                  ? avslagsListeOpphør.filter((value) =>
-                                        erTypeOpphør
-                                            ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
-                                            : true
-                                    )
-                                  : avslagsListe
-                            ).map((value) => (
-                                <option key={value} value={value}>
-                                    {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                </option>
-                            ))}
-                            {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
-                                <>
-                                    {avslagsListeDeprekert.map((value) => (
-                                        <option key={value} value={value} disabled>
-                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                        </option>
-                                    ))}
-                                </>
-                            )}
-                        </optgroup>
-                    )}
-                </FormControlledSelectField>
+                                {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
+                                    <>
+                                        {avslagsListeDeprekert.map((value) => (
+                                            <option key={value} value={value} disabled>
+                                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                            </option>
+                                        ))}
+                                    </>
+                                )}
+                            </optgroup>
+                        )}
+                    </FormControlledSelectField>
+                )}
                 <FormControlledMonthPicker
                     name={`roller.${barnIndex}.virkningstidspunkt`}
                     label={text.label.virkningstidspunkt}
@@ -553,6 +558,7 @@ const VirkningstidspunktBarn = ({
                     defaultValue={initialValues.virkningstidspunkt}
                     fromDate={fom}
                     toDate={tom}
+                    readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
                     required
                 />
             </FlexRow>

@@ -248,7 +248,7 @@ const PrivatAvtalePerioder = ({
     initialValues: PrivatAvtaleFormValues;
 }) => {
     const { privatAvtale, stønadstype } = useGetBehandlingV2();
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
@@ -364,6 +364,7 @@ const PrivatAvtalePerioder = ({
                         defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
                         fromDate={fom}
                         toDate={tom}
+                        readonly={lesemodus}
                         required
                     />
                     <FormControlledSelectField

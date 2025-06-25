@@ -109,7 +109,7 @@ export const UnderholdskostnadPeriode = ({
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<UnderholdskostnadFormValues>();
     const fieldIsDatoTom = field === "datoTom";
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
 
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}`);
@@ -136,6 +136,7 @@ export const UnderholdskostnadPeriode = ({
             toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
+            readonly={lesemodus}
             hideLabel
         />
     ) : (

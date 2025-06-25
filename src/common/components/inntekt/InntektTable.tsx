@@ -152,7 +152,7 @@ export const Periode = ({
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const isSærbidragTypeAndFieldIsDatoFom = type === TypeBehandling.SAeRBIDRAG && !fieldIsDatoTom;
 
     const validateFomOgTom = () => {
@@ -183,6 +183,7 @@ export const Periode = ({
             toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={item.taMed && !fieldIsDatoTom}
+            readonly={lesemodus}
             hideLabel
         />
     ) : (
