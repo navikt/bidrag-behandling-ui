@@ -1,5 +1,7 @@
+import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Button, Link } from "@navikt/ds-react";
 import React from "react";
@@ -11,6 +13,7 @@ export const ActionButtons = ({ onNext }) => {
         vedtakId?: string;
         saksnummer?: string;
     }>();
+    const { vedtakstype } = useGetBehandlingV2();
     const notatUrl = behandlingId ? `/behandling/${behandlingId}/notat` : vedtakId ? `/vedtak/${vedtakId}/notat` : "";
     return (
         <FlexRow className="items-center">
@@ -24,9 +27,15 @@ export const ActionButtons = ({ onNext }) => {
             >
                 {text.label.gåVidere}
             </Button>
-            <Link href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl} target="_blank" className="font-bold">
-                {text.label.notatButton} <ExternalLinkIcon aria-hidden />
-            </Link>
+            {vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
+                <Link
+                    href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl}
+                    target="_blank"
+                    className="font-bold"
+                >
+                    {text.label.notatButton} <ExternalLinkIcon aria-hidden />
+                </Link>
+            )}
         </FlexRow>
     );
 };
