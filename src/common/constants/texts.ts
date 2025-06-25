@@ -158,6 +158,7 @@ const tekster = {
         direkteBetaltAvBP: "Direkte betalt av BP",
         fastlønn: "Fastlønn",
         fatteVedtakButton: "Fatte vedtak",
+        fatteVedtakOgSendForsendelseButton: "Fatte vedtak og send forsendelse",
         forbruk: "Forbruk",
         forfallsdato: "Forfallsdato",
         forkastEndringer: "Forkast endringer",
