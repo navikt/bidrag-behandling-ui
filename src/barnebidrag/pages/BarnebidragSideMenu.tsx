@@ -670,7 +670,7 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
-    if (erVedtakUtenBeregning && lesemodus) {
+    if (erVedtakUtenBeregning && lesemodus && vedtakstype !== Vedtakstype.ALDERSJUSTERING) {
         return (
             <SideMenu>
                 <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
