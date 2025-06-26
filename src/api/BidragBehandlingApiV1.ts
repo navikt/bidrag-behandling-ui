@@ -670,6 +670,7 @@ export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
     type: TypeBehandling;
+    lesemodus: boolean;
     erBisysVedtak: boolean;
     erVedtakUtenBeregning: boolean;
     /** @format int64 */
@@ -2206,11 +2207,13 @@ export interface OppdaterManuellVedtakRequest {
     /** @format int64 */
     barnId: number;
     /** @format int64 */
-    vedtaksid: number;
+    vedtaksid?: number;
 }
 
 export interface OppdaterManuellVedtakResponse {
     erVedtakUtenBeregning: boolean;
+    /** @uniqueItems true */
+    underholdskostnader: UnderholdDto[];
 }
 
 export interface OpprettBehandlingFraVedtakRequest {
@@ -2960,10 +2963,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3419,8 +3422,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {

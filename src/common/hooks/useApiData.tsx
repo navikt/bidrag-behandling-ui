@@ -838,6 +838,7 @@ export const useOppdaterManuelleVedtak = () => {
                 (currentData): BehandlingDtoV2 => {
                     return {
                         ...currentData,
+                        underholdskostnader: response.underholdskostnader,
                         erVedtakUtenBeregning: response.erVedtakUtenBeregning,
                         virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkingstidspunkt) => {
                             if (virkingstidspunkt.rolle.id === payload.barnId) {
