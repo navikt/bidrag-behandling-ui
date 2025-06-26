@@ -655,7 +655,7 @@ const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step:
 export const BarnebidragSideMenu = () => {
     const { isBidragV2Enabled } = useFeatureToogle();
     const { lesemodus } = useBehandlingProvider();
-    const { vedtakstype, erBisysVedtak, erVedtakUtenBeregning } = useGetBehandlingV2();
+    const { vedtakstype, erBisysVedtak, erVedtakUtenBeregning, lesemodus: behandlingLesemodus } = useGetBehandlingV2();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -680,7 +680,7 @@ export const BarnebidragSideMenu = () => {
     }
 
     if (vedtakstype === Vedtakstype.ALDERSJUSTERING) {
-        if (erVedtakUtenBeregning && lesemodus) {
+        if (erVedtakUtenBeregning && behandlingLesemodus) {
             return (
                 <SideMenu>
                     <VedtakMenuButton activeButton={activeButton} step="1" />
@@ -688,7 +688,7 @@ export const BarnebidragSideMenu = () => {
             );
         }
 
-        if (!erBisysVedtak && lesemodus) {
+        if (!erBisysVedtak && behandlingLesemodus) {
             return (
                 <SideMenu>
                     <UnderholdskostnadMenuButton activeButton={activeButton} step="1" />
