@@ -35,12 +35,13 @@ export const FatteVedtakButtons = ({
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
+    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
     const erBarnebidrag = type === TypeBehandling.BIDRAG;
+    const erAldersjustering = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const [innkrevingUtsattAntallDager, setInnkrevingUtsattAntallDager] = useState<number | null>(
-        erBarnebidrag ? 3 : null
+        erBarnebidrag && !erAldersjustering ? 3 : null
     );
     const isMutating = Boolean(useIsMutating({ mutationKey: fatteVedtakMutationKey }));
-    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const skalBekrefteNotatOpplysninger = vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     const enhet = useQueryParams().get("enhet");
