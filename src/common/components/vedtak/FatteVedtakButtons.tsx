@@ -120,7 +120,11 @@ export const FatteVedtakButtons = ({
                     <Heading size="small" level="3">
                         {tekster.title.vedtakFattet}
                     </Heading>
-                    <BodyShort>{tekster.varsel.vedtakFattet}</BodyShort>
+                    <BodyShort>
+                        {opprettesForsendelse
+                            ? tekster.varsel.vedtakFattetUtenNotatDistribuert
+                            : tekster.varsel.vedtakFattet}
+                    </BodyShort>
                 </Alert>
             )}
             <FlexRow>
