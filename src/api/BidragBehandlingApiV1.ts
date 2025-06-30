@@ -1241,9 +1241,9 @@ export interface PrivatAvtaleValideringsfeilDto {
     ingenLøpendePeriode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
-    harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface RolleDto {
@@ -1278,9 +1278,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendePeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -2372,9 +2372,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2584,20 +2584,20 @@ export interface UgyldigResultatPeriode {
 }
 
 export interface BehandlingInfoDto {
-    /** @format int64 */
-    vedtakId?: number;
-    /** @format int64 */
-    behandlingId?: number;
-    /** @format int64 */
-    soknadId?: number;
-    erFattetBeregnet?: boolean;
-    erVedtakIkkeTilbakekreving: boolean;
-    stonadType?: Stonadstype;
+    vedtakId?: string;
+    behandlingId?: string;
+    soknadId?: string;
     engangsBelopType?: Engangsbeloptype;
+    stonadType?: Stonadstype;
+    /** Brukes bare hvis stonadType og engangsbelopType er null */
     behandlingType?: string;
-    soknadType?: string;
-    soknadFra?: SoktAvType;
     vedtakType?: Vedtakstype;
+    /** Soknadtype er gamle kodeverdier som er erstattet av vedtaktype. */
+    soknadType?: string;
+    erFattetBeregnet?: boolean;
+    /** Hvis resultatkoden fra BBM er IT så skal denne være sann */
+    erVedtakIkkeTilbakekreving?: boolean;
+    soknadFra?: SoktAvType;
     barnIBehandling: string[];
 }
 
@@ -2614,7 +2614,7 @@ export interface InitalizeForsendelseRequest {
     saksnummer: string;
     behandlingInfo: BehandlingInfoDto;
     enhet?: string;
-    tema?: string;
+    tema?: InitalizeForsendelseRequestTemaEnum;
     roller: ForsendelseRolleDto[];
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatusEnum;
 }
@@ -2652,16 +2652,17 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
-    /** @format int64 */
-    underholdskostnadId?: number;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
+    /** @format int64 */
+    underholdskostnadId?: number;
 }
 
 export interface VirkningstidspunktFeilDto {
     manglerVirkningstidspunkt: boolean;
     manglerOpphørsdato: RolleDto[];
     manglerÅrsakEllerAvslag: boolean;
+    måVelgeVedtakForBeregning: RolleDto[];
     manglerBegrunnelse: boolean;
     virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
 }
@@ -2964,9 +2965,9 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3061,9 +3062,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
+    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
-    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3233,9 +3234,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3619,6 +3620,11 @@ export enum UgyldigResultatPeriodeTypeEnum {
     BEGRENSETREVURDERINGUTENLOPENDEFORSKUDD = "BEGRENSET_REVURDERING_UTEN_LØPENDE_FORSKUDD",
 }
 
+export enum InitalizeForsendelseRequestTemaEnum {
+    BID = "BID",
+    FAR = "FAR",
+}
+
 export enum InitalizeForsendelseRequestBehandlingStatusEnum {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
@@ -3707,10 +3713,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3802,7 +3805,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

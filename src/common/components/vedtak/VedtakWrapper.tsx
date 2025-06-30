@@ -92,6 +92,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             });
+            feilInnhold.virkningstidspunkt?.måVelgeVedtakForBeregning.forEach((rolle) => {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Vedtak må velges for {rolle.navn}
+                    </ErrorSummary.Item>
+                );
+            });
         }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];
@@ -342,10 +349,10 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                                 [behandlingQueryKeys.tab]:
                                     value.type === OpplysningerType.BARNETILSYN
                                         ? toUnderholdskostnadTabQueryParameter(
-                                              value.gjelderBarn?.husstandsmedlemId,
-                                              value.underholdskostnadId,
-                                              true
-                                          )
+                                            value.gjelderBarn?.husstandsmedlemId,
+                                            value.underholdskostnadId,
+                                            true
+                                        )
                                         : value.rolle?.id?.toString(),
                             })
                         }
@@ -359,12 +366,12 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 typeof feil.detaljer == "string"
                     ? []
                     : Object.keys(feil.detaljer)
-                          .filter((key) =>
-                              !Array.isArray(feil.detaljer[key])
-                                  ? feil.detaljer[key] != null
-                                  : feil.detaljer[key].length > 0
-                          )
-                          .map((key) => capitalizeFirstLetter(key));
+                        .filter((key) =>
+                            !Array.isArray(feil.detaljer[key])
+                                ? feil.detaljer[key] != null
+                                : feil.detaljer[key].length > 0
+                        )
+                        .map((key) => capitalizeFirstLetter(key));
 
             feilliste.push(
                 <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
