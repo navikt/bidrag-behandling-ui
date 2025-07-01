@@ -284,7 +284,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const { erBisysVedtak, gebyr, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
+    const { erBisysVedtak, gebyr, virkningstidspunktV2, vedtakstype, erVedtakUtenBeregning } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
@@ -297,7 +297,7 @@ const Side = () => {
 
     const onNext = () =>
         onStepChange(
-            avslaglisteAlle.includes(årsakAvslag as Resultatkode)
+            avslaglisteAlle.includes(årsakAvslag as Resultatkode) || erVedtakUtenBeregning
                 ? gebyr !== undefined
                     ? STEPS[BarnebidragStepper.GEBYR]
                     : STEPS[BarnebidragStepper.VEDTAK]
