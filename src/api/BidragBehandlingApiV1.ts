@@ -134,6 +134,7 @@ export enum Grunnlagstype {
     BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
     BELOPSHISTORIKKBIDRAG18AR = "BELØPSHISTORIKK_BIDRAG_18_ÅR",
     BELOPSHISTORIKKFORSKUDD = "BELØPSHISTORIKK_FORSKUDD",
+    MANUELLE_VEDTAK = "MANUELLE_VEDTAK",
     MANUELT_OVERSTYRT_GEBYR = "MANUELT_OVERSTYRT_GEBYR",
     DELBEREGNING_INNTEKTSBASERT_GEBYR = "DELBEREGNING_INNTEKTSBASERT_GEBYR",
     SLUTTBEREGNING_GEBYR = "SLUTTBEREGNING_GEBYR",
@@ -274,6 +275,7 @@ export enum OpplysningerType {
     SKATTEPLIKTIGE_INNTEKTER = "SKATTEPLIKTIGE_INNTEKTER",
     SUMMERTEMANEDSINNTEKTER = "SUMMERTE_MÅNEDSINNTEKTER",
     TILLEGGSSTONAD = "TILLEGGSSTØNAD",
+    MANUELLE_VEDTAK = "MANUELLE_VEDTAK",
     BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
     BELOPSHISTORIKKFORSKUDD = "BELØPSHISTORIKK_FORSKUDD",
     BELOPSHISTORIKKBIDRAG18AR = "BELØPSHISTORIKK_BIDRAG_18_ÅR",
@@ -350,6 +352,7 @@ export enum Resultatkode {
     MANGLER_DOKUMENTASJON_AV_INNTEKT_BIDRAGSMOTTAKER = "MANGLER_DOKUMENTASJON_AV_INNTEKT_BIDRAGSMOTTAKER",
     INNTIL1ARTILBAKE = "INNTIL_1_ÅR_TILBAKE",
     MAKS25PROSENTAVINNTEKT = "MAKS_25_PROSENT_AV_INNTEKT",
+    MANGLER_BIDRAGSEVNE = "MANGLER_BIDRAGSEVNE",
     KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
 }
 
@@ -1132,6 +1135,21 @@ export interface MaksGodkjentBelopValideringsfeil {
     harFeil: boolean;
 }
 
+export interface ManuellVedtakDto {
+    /** @format int64 */
+    vedtaksid: number;
+    /** @format int64 */
+    barnId: number;
+    /** @format date-time */
+    fattetTidspunkt: string;
+    /** @format date */
+    virkningsDato: string;
+    vedtakstype: Vedtakstype;
+    resultatSistePeriode: string;
+    manglerGrunnlag: boolean;
+    søknadstype: string;
+}
+
 export interface OpphorsdetaljerDto {
     /** @format date */
     opphørsdato?: string;
@@ -1678,6 +1696,7 @@ export interface VirkningstidspunktDtoV2 {
      * @format int64
      */
     grunnlagFraVedtak?: number;
+    manuelleVedtak: ManuellVedtakDto[];
     /**
      * Bruk begrunnelse
      * @deprecated
@@ -2338,9 +2357,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2420,7 +2439,10 @@ export interface AldersjusteringDetaljerGrunnlag {
     /** @format int64 */
     grunnlagFraVedtak?: number;
     aldersjustert: boolean;
+    /** Er sann hvis automatiske løsningen ikke kunne aldersjustere og det må utføres manuelt */
     aldersjusteresManuelt: boolean;
+    /** Er sann hvis aldersjustering er gjort manuelt */
+    aldersjustertManuelt: boolean;
     begrunnelser?: string[];
 }
 
@@ -2829,19 +2851,6 @@ export interface VedtakPeriodeDto {
     grunnlagReferanseListe: string[];
 }
 
-export interface ManuellVedtakDto {
-    /** @format int64 */
-    vedtaksid: number;
-    /** @format int64 */
-    barnId: number;
-    /** @format date-time */
-    fattetTidspunkt: string;
-    /** @format date */
-    virkningsDato: string;
-    resultatSistePeriode: string;
-    manglerGrunnlag: boolean;
-}
-
 export interface ManuellVedtakResponse {
     manuelleVedtak: ManuellVedtakDto[];
 }
@@ -2965,8 +2974,8 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3153,9 +3162,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 

@@ -616,6 +616,9 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
                             Vedtaksdato
                         </Table.HeaderCell>
                         <Table.HeaderCell scope="col" textSize="small">
+                            Søknadstype
+                        </Table.HeaderCell>
+                        <Table.HeaderCell scope="col" textSize="small">
                             Resultat siste periode
                         </Table.HeaderCell>
                         <Table.HeaderCell scope="col" textSize="small">
@@ -651,6 +654,7 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
                                 <Table.DataCell>
                                     {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
                                 </Table.DataCell>
+                                <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
                                 <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
                                 <Table.DataCell>
                                     <Link
