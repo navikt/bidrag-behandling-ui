@@ -17,6 +17,7 @@ export const ActionButtons = ({ onNext }) => {
     const { vedtakstype, erBisysVedtak } = useGetBehandlingV2();
     const { lesemodus } = useBehandlingProvider();
     const notatUrl = behandlingId ? `/behandling/${behandlingId}/notat` : vedtakId ? `/vedtak/${vedtakId}/notat` : "";
+
     return (
         <FlexRow className="items-center">
             <Button
@@ -29,16 +30,15 @@ export const ActionButtons = ({ onNext }) => {
             >
                 {text.label.gåVidere}
             </Button>
-            {vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
-                (!lesemodus && !erBisysVedtak) && (
-                    <Link
-                        href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl}
-                        target="_blank"
-                        className="font-bold"
-                    >
-                        {text.label.notatButton} <ExternalLinkIcon aria-hidden />
-                    </Link>
-                ))}
+            {vedtakstype !== Vedtakstype.ALDERSJUSTERING && !lesemodus && !erBisysVedtak && (
+                <Link
+                    href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl}
+                    target="_blank"
+                    className="font-bold"
+                >
+                    {text.label.notatButton} <ExternalLinkIcon aria-hidden />
+                </Link>
+            )}
         </FlexRow>
     );
 };
