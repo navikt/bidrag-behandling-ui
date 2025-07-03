@@ -304,11 +304,9 @@ const Side = () => {
     const erAldersjusteringsVedtakstypeAndAvvist = erAldersjusteringsVedtakstype && behandlingLesemodus?.erAvvist;
 
     const getNextStep = () => {
-        if (
-            (erVedtakUtenBeregning && lesemodus && !erAldersjusteringsVedtakstype) ||
-            erAldersjusteringsVedtakstypeAndAvvist
-        )
+        if ((erVedtakUtenBeregning && !erAldersjusteringsVedtakstype) || erAldersjusteringsVedtakstypeAndAvvist) {
             return STEPS[BarnebidragStepper.VEDTAK];
+        }
 
         if (erAldersjusteringsVedtakstype) return STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
 
