@@ -284,26 +284,38 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 };
 
 const Side = () => {
-    const { onStepChange } = useBehandlingProvider();
-    const { erBisysVedtak, gebyr, virkningstidspunktV2, vedtakstype, erVedtakUtenBeregning } = useGetBehandlingV2();
+    const { onStepChange, lesemodus } = useBehandlingProvider();
+    const {
+        erBisysVedtak,
+        gebyr,
+        virkningstidspunktV2,
+        vedtakstype,
+        erVedtakUtenBeregning,
+        lesemodus: behandlingLesemodus,
+    } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
     const values = getValues(`roller.${fieldIndex}`);
-    const årsakAvslag = values.årsakAvslag;
     const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
         ({ rolle }) => rolle.ident === values.rolle.ident
     ).begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
+    const erAldersjusteringsVedtakstypeAndAvvist = erAldersjusteringsVedtakstype && behandlingLesemodus?.erAvvist;
 
-    const onNext = () =>
-        onStepChange(
-            avslaglisteAlle.includes(årsakAvslag as Resultatkode) || erVedtakUtenBeregning
-                ? gebyr !== undefined
-                    ? STEPS[BarnebidragStepper.GEBYR]
-                    : STEPS[BarnebidragStepper.VEDTAK]
-                : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]
-        );
+    const getNextStep = () => {
+        if (
+            (erVedtakUtenBeregning && lesemodus && !erAldersjusteringsVedtakstype) ||
+            erAldersjusteringsVedtakstypeAndAvvist
+        )
+            return STEPS[BarnebidragStepper.VEDTAK];
+
+        if (erAldersjusteringsVedtakstype) return STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
+
+        return gebyr !== undefined ? STEPS[BarnebidragStepper.GEBYR] : STEPS[BarnebidragStepper.VEDTAK];
+    };
+
+    const onNext = () => onStepChange(getNextStep());
 
     return (
         <Fragment key={activeTab}>
