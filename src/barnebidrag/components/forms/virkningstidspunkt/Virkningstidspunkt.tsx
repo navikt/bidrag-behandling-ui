@@ -26,7 +26,7 @@ import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
 } from "@common/helpers/virkningstidspunktHelpers";
-import { useGetBehandlingV2, useHentManuelleVedtak, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
+import { useGetBehandlingV2, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
@@ -36,7 +36,7 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Checkbox, Label, Link, Loader, Table, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, Checkbox, Label, Link, Table, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -583,7 +583,6 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
     const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
     const { lesemodus } = useBehandlingProvider();
-    const { data, isLoading, isError, isSuccess } = useHentManuelleVedtak();
     const { mutate, isError: mutationError } = useOppdaterManuelleVedtak();
     const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
 
@@ -598,7 +597,7 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
         });
     };
 
-    const vedtaksLista = data?.manuelleVedtak?.filter((vedtak) => vedtak.barnId === selectedBarn.rolle.id);
+    const vedtaksLista = selectedBarn?.manuelleVedtak;
 
     return (
         <div>
@@ -626,50 +625,38 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
                         </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
-                {isError && <Alert variant="error">{text.error.hentingAvVedtak}</Alert>}
-                {isLoading && (
-                    <div className="flex justify-center">
-                        <Loader size="medium" title={text.loading} variant="interaction" />
-                    </div>
-                )}
-                {isSuccess && (
-                    <Table.Body>
-                        {vedtaksLista.map((vedtak) => (
-                            <Table.Row key={vedtak.vedtaksid}>
-                                <Table.HeaderCell scope="row">
-                                    <Checkbox
-                                        hideLabel
-                                        value={vedtak.vedtaksid}
-                                        checked={val === vedtak.vedtaksid}
-                                        onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
-                                        size="small"
-                                        readOnly={lesemodus}
-                                    >
-                                        {vedtak.vedtaksid}
-                                    </Checkbox>
-                                </Table.HeaderCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
-                                </Table.DataCell>
-                                <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
-                                <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
-                                <Table.DataCell>
-                                    <Link
-                                        variant="action"
-                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                    </Link>
-                                </Table.DataCell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                )}
+                <Table.Body>
+                    {vedtaksLista.map((vedtak) => (
+                        <Table.Row key={vedtak.vedtaksid}>
+                            <Table.HeaderCell scope="row">
+                                <Checkbox
+                                    hideLabel
+                                    value={vedtak.vedtaksid}
+                                    checked={val === vedtak.vedtaksid}
+                                    onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
+                                    size="small"
+                                    readOnly={lesemodus}
+                                >
+                                    {vedtak.vedtaksid}
+                                </Checkbox>
+                            </Table.HeaderCell>
+                            <Table.DataCell>{DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}</Table.DataCell>
+                            <Table.DataCell>{DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}</Table.DataCell>
+                            <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
+                            <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
+                            <Table.DataCell>
+                                <Link
+                                    variant="action"
+                                    href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
+                                </Link>
+                            </Table.DataCell>
+                        </Table.Row>
+                    ))}
+                </Table.Body>
             </Table>
             {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
         </div>
