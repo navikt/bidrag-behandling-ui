@@ -29,6 +29,7 @@ import {
 } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
     OpphørsVarighet,
@@ -284,10 +285,10 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 };
 
 const Side = () => {
+    const { isBidragV2Enabled } = useFeatureToogle();
     const { onStepChange } = useBehandlingProvider();
     const {
         erBisysVedtak,
-        gebyr,
         virkningstidspunktV2,
         vedtakstype,
         erVedtakUtenBeregning,
@@ -310,7 +311,9 @@ const Side = () => {
 
         if (erAldersjusteringsVedtakstype) return STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
 
-        return gebyr !== undefined ? STEPS[BarnebidragStepper.GEBYR] : STEPS[BarnebidragStepper.VEDTAK];
+        return isBidragV2Enabled
+            ? STEPS[BarnebidragStepper.PRIVAT_AVTALE]
+            : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
     };
 
     const onNext = () => onStepChange(getNextStep());
