@@ -15,6 +15,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -583,7 +584,7 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
     const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
     const { lesemodus } = useBehandlingProvider();
-    const { mutate, isError: mutationError } = useOppdaterManuelleVedtak();
+    const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak();
     const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
 
     if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
@@ -604,60 +605,67 @@ const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) =
             <BodyShort size="small" weight="semibold" className="mb-2">
                 {text.description.velgVedtak}
             </BodyShort>
-            <Table size="small" zebraStripes>
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell scope="col"></Table.HeaderCell>
-                        <Table.HeaderCell scope="col" textSize="small">
-                            Virkingsdato
-                        </Table.HeaderCell>
-                        <Table.HeaderCell scope="col" textSize="small">
-                            Vedtaksdato
-                        </Table.HeaderCell>
-                        <Table.HeaderCell scope="col" textSize="small">
-                            Søknadstype
-                        </Table.HeaderCell>
-                        <Table.HeaderCell scope="col" textSize="small">
-                            Resultat siste periode
-                        </Table.HeaderCell>
-                        <Table.HeaderCell scope="col" textSize="small">
-                            Vedtak
-                        </Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {vedtaksLista.map((vedtak) => (
-                        <Table.Row key={vedtak.vedtaksid}>
-                            <Table.HeaderCell scope="row">
-                                <Checkbox
-                                    hideLabel
-                                    value={vedtak.vedtaksid}
-                                    checked={val === vedtak.vedtaksid}
-                                    onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
-                                    size="small"
-                                    readOnly={lesemodus}
-                                >
-                                    {vedtak.vedtaksid}
-                                </Checkbox>
+            <div className={`${isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}>
+                <OverlayLoader loading={isPending} />
+                <Table size="small" zebraStripes>
+                    <Table.Header>
+                        <Table.Row>
+                            <Table.HeaderCell scope="col"></Table.HeaderCell>
+                            <Table.HeaderCell scope="col" textSize="small">
+                                Virkingsdato
                             </Table.HeaderCell>
-                            <Table.DataCell>{DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}</Table.DataCell>
-                            <Table.DataCell>{DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}</Table.DataCell>
-                            <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
-                            <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
-                            <Table.DataCell>
-                                <Link
-                                    variant="action"
-                                    href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                </Link>
-                            </Table.DataCell>
+                            <Table.HeaderCell scope="col" textSize="small">
+                                Vedtaksdato
+                            </Table.HeaderCell>
+                            <Table.HeaderCell scope="col" textSize="small">
+                                Søknadstype
+                            </Table.HeaderCell>
+                            <Table.HeaderCell scope="col" textSize="small">
+                                Resultat siste periode
+                            </Table.HeaderCell>
+                            <Table.HeaderCell scope="col" textSize="small">
+                                Vedtak
+                            </Table.HeaderCell>
                         </Table.Row>
-                    ))}
-                </Table.Body>
-            </Table>
+                    </Table.Header>
+                    <Table.Body>
+                        {vedtaksLista.map((vedtak) => (
+                            <Table.Row key={vedtak.vedtaksid}>
+                                <Table.HeaderCell scope="row">
+                                    <Checkbox
+                                        hideLabel
+                                        value={vedtak.vedtaksid}
+                                        checked={val === vedtak.vedtaksid}
+                                        onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
+                                        size="small"
+                                        readOnly={lesemodus}
+                                    >
+                                        {vedtak.vedtaksid}
+                                    </Checkbox>
+                                </Table.HeaderCell>
+                                <Table.DataCell>
+                                    {DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}
+                                </Table.DataCell>
+                                <Table.DataCell>
+                                    {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
+                                </Table.DataCell>
+                                <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
+                                <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
+                                <Table.DataCell>
+                                    <Link
+                                        variant="action"
+                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
+                                    </Link>
+                                </Table.DataCell>
+                            </Table.Row>
+                        ))}
+                    </Table.Body>
+                </Table>
+            </div>
             {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
         </div>
     );
