@@ -284,7 +284,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 };
 
 const Side = () => {
-    const { onStepChange, lesemodus } = useBehandlingProvider();
+    const { onStepChange } = useBehandlingProvider();
     const {
         erBisysVedtak,
         gebyr,
