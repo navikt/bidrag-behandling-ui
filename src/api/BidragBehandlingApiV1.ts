@@ -260,6 +260,11 @@ export enum Kilde {
     OFFENTLIG = "OFFENTLIG",
 }
 
+export interface LesemodusVedtak {
+    erAvvist: boolean;
+    opprettetAvBatch: boolean;
+}
+
 export enum OpplysningerType {
     ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
     BARNETILLEGG = "BARNETILLEGG",
@@ -673,7 +678,7 @@ export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
     type: TypeBehandling;
-    lesemodus: boolean;
+    lesemodus?: LesemodusVedtak;
     erBisysVedtak: boolean;
     erVedtakUtenBeregning: boolean;
     /** @format int64 */
@@ -1260,8 +1265,8 @@ export interface PrivatAvtaleValideringsfeilDto {
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
     gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
 }
 
 export interface RolleDto {
@@ -1297,8 +1302,8 @@ export interface SamvaerValideringsfeilDto {
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
     gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2357,10 +2362,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2391,9 +2396,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2574,6 +2579,7 @@ export interface SluttberegningBarnebidrag {
     bidragJustertNedTilEvne: boolean;
     bidragJustertNedTil25ProsentAvInntekt: boolean;
     bidragJustertTilForskuddssats: boolean;
+    bidragJustertManueltTilForskuddssats: boolean;
     begrensetRevurderingUtført: boolean;
     ikkeOmsorgForBarnet: boolean;
     tilleggsbidrag?: number;
@@ -2973,9 +2979,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3057,8 +3063,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3162,10 +3168,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3212,8 +3218,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -3243,9 +3249,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -4339,6 +4345,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         fatteVedtak: (behandlingsid: number, data: FatteVedtakRequestDto, params: RequestParams = {}) =>
             this.request<number, any>({
                 path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Opprett aldersjustering behandling for sak
+         *
+         * @tags admin-controller
+         * @name OpprettAldersjustering
+         * @request POST:/api/v2/admin/opprett/aldersjustering/{saksnummer}
+         * @secure
+         */
+        opprettAldersjustering: (saksnummer: string, data: string, params: RequestParams = {}) =>
+            this.request<OpprettBehandlingResponse, any>({
+                path: `/api/v2/admin/opprett/aldersjustering/${saksnummer}`,
                 method: "POST",
                 body: data,
                 secure: true,

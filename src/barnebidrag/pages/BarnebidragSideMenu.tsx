@@ -680,7 +680,7 @@ export const BarnebidragSideMenu = () => {
     }
 
     if (vedtakstype === Vedtakstype.ALDERSJUSTERING) {
-        if (erVedtakUtenBeregning && behandlingLesemodus) {
+        if (erVedtakUtenBeregning && behandlingLesemodus && behandlingLesemodus.opprettetAvBatch) {
             return (
                 <SideMenu>
                     <VedtakMenuButton activeButton={activeButton} step="1" />
@@ -688,10 +688,19 @@ export const BarnebidragSideMenu = () => {
             );
         }
 
-        if (!erBisysVedtak && behandlingLesemodus) {
+        if (!erBisysVedtak && behandlingLesemodus && behandlingLesemodus.opprettetAvBatch) {
             return (
                 <SideMenu>
                     <UnderholdskostnadMenuButton activeButton={activeButton} step="1" />
+                    <VedtakMenuButton activeButton={activeButton} step="2" />
+                </SideMenu>
+            );
+        }
+
+        if (behandlingLesemodus && behandlingLesemodus.erAvvist) {
+            return (
+                <SideMenu>
+                    <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
                     <VedtakMenuButton activeButton={activeButton} step="2" />
                 </SideMenu>
             );

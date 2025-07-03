@@ -7,7 +7,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
