@@ -37,7 +37,6 @@ import {
     StonadTilBarnetilsynAktiveGrunnlagDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
-    Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -807,18 +806,6 @@ export const useDeletePrivatAvtale = () => {
             console.log("onError", error);
             LoggerService.error("Feil ved sletting av privat avtale", error);
         },
-    });
-};
-
-export const useHentManuelleVedtak = () => {
-    const { id: behandlingId, vedtakstype } = useGetBehandlingV2();
-    return useQuery({
-        queryKey: QueryKeys.manuelleVedtak(behandlingId.toString()),
-        queryFn: async () => {
-            const { data } = await BEHANDLING_API_V1.api.hentManuelleVedtak(behandlingId);
-            return data;
-        },
-        enabled: vedtakstype === Vedtakstype.ALDERSJUSTERING,
     });
 };
 
