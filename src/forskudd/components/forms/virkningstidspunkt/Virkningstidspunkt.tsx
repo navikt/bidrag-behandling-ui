@@ -39,6 +39,7 @@ import { useSearchParams } from "react-router-dom";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../../barnebidrag/hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../../barnebidrag/hooks/useOnSaveVirkningstidspunkt";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
@@ -305,6 +306,7 @@ const VirkningstidspunktRolle = ({
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
                 </BehandlingAlert>
             )}
+            <KlagetPåVedtakButton />
         </>
     );
 };
