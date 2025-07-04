@@ -39,6 +39,7 @@ import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import elementIds from "../../../../common/constants/elementIds";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
@@ -296,6 +297,7 @@ const Main = () => {
                 )}
             </FlexRow>
 
+            <KlagetPåVedtakButton />
             <FlexRow>
                 <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
                     {!erAvslagSomInneholderUtgifter && <option value="">{text.select.avslagPlaceholder}</option>}
