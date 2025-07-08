@@ -7,7 +7,7 @@ export const BeregningBegrensetRevurdering = () => {
         beregningsdetaljer: { sluttberegning, samværsfradrag },
     } = useBidragBeregningPeriode();
 
-    if (!sluttberegning.begrensetRevurderingUtført) return null;
+    if (!sluttberegning.bidragJustertTilForskuddssats) return null;
     return (
         <ResultatDescription
             title="Begrenset revurdering"

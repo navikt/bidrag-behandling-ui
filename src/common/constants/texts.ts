@@ -74,6 +74,7 @@ const tekster = {
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette. Husk å vurdere forskuddet.",
         inntektBegrunnelseBP:
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette.",
+        velgVedtak: "Velg vedtak som beregning av aldersjustering skal hente grunnlag fra",
     },
     error: {
         dagsatsVerdi: "Dagsats kan ikke være 0 eller mindre",
@@ -92,7 +93,9 @@ const tekster = {
         beregning: "Det skjedde en feil ved beregning. Prøv å laste siden på nytt",
         fatteVedtak: "Det skjedde en feil ved fatting av vedtak. Vennligst prøv på nytt.",
         feilmelding: "Det har skjedd en feil",
+        feilVedOppdatering: "Det har skjedd en feil ved oppdatering",
         hentingAvNotat: "Det skjedde en feil ved henting av notat",
+        hentingAvVedtak: "Det skjedde en feil ved henting av vedtak",
         hullIPerioder: "Det er perioder uten status.",
         manglerBegrunnelse: "Begrunnelse må fylles ut",
         hullIPerioderInntekt: "Det er perioder uten inntekt",
@@ -155,6 +158,7 @@ const tekster = {
         direkteBetaltAvBP: "Direkte betalt av BP",
         fastlønn: "Fastlønn",
         fatteVedtakButton: "Fatte vedtak",
+        fatteVedtakOgSendForsendelseButton: "Fatte vedtak og send forsendelse",
         forbruk: "Forbruk",
         forfallsdato: "Forfallsdato",
         forkastEndringer: "Forkast endringer",
@@ -305,6 +309,9 @@ const tekster = {
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
         vedtakFattet: "Notat og forsendelse er opprettet og er tilgjengelig i journalen. Åpner sakshistorikken.",
+        vedtakFattetAvvistUtenNotatForsendelse: "Åpner sakshistorikken.",
+        vedtakFattetUtenNotatDistribuert:
+            "Forsendelse er opprettet og distribueres automatisk. Forsendelsene er tilgjengelig i journalen. Åpner sakshistorikken.",
         ukjentNavn: "UKJENT",
         bekreftFatteVedtak: "Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer.",
         vedtakNotat:

@@ -131,7 +131,7 @@ const Periode = ({
         },
     } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato, opphørsTomDato);
@@ -162,6 +162,7 @@ const Periode = ({
             toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
+            readonly={lesemodus}
             hideLabel
         />
     ) : (

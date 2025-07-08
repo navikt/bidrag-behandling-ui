@@ -92,6 +92,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             });
+            feilInnhold.virkningstidspunkt?.måVelgeVedtakForBeregning.forEach((rolle) => {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Vedtak må velges for {rolle.navn}
+                    </ErrorSummary.Item>
+                );
+            });
         }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];

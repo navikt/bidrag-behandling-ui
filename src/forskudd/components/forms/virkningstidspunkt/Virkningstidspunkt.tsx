@@ -298,6 +298,7 @@ const VirkningstidspunktRolle = ({
                     defaultValue={initialValues.virkningstidspunkt}
                     fromDate={fom}
                     toDate={tom}
+                    readonly={lesemodus}
                     required
                 />
             </FlexRow>

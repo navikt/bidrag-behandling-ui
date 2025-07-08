@@ -68,6 +68,9 @@ const Vedtak = () => {
                 <FatteVedtakButtons
                     isBeregningError={isBeregningError}
                     disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
+                    opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
+                        (r) => r.forsendelseDistribueresAutomatisk
+                    )}
                 />
             )}
             <AdminButtons />

@@ -89,7 +89,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { lesemodus, onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { erBisysVedtak, underholdskostnader, vedtakstype } = useGetBehandlingV2();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [field, _, underholdskostnadId] = activeTab.split("-");
@@ -176,6 +176,7 @@ const Side = () => {
                     key={fieldName}
                     name={fieldName}
                     label={text.title.begrunnelse}
+                    readOnly={lesemodus}
                     resize
                 />
             )}

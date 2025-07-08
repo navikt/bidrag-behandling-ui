@@ -13,7 +13,6 @@ import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
-import useFeatureToogle from "../../hooks/useFeatureToggle";
 import { useQueryParams } from "../../hooks/useQueryParams";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
@@ -28,26 +27,28 @@ const fatteVedtakMutationKey = ["fatteVedtak"];
 export const FatteVedtakButtons = ({
     isBeregningError,
     disabled = false,
+    opprettesForsendelse = false,
 }: {
     isBeregningError: boolean;
     disabled?: boolean;
+    opprettesForsendelse?: boolean;
 }) => {
-    const { isAdminEnabled } = useFeatureToogle();
-    const [showConfetti, setShowConfetti] = useState(false);
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
+    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
     const erBarnebidrag = type === TypeBehandling.BIDRAG;
+    const erAldersjustering = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const [innkrevingUtsattAntallDager, setInnkrevingUtsattAntallDager] = useState<number | null>(
-        erBarnebidrag ? 3 : null
+        erBarnebidrag && !erAldersjustering ? 3 : null
     );
     const isMutating = Boolean(useIsMutating({ mutationKey: fatteVedtakMutationKey }));
-    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const skalBekrefteNotatOpplysninger = vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
         mutationKey: fatteVedtakMutationKey,
         mutationFn: () => {
-            if (!bekreftetVedtak) {
+            if (!bekreftetVedtak && skalBekrefteNotatOpplysninger) {
                 throw new MåBekrefteOpplysningerStemmerError();
             }
             return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager, enhet });
@@ -60,9 +61,6 @@ export const FatteVedtakButtons = ({
                 behandlingType: type,
             });
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
-            if (erBarnebidrag && isAdminEnabled) {
-                setShowConfetti(true);
-            }
         },
     });
     const throttledSubmit = debounce(fatteVedtakFn.mutate, 100);
@@ -72,8 +70,7 @@ export const FatteVedtakButtons = ({
 
     return (
         <div>
-            {showConfetti && <Confetti />}
-            {erBarnebidrag && vedtakstype !== Vedtakstype.OPPHOR && (
+            {erBarnebidrag && vedtakstype !== Vedtakstype.OPPHOR && vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
                 <Select
                     size="small"
                     onChange={(e) =>
@@ -91,23 +88,25 @@ export const FatteVedtakButtons = ({
                     ))}
                 </Select>
             )}
-            <ConfirmationPanel
-                className="pb-2"
-                checked={bekreftetVedtak}
-                label={tekster.varsel.bekreftFatteVedtak}
-                onChange={() => {
-                    setBekreftetVedtak((x) => !x);
-                    fatteVedtakFn.reset();
-                }}
-                error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
-            >
-                <Heading spacing level="2" size="xsmall">
-                    {tekster.title.sjekkNotatOgOpplysninger}
-                </Heading>
-                <div className="text-wrap">
-                    {tekster.varsel.vedtakNotat} <NotatButton />
-                </div>
-            </ConfirmationPanel>
+            {skalBekrefteNotatOpplysninger && (
+                <ConfirmationPanel
+                    className="pb-2"
+                    checked={bekreftetVedtak}
+                    label={tekster.varsel.bekreftFatteVedtak}
+                    onChange={() => {
+                        setBekreftetVedtak((x) => !x);
+                        fatteVedtakFn.reset();
+                    }}
+                    error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
+                >
+                    <Heading spacing level="2" size="xsmall">
+                        {tekster.title.sjekkNotatOgOpplysninger}
+                    </Heading>
+                    <div className="text-wrap">
+                        {tekster.varsel.vedtakNotat} <NotatButton />
+                    </div>
+                </ConfirmationPanel>
+            )}
             {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
                 <Alert variant="error" className="mt-2 mb-2">
                     <Heading spacing size="small" level="3">
@@ -121,7 +120,13 @@ export const FatteVedtakButtons = ({
                     <Heading size="small" level="3">
                         {tekster.title.vedtakFattet}
                     </Heading>
-                    <BodyShort>{tekster.varsel.vedtakFattet}</BodyShort>
+                    <BodyShort>
+                        {opprettesForsendelse
+                            ? tekster.varsel.vedtakFattetUtenNotatDistribuert
+                            : erAldersjustering
+                              ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
+                              : tekster.varsel.vedtakFattet}
+                    </BodyShort>
                 </Alert>
             )}
             <FlexRow>
@@ -132,7 +137,9 @@ export const FatteVedtakButtons = ({
                     className="w-max"
                     size="small"
                 >
-                    {tekster.label.fatteVedtakButton}
+                    {opprettesForsendelse
+                        ? tekster.label.fatteVedtakOgSendForsendelseButton
+                        : tekster.label.fatteVedtakButton}
                 </Button>
             </FlexRow>
         </div>

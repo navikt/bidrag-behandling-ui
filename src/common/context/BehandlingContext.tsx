@@ -21,7 +21,7 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
+import { TypeBehandling, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -227,7 +227,10 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
                 vedtakId != null ||
                 behandling.erVedtakFattet ||
                 queryLesemodus ||
-                behandling.kanBehandlesINyLøsning === false,
+                behandling.kanBehandlesINyLøsning === false ||
+                (behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING &&
+                    !behandling.erVedtakUtenBeregning &&
+                    activeStep === BarnebidragStepper.UNDERHOLDSKOSTNAD),
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             errorMessage,
@@ -256,6 +259,9 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             JSON.stringify(pageErrorsOrUnsavedState),
             queryLesemodus,
             behandling.erVedtakFattet,
+            behandling.vedtakstype,
+            behandling.erVedtakUtenBeregning,
+            behandling.kanBehandlesINyLøsning,
             navigatingToNextPage,
             navigatingToNextTab,
             mutationStatus,

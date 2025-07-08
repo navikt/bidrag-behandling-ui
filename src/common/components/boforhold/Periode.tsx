@@ -37,7 +37,7 @@ export const Periode = ({
             opphør: { opphørsdato },
         },
     } = useGetBehandlingV2();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
@@ -70,6 +70,7 @@ export const Periode = ({
             toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
+            readonly={lesemodus}
             hideLabel
         />
     ) : (

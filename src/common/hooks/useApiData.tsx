@@ -22,6 +22,7 @@ import {
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
     OppdaterGebyrDto,
+    OppdaterManuellVedtakRequest,
     OppdaterOpphorsdatoRequestDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
@@ -51,6 +52,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQ
 import { AxiosError } from "axios";
 
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
+
 export const MutationKeys = {
     opprettePrivatAvtale: (behandlingId: string) => ["mutation", "createPrivatavtale", behandlingId],
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
@@ -97,6 +99,7 @@ export const QueryKeys = {
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person2", ident],
+    manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
@@ -802,6 +805,40 @@ export const useDeletePrivatAvtale = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved sletting av privat avtale", error);
+        },
+    });
+};
+
+export const useOppdaterManuelleVedtak = () => {
+    const { id: behandlingId } = useGetBehandlingV2();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId.toString()),
+        mutationFn: async (payload: OppdaterManuellVedtakRequest) => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterValgtManuellVedtak(behandlingId, payload);
+            return data;
+        },
+        onSuccess: async (response, payload) => {
+            queryClient.setQueryData<BehandlingDtoV2>(
+                QueryKeys.behandlingV2(behandlingId.toString()),
+                (currentData): BehandlingDtoV2 => {
+                    return {
+                        ...currentData,
+                        underholdskostnader: response.underholdskostnader,
+                        erVedtakUtenBeregning: response.erVedtakUtenBeregning,
+                        virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkingstidspunkt) => {
+                            if (virkingstidspunkt.rolle.id === payload.barnId) {
+                                return {
+                                    ...virkingstidspunkt,
+                                    grunnlagFraVedtak: payload.vedtaksid,
+                                };
+                            }
+                            return virkingstidspunkt;
+                        }),
+                    };
+                }
+            );
         },
     });
 };
