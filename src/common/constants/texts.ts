@@ -309,6 +309,7 @@ const tekster = {
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
         vedtakFattet: "Notat og forsendelse er opprettet og er tilgjengelig i journalen. Åpner sakshistorikken.",
+        vedtakFattetAvvistUtenNotatForsendelse: "Åpner sakshistorikken.",
         vedtakFattetUtenNotatDistribuert:
             "Forsendelse er opprettet og distribueres automatisk. Forsendelsene er tilgjengelig i journalen. Åpner sakshistorikken.",
         ukjentNavn: "UKJENT",
