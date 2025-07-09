@@ -305,7 +305,7 @@ const Side = () => {
     const erAldersjusteringsVedtakstypeAndAvvist = erAldersjusteringsVedtakstype && behandlingLesemodus?.erAvvist;
 
     const getNextStep = () => {
-        if ((erVedtakUtenBeregning && !erAldersjusteringsVedtakstype) || erAldersjusteringsVedtakstypeAndAvvist) {
+        if ((erVedtakUtenBeregning && erAldersjusteringsVedtakstype) || erAldersjusteringsVedtakstypeAndAvvist) {
             return STEPS[BarnebidragStepper.VEDTAK];
         }
 
