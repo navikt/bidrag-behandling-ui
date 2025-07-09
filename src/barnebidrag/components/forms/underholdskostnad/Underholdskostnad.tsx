@@ -110,7 +110,10 @@ const Side = () => {
     )?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
+    const onNext = () =>
+        erAldersjusteringsVedtakstype
+            ? onStepChange(STEPS[BarnebidragStepper.VEDTAK])
+            : onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
 
     const onSave = () => {
         const begrunnelse = getValues(fieldName);
