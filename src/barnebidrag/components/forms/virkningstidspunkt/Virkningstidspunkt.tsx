@@ -291,6 +291,7 @@ const Side = () => {
         erBisysVedtak,
         virkningstidspunktV2,
         vedtakstype,
+        gebyr,
         erVedtakUtenBeregning,
         lesemodus: behandlingLesemodus,
     } = useGetBehandlingV2();
@@ -304,9 +305,15 @@ const Side = () => {
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const erAldersjusteringsVedtakstypeAndAvvist = erAldersjusteringsVedtakstype && behandlingLesemodus?.erAvvist;
 
+    const erDirekteAvslag = virkningstidspunktV2.every((b) => b.avslag != null);
+    const harGebyr = gebyr != null && gebyr.gebyrRoller.length > 0;
     const getNextStep = () => {
-        if ((erVedtakUtenBeregning && erAldersjusteringsVedtakstype) || erAldersjusteringsVedtakstypeAndAvvist) {
+        if (erVedtakUtenBeregning || erAldersjusteringsVedtakstypeAndAvvist || (erDirekteAvslag && !harGebyr)) {
             return STEPS[BarnebidragStepper.VEDTAK];
+        }
+
+        if (erDirekteAvslag && harGebyr) {
+            return STEPS[BarnebidragStepper.GEBYR];
         }
 
         if (erAldersjusteringsVedtakstype) return STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
