@@ -524,6 +524,8 @@ export interface OppdatereVirkningstidspunkt {
     virkningstidspunkt?: string;
     /** Oppdatere saksbehandlers begrunnelse */
     oppdatereBegrunnelse?: OppdatereBegrunnelse;
+    /** Oppdatere saksbehandlers begrunnelse for vurdering av skolegang. Dette kan bare settes hvis det er 18 års bidrag */
+    oppdaterBegrunnelseVurderingAvSkolegang?: OppdatereBegrunnelse;
     /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
     notat?: OppdatereBegrunnelse;
 }
@@ -1688,6 +1690,7 @@ export interface VirkningstidspunktDtoV2 {
     avslag?: Resultatkode;
     /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
+    begrunnelseVurderingAvSkolegang?: BegrunnelseDto;
     harLøpendeBidrag: boolean;
     begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
     /** @format date */
@@ -2193,6 +2196,8 @@ export interface OpprettBehandlingRequest {
     engangsbeløpstype: Engangsbeloptype;
     /** @format int64 */
     søknadsid: number;
+    /** @format int32 */
+    vedtaksid?: number;
     /** @format int64 */
     søknadsreferanseid?: number;
     kategori?: OpprettKategoriRequestDto;
@@ -2285,9 +2290,9 @@ export interface KanBehandlesINyLosningRequest {
     søktFomDato?: string;
     /** @format date */
     mottattdato?: string;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2363,9 +2368,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2448,6 +2453,11 @@ export interface AldersjusteringDetaljerGrunnlag {
     aldersjusteresManuelt: boolean;
     /** Er sann hvis aldersjustering er gjort manuelt */
     aldersjustertManuelt: boolean;
+    /**
+     * Vedtaksid som er opprettet av automatisk aldersjustering. Dette settes hvis det er fattet manuell vedtak etter at automatisk aldersjustering ikke kunne hente grunnlag fra siste manuelle vedtak Vil bare bli satt hvis aldersjustertManuelt=true
+     * @format int32
+     */
+    følgerAutomatiskVedtak?: number;
     begrunnelser?: string[];
 }
 
@@ -2692,6 +2702,7 @@ export interface VirkningstidspunktFeilDto {
     manglerÅrsakEllerAvslag: boolean;
     måVelgeVedtakForBeregning: RolleDto[];
     manglerBegrunnelse: boolean;
+    manglerVurderingAvSkolegang: boolean;
     virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
 }
 
@@ -2979,8 +2990,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
     avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3169,9 +3180,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3433,13 +3444,15 @@ export interface NotatVirkningstidspunktDto {
     årsak?: TypeArsakstype;
     /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelseVurderingAvSkolegang?: NotatBegrunnelseDto;
     /**
      * Bruk begrunnelse
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3485,6 +3498,7 @@ export interface OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit
 
 export interface VedtakNotatDto {
     type: NotatMalType;
+    stønadstype?: Stonadstype;
     medInnkreving: boolean;
     saksnummer: string;
     behandling: NotatBehandlingDetaljerDto;
