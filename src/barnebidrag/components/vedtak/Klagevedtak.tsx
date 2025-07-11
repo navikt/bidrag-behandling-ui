@@ -1,29 +1,27 @@
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { AdminButtons } from "@common/components/vedtak/AdminButtons";
-import { FatteVedtakButtons } from "@common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "@common/components/vedtak/VedtakWrapper";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { ActionButtons } from "../../../common/components/ActionButtons";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
+import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
 import { GrunnlagFraVedtakButton, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
 
-const Vedtak = () => {
+const Klagevedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
+    const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(false))?.status === "error";
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
@@ -50,17 +48,6 @@ const Vedtak = () => {
 
                 <VedtakResultat />
             </div>
-
-            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
-                <FatteVedtakButtons
-                    isBeregningError={isBeregningError}
-                    disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
-                    opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
-                        (r) => r.forsendelseDistribueresAutomatisk
-                    )}
-                />
-            )}
-            <AdminButtons />
         </div>
     );
 };
@@ -137,11 +124,25 @@ const VedtakResultat = () => {
         </VedtakWrapper>
     );
 };
+const Side = () => {
+    const { onStepChange } = useBehandlingProvider();
+
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.VEDTAK_ENDELIG]);
+
+    return (
+        <>
+            <ActionButtons onNext={onNext} />
+        </>
+    );
+};
 
 export default () => {
     return (
         <QueryErrorWrapper>
-            <Vedtak />
+            <Klagevedtak />
+            <Side />
+            <div className="my-3" />
+            <AdminButtons />
         </QueryErrorWrapper>
     );
 };

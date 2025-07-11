@@ -1,4 +1,4 @@
-import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { Rolletype, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { PersonIdent } from "@common/components/PersonIdent";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
@@ -29,6 +29,28 @@ const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: str
     );
 };
 
+const VedtakEndeligMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+    const { onStepChange } = useBehandlingProvider();
+    return (
+        <MenuButton
+            step={step}
+            title={text.title.vedtak}
+            onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK_ENDELIG])}
+            active={activeButton === BarnebidragStepper.VEDTAK_ENDELIG}
+        />
+    );
+};
+const KlageVedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+    const { onStepChange } = useBehandlingProvider();
+    return (
+        <MenuButton
+            step={step}
+            title={text.title.klagevedtak}
+            onStepChange={() => onStepChange(STEPS[BarnebidragStepper.KLAGEVEDTAK])}
+            active={activeButton === BarnebidragStepper.KLAGEVEDTAK}
+        />
+    );
+};
 const VedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
     return (
@@ -655,7 +677,13 @@ const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step:
 export const BarnebidragSideMenu = () => {
     const { isBidragV2Enabled } = useFeatureToogle();
     const { lesemodus } = useBehandlingProvider();
-    const { vedtakstype, erBisysVedtak, erVedtakUtenBeregning, lesemodus: behandlingLesemodus } = useGetBehandlingV2();
+    const {
+        vedtakstype,
+        erBisysVedtak,
+        erVedtakUtenBeregning,
+        lesemodus: behandlingLesemodus,
+        stønadstype,
+    } = useGetBehandlingV2();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -665,6 +693,7 @@ export const BarnebidragSideMenu = () => {
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
 
+    const erKlageBidrag = vedtakstype === Vedtakstype.KLAGE && stønadstype === Stonadstype.BIDRAG;
     useEffect(() => {
         const activeButton = getActiveButtonFromParams();
         setActiveButton(activeButton);
@@ -724,7 +753,14 @@ export const BarnebidragSideMenu = () => {
             <GebyrMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "5." : "4"} />
             <BoforholdMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "6." : "5"} />
             <SamværMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "7." : "6"} />
-            <VedtakMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "8." : "7"} />
+            {erKlageBidrag ? (
+                <>
+                    <KlageVedtakMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "8." : "7"} />
+                    <VedtakEndeligMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "9." : "7"} />
+                </>
+            ) : (
+                <VedtakMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "8." : "7"} />
+            )}
         </SideMenu>
     );
 };

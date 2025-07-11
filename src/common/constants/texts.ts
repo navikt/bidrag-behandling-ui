@@ -302,6 +302,7 @@ const tekster = {
         utvidetBarnetrygd: "Utvidet barnetrygd",
         utgift: "Utgift",
         vedtak: "Vedtak",
+        klagevedtak: "Klagevedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",
         kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles i ny løsning",

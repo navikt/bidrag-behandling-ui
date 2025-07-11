@@ -18,8 +18,8 @@ const inntekskodeMedPeriode = [
     Inntektsrapportering.INTRODUKSJONSSTONAD.toString(),
     Inntektsrapportering.KVALIFISERINGSSTONAD.toString(),
     Inntektsrapportering.FORELDREPENGER.toString(),
-    Inntektsrapportering.AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
-    Inntektsrapportering.AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
+    Inntektsrapportering.AINNTEKT_BEREGNET_12MND_FRA_OPPRINNELIG_VEDTAKSTIDSPUNKT.toString(),
+    Inntektsrapportering.AINNTEKT_BEREGNET_3MND_FRA_OPPRINNELIG_VEDTAKSTIDSPUNKT.toString(),
 ];
 const allInntektskoder = Object.values(Inntektsrapportering).map((entry) => entry.toString());
 

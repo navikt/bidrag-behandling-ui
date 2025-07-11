@@ -9,4 +9,6 @@ export const STEPS = {
     [BarnebidragStepper.BOFORHOLD]: 6,
     [BarnebidragStepper.SAMVÆR]: 7,
     [BarnebidragStepper.VEDTAK]: 8,
+    [BarnebidragStepper.KLAGEVEDTAK]: 9,
+    [BarnebidragStepper.VEDTAK_ENDELIG]: 10,
 };

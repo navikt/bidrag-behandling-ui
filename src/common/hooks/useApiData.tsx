@@ -86,7 +86,7 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
-    beregnBarnebidrag: () => ["beregning_barnebidrag", QueryKeys.behandlingVersion],
+    beregnBarnebidrag: (endelig: boolean) => ["beregning_barnebidrag", QueryKeys.behandlingVersion, endelig],
     beregningInnteksgrenseSærbidrag: () => ["beregning_særbidrag_innteksgrense", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
@@ -434,18 +434,20 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
         },
     });
 };
-export const useGetBeregningBidrag = () => {
+export const useGetBeregningBidrag = (endelig: boolean) => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 
     return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
-        queryKey: QueryKeys.beregnBarnebidrag(),
+        queryKey: QueryKeys.beregnBarnebidrag(endelig),
         queryFn: async () => {
             try {
                 if (vedtakId) {
                     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatBidrag(Number(vedtakId));
                     return { resultat: response.data };
                 }
-                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId), {
+                    endeligBeregning: endelig,
+                });
                 const ugyldigBeregning = response.data.resultatBarn.some((barn) => barn.ugyldigBeregning);
                 return { resultat: response.data, ugyldigBeregning: ugyldigBeregning };
             } catch (error) {
