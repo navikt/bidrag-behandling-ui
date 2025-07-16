@@ -126,7 +126,8 @@ const createInitialValues = (
                 rolle: virkningstidspunkt.rolle,
                 virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
                 årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
-                begrunnelse: virkningstidspunkt.begrunnelse?.innhold,
+                begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
+                begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
             };
         }),
@@ -147,6 +148,9 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         avslag,
         oppdatereBegrunnelse: {
             nyBegrunnelse: values.begrunnelse,
+        },
+        oppdaterBegrunnelseVurderingAvSkolegang: {
+            nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
         },
     };
 };
@@ -594,6 +598,11 @@ const VirkningstidspunktBarn = ({
                 initialValues={initialValues}
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
+            />
+            <FormControlledCustomTextareaEditor
+                name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
+                label={text.title.begrunnelseVurderingAvSkolegang}
+                resize
             />
             <VedtaksListe item={item} />
         </>
