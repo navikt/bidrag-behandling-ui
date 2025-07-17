@@ -8,12 +8,12 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading } from "@navikt/ds-react";
 import React, { Fragment, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import PersonNavnIdent from "../PersonNavnIdent";
 
 export const BarnPerioder = () => {
     const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
@@ -80,7 +80,7 @@ export const BarnPerioder = () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onRemoveBarn(index),
-                        rollbackFn: () => {},
+                        rollbackFn: () => { },
                     });
                 },
             }

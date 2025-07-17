@@ -1,8 +1,8 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
+import { PersonNavn } from "@navikt/bidrag-ui-common";
 import { Link, VStack } from "@navikt/ds-react";
 
 import { UnderholdskostnadPeriodeBeregningsdetaljer } from "../../../../api/BidragBehandlingApiV1";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
 import { CalculationTabell } from "../../../../common/components/vedtak/CalculationTable";
 import { ResultatDescription } from "../../../../common/components/vedtak/ResultatDescription";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../../utils/number-utils";

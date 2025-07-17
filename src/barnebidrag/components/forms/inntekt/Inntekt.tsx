@@ -18,6 +18,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
+import { PersonIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -25,7 +26,6 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
@@ -171,8 +171,8 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-              ? text.description.inntektBegrunnelseBP
-              : undefined;
+                ? text.description.inntektBegrunnelseBP
+                : undefined;
 
     return (
         <Fragment key={selectedRolleId}>

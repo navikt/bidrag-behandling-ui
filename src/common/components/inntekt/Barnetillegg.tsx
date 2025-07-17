@@ -7,7 +7,7 @@ import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
@@ -15,7 +15,6 @@ import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
-import PersonNavnIdent from "../PersonNavnIdent";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";

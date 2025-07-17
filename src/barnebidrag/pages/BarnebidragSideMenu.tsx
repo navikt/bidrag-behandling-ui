@@ -1,6 +1,4 @@
 import { Rolletype, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
-import { PersonIdent } from "@common/components/PersonIdent";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
 import behandlingQueryKeys, {
     toUnderholdskostnadTabQueryParameter,
@@ -11,6 +9,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { PersonIdent, PersonNavn } from "@navikt/bidrag-ui-common";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 

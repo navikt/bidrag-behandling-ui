@@ -6,7 +6,6 @@ import {
     Rolletype,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -15,6 +14,7 @@ import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "@common/hooks/useApi
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { InntektFormValues } from "@common/types/inntektFormValues";
+import { PersonNavn } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment } from "react";
@@ -213,8 +213,8 @@ export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName 
                                                     style={
                                                         index === inntektsposterSomErEndret.length - 1
                                                             ? {
-                                                                  borderBottom: "1px solid black",
-                                                              }
+                                                                borderBottom: "1px solid black",
+                                                            }
                                                             : {}
                                                     }
                                                 >

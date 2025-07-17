@@ -7,6 +7,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
+import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Link, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
@@ -28,8 +29,10 @@ const VedtakEndelig = () => {
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(true))?.status === "error";
 
     useEffect(() => {
+        console.log(activeStep);
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.resetQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
+        queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
+        LoggerService.info("Vedtak component mounted");
     }, [activeStep]);
 
     return (
@@ -140,16 +143,26 @@ const VedtakResultat = () => {
                         )}
                         <VStack gap="4">
                             {r.delvedtak.map((delvedtak, i) => (
-                                <ResultatTabell
-                                    key={i + "Delvedtak"}
-                                    erAvslag={erAvslag}
-                                    avvistAldersjustering={avvistAldersjustering}
-                                    resultatBarn={{
-                                        ...r,
-                                        perioder: delvedtak.perioder,
-                                    }}
-                                    erOpphor={vedtakstype === Vedtakstype.OPPHOR}
-                                />
+                                <VStack>
+                                    <Heading size="small" className="mb-2">
+                                        {delvedtak.klagevedtak
+                                            ? "Klagevedtak"
+                                            : delvedtak.delvedtak === false
+                                                ? "Endelig vedtak"
+                                                : "Delvedtak"}
+                                    </Heading>
+
+                                    <ResultatTabell
+                                        key={i + "Delvedtak"}
+                                        erAvslag={erAvslag}
+                                        avvistAldersjustering={avvistAldersjustering}
+                                        resultatBarn={{
+                                            ...r,
+                                            perioder: delvedtak.perioder,
+                                        }}
+                                        erOpphor={vedtakstype === Vedtakstype.OPPHOR}
+                                    />
+                                </VStack>
                             ))}
                         </VStack>
                     </div>

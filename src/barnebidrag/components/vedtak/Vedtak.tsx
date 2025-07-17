@@ -6,6 +6,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
@@ -27,41 +28,44 @@ const Vedtak = () => {
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.resetQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
+        queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
+        LoggerService.info("Vedtak component mounted");
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8  w-[1150px]">
-            {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
-            <div className="grid gap-y-2">
-                <Heading level="2" size="medium">
-                    {text.title.vedtak}
-                </Heading>
-            </div>
-            <div className="grid gap-y-2">
-                {!beregning?.feil && (
-                    <div className="flex flex-row">
-                        <Heading level="3" size="small">
-                            {text.title.oppsummering}
-                        </Heading>
-                        <GrunnlagFraVedtakButton />
-                    </div>
-                )}
-
-                <VedtakResultat />
-            </div>
-
-            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
-                <FatteVedtakButtons
-                    isBeregningError={isBeregningError}
-                    disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
-                    opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
-                        (r) => r.forsendelseDistribueresAutomatisk
+        <React.Suspense fallback={<div></div>}>
+            <div className="grid gap-y-8  w-[1150px]">
+                {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+                <div className="grid gap-y-2">
+                    <Heading level="2" size="medium">
+                        {text.title.vedtak}
+                    </Heading>
+                </div>
+                <div className="grid gap-y-2">
+                    {!beregning?.feil && (
+                        <div className="flex flex-row">
+                            <Heading level="3" size="small">
+                                {text.title.oppsummering}
+                            </Heading>
+                            <GrunnlagFraVedtakButton />
+                        </div>
                     )}
-                />
-            )}
-            <AdminButtons />
-        </div>
+
+                    <VedtakResultat />
+                </div>
+
+                {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
+                    <FatteVedtakButtons
+                        isBeregningError={isBeregningError}
+                        disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
+                        opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
+                            (r) => r.forsendelseDistribueresAutomatisk
+                        )}
+                    />
+                )}
+                <AdminButtons />
+            </div>
+        </React.Suspense>
     );
 };
 

@@ -10,12 +10,12 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { PersonIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Tabs } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { toUnderholdskostnadTabQueryParameter } from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
@@ -131,15 +131,15 @@ const Side = () => {
 
                         const updatedUnderholdskostnader = tabIsAndreBarn
                             ? currentData.underholdskostnader.map((underhold) => ({
-                                  ...underhold,
-                                  begrunnelse: underhold.gjelderBarn.medIBehandlingen
-                                      ? underhold.begrunnelse
-                                      : begrunnelse,
-                              }))
+                                ...underhold,
+                                begrunnelse: underhold.gjelderBarn.medIBehandlingen
+                                    ? underhold.begrunnelse
+                                    : begrunnelse,
+                            }))
                             : currentData.underholdskostnader.toSpliced(Number(underholdIndex), 1, {
-                                  ...currentData.underholdskostnader[underholdIndex],
-                                  begrunnelse: begrunnelse,
-                              });
+                                ...currentData.underholdskostnader[underholdIndex],
+                                begrunnelse: begrunnelse,
+                            });
 
                         return {
                             ...currentData,

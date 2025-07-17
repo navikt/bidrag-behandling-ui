@@ -18,7 +18,7 @@ import {
     ReactIntegration,
 } from "@grafana/faro-react";
 import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
-import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
+import { BidragCommonsProvider, BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -148,73 +148,78 @@ export default function App() {
     return (
         <FlagProvider config={config}>
             <QueryClientProvider client={queryClient}>
-                <Suspense
-                    fallback={
-                        <div className="flex justify-center overflow-hidden">
-                            <Loader size="3xlarge" title={text.loading} variant="interaction" />
-                        </div>
-                    }
-                >
-                    <HideSensitiveInfoButton />
+                <BidragCommonsProvider client={queryClient}>
+                    <Suspense
+                        fallback={
+                            <div className="flex justify-center overflow-hidden">
+                                <Loader size="3xlarge" title={text.loading} variant="interaction" />
+                            </div>
+                        }
+                    >
+                        <HideSensitiveInfoButton />
 
-                    <BrowserRouter>
-                        <FaroRoutes>
-                            <Route path="/sak/:saksnummer/behandling/:behandlingId">
-                                <Route index element={<BidragBehandlingWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                                <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
-                            </Route>
-                            <Route path="/behandling/:behandlingId">
-                                <Route index element={<BidragBehandlingWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                                <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
-                            </Route>
-                            <Route path="/sak/:saksnummer/vedtak/:vedtakId">
+                        <BrowserRouter>
+                            <FaroRoutes>
+                                <Route path="/sak/:saksnummer/behandling/:behandlingId">
+                                    <Route index element={<BidragBehandlingWrapper />} />
+                                    <Route path="notat" element={<NotatPageWrapper />} />
+                                    <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
+                                </Route>
+                                <Route path="/behandling/:behandlingId">
+                                    <Route index element={<BidragBehandlingWrapper />} />
+                                    <Route path="notat" element={<NotatPageWrapper />} />
+                                    <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
+                                </Route>
+                                <Route path="/sak/:saksnummer/vedtak/:vedtakId">
+                                    <Route
+                                        index
+                                        element={
+                                            <BehandlingPageWrapper>
+                                                <VedtakLesemodus />
+                                            </BehandlingPageWrapper>
+                                        }
+                                    />
+                                    <Route path="notat" element={<NotatPageWrapper />} />
+                                </Route>
+                                <Route path="/vedtak/:behandlingId">
+                                    <Route
+                                        index
+                                        element={
+                                            <BehandlingPageWrapper>
+                                                <ForskuddBehandling />
+                                            </BehandlingPageWrapper>
+                                        }
+                                    />
+                                    <Route path="notat" element={<NotatPageWrapper />} />
+                                </Route>
                                 <Route
-                                    index
-                                    element={
-                                        <BehandlingPageWrapper>
-                                            <VedtakLesemodus />
-                                        </BehandlingPageWrapper>
-                                    }
+                                    path="/forskudd/brukerveiledning"
+                                    element={<ForskuddBrukerveiledningPageWrapper />}
                                 />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route path="/vedtak/:behandlingId">
                                 <Route
-                                    index
-                                    element={
-                                        <BehandlingPageWrapper>
-                                            <ForskuddBehandling />
-                                        </BehandlingPageWrapper>
-                                    }
+                                    path="/sarbidrag/brukerveiledning"
+                                    element={<SærbidragBrukerveiledningPageWrapper />}
                                 />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route
-                                path="/forskudd/brukerveiledning"
-                                element={<ForskuddBrukerveiledningPageWrapper />}
-                            />
-                            <Route
-                                path="/sarbidrag/brukerveiledning"
-                                element={<SærbidragBrukerveiledningPageWrapper />}
-                            />
-                            <Route path="/bidrag/brukerveiledning" element={<BidragBrukerveiledningPageWrapper />} />
-                            <Route path="/forskudd/:behandlingId">
                                 <Route
-                                    index
-                                    element={
-                                        <BehandlingPageWrapper>
-                                            <ForskuddBehandling />
-                                        </BehandlingPageWrapper>
-                                    }
+                                    path="/bidrag/brukerveiledning"
+                                    element={<BidragBrukerveiledningPageWrapper />}
                                 />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                        </FaroRoutes>
-                    </BrowserRouter>
-                </Suspense>
-                <ReactQueryDevtools initialIsOpen={false} />
+                                <Route path="/forskudd/:behandlingId">
+                                    <Route
+                                        index
+                                        element={
+                                            <BehandlingPageWrapper>
+                                                <ForskuddBehandling />
+                                            </BehandlingPageWrapper>
+                                        }
+                                    />
+                                    <Route path="notat" element={<NotatPageWrapper />} />
+                                </Route>
+                            </FaroRoutes>
+                        </BrowserRouter>
+                    </Suspense>
+                    <ReactQueryDevtools initialIsOpen={false} />
+                </BidragCommonsProvider>
             </QueryClientProvider>
         </FlagProvider>
     );

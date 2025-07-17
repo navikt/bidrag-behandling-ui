@@ -6,14 +6,13 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
-import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect } from "react";
 
-import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { AdminButtons } from "../../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../../common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";

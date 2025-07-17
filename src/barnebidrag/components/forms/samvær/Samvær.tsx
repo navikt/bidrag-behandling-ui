@@ -11,7 +11,6 @@ import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
@@ -32,7 +31,7 @@ import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "@common/hooks/useS
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { SamværBarnformvalues, SamværPeriodeFormvalues } from "@common/types/samværFormValues";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { deductDays } from "@navikt/bidrag-ui-common";
+import { deductDays, PersonNavn } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Table, Tabs } from "@navikt/ds-react";
 import {
     addDays,
@@ -498,9 +497,8 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${
-                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                            } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                                } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

@@ -98,7 +98,7 @@ export const QueryKeys = {
     ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
-    person: (ident: string) => ["person2", ident],
+    person: (ident: string) => ["person", ident],
     manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {

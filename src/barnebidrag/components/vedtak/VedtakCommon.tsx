@@ -1,7 +1,7 @@
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Link, Table } from "@navikt/ds-react";
 import React from "react";
 
@@ -13,7 +13,6 @@ import {
     Samvaersklasse,
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
-import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -57,9 +56,9 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
     const samværsklasse =
-        periode.beregningsdetaljer.samværsfradrag.samværsklasse === Samvaersklasse.DELT_BOSTED
+        periode.beregningsdetaljer.samværsfradrag?.samværsklasse === Samvaersklasse.DELT_BOSTED
             ? "D"
-            : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag.samværsklasse);
+            : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag?.samværsklasse);
     return (
         <>
             <Table.DataCell textSize="small">

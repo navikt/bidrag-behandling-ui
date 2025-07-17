@@ -2,13 +2,13 @@ import { Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import { hasValue } from "@utils/array-utils";
 import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils";
 import React from "react";
 
 import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntektFormHelpers";
-import PersonNavnIdent from "../PersonNavnIdent";
 import { useInntektTableProvider } from "./InntektTableContext";
 
 export const columnWitdhRules = {
@@ -189,8 +189,8 @@ export const BeregnetInntekter = () => {
                                                 {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.fom))} -{" "}
                                                 {delberegningSumInntekt.periode.til
                                                     ? DateToDDMMYYYYString(
-                                                          deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
-                                                      )
+                                                        deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
+                                                    )
                                                     : null}
                                             </Table.DataCell>
 
