@@ -599,11 +599,13 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            <FormControlledCustomTextareaEditor
-                name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
-                label={text.title.begrunnelseVurderingAvSkolegang}
-                resize
-            />
+            {er18ÅrsBidrag && (
+                <FormControlledCustomTextareaEditor
+                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
+                    label={text.title.begrunnelseVurderingAvSkolegang}
+                    resize
+                />
+            )}
             <VedtaksListe item={item} />
         </>
     );
