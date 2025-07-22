@@ -397,10 +397,9 @@ const VirkningstidspunktBarn = ({
     }, [selectedVirkningstidspunkt.virkningstidspunkt]);
 
     useEffect(() => {
-        const subscription = watch((value, { name, type }) => {
+        const subscription = watch((value, { name }) => {
             if (
                 (name === `roller.${barnIndex}.virkningstidspunkt` && !value.roller[barnIndex].virkningstidspunkt) ||
-                (name !== `roller.${barnIndex}.begrunnelse` && type === undefined) ||
                 name === `roller.${barnIndex}.opphørsvarighet` ||
                 name === `roller.${barnIndex}.opphørsdato`
             ) {
