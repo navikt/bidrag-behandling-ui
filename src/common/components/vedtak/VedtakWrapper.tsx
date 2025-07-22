@@ -85,13 +85,6 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
-            if (feilInnhold.virkningstidspunkt?.manglerVurderingAvSkolegang === true) {
-                feilliste.push(
-                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
-                        Virkningstidspunkt: Vurdering av skolegang må fylles ut ved 18 års bidrag
-                    </ErrorSummary.Item>
-                );
-            }
             feilInnhold.virkningstidspunkt?.manglerOpphørsdato.forEach((rolle) => {
                 feilliste.push(
                     <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
