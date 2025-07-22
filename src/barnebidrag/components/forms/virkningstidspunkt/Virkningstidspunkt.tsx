@@ -126,8 +126,7 @@ const createInitialValues = (
                 rolle: virkningstidspunkt.rolle,
                 virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
                 årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
-                begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
-                begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
+                begrunnelse: virkningstidspunkt.begrunnelse?.innhold,
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
             };
         }),
@@ -148,9 +147,6 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         avslag,
         oppdatereBegrunnelse: {
             nyBegrunnelse: values.begrunnelse,
-        },
-        oppdaterBegrunnelseVurderingAvSkolegang: {
-            nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
         },
     };
 };
@@ -400,10 +396,7 @@ const VirkningstidspunktBarn = ({
         const subscription = watch((value, { name, type }) => {
             if (
                 (name === `roller.${barnIndex}.virkningstidspunkt` && !value.roller[barnIndex].virkningstidspunkt) ||
-                (![`roller.${barnIndex}.begrunnelse`, `roller.${barnIndex}.begrunnelseVurderingAvSkolegang`].includes(
-                    name
-                ) &&
-                    type === undefined) ||
+                (name !== `roller.${barnIndex}.begrunnelse` && type === undefined) ||
                 name === `roller.${barnIndex}.opphørsvarighet` ||
                 name === `roller.${barnIndex}.opphørsdato`
             ) {
@@ -602,13 +595,6 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            {er18ÅrsBidrag && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
-                    label={text.title.begrunnelseVurderingAvSkolegang}
-                    resize
-                />
-            )}
             <VedtaksListe item={item} />
         </>
     );
