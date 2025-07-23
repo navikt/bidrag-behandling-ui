@@ -52,6 +52,7 @@ import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useG
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
 import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
+import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
