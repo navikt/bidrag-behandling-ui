@@ -51,7 +51,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
-import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -687,6 +687,7 @@ const VirkningstidspunktBarn = ({
                     resize
                 />
             )}
+            <KlagetPåVedtakButton />
             <VedtaksListe item={item} />
         </>
     );
