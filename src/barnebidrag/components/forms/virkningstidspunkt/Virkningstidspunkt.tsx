@@ -122,15 +122,23 @@ const createInitialValues = (
                 stønadstype
             );
 
-            return {
+            let initalValues: VirkningstidspunktFormValuesPerBarn = {
                 opphørsvarighet,
                 rolle: virkningstidspunkt.rolle,
                 virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
                 årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
                 begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
-                begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
             };
+
+            if (stønadstype === Stonadstype.BIDRAG18AAR) {
+                initalValues = {
+                    ...initalValues,
+                    begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
+                };
+            }
+
+            return initalValues;
         }),
     };
 };
@@ -142,7 +150,8 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
     const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør].find(
         (value) => value === values.årsakAvslag
     );
-    return {
+
+    let payload: OppdatereVirkningstidspunkt = {
         rolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
@@ -150,10 +159,18 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         oppdatereBegrunnelse: {
             nyBegrunnelse: values.begrunnelse,
         },
-        oppdaterBegrunnelseVurderingAvSkolegang: {
-            nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
-        },
     };
+
+    if (values.begrunnelseVurderingAvSkolegang !== undefined) {
+        payload = {
+            ...payload,
+            oppdaterBegrunnelseVurderingAvSkolegang: {
+                nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
+            },
+        };
+    }
+
+    return payload;
 };
 
 const getOpphørOptions = (
