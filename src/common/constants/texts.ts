@@ -205,6 +205,7 @@ const tekster = {
         omfang: "Heltid/Deltid",
         opphør: "Opphør",
         opphørsdato: "Opphørsdato",
+        beregnTilDato: "Beregn til dato",
         opplysninger: "Opplysninger",
         oppdaterOpplysninger: "Oppdater opplysninger",
         opprettePrivatAvtale: "Opprette privat avtale",

@@ -10,6 +10,7 @@ import {
     FaktiskTilsynsutgiftDto,
     GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
+    OppdaterBeregnTilDatoRequestDto,
     OppdatereBegrunnelseRequest,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -761,6 +762,22 @@ export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
     });
 };
 
+export const useUpdateBeregnTilDato = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
+        mutationFn: async (payload: OppdaterBeregnTilDatoRequestDto): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBeregnTilDato(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av opphørsdato", error);
+        },
+    });
+};
 export const useUpdateOpphørsdato = () => {
     const { behandlingId } = useBehandlingProvider();
 

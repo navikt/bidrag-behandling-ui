@@ -1,4 +1,5 @@
 import {
+    BeregnTil,
     EksisterendeOpphorsvedtakDto,
     OppdatereVirkningstidspunkt,
     Resultatkode,
@@ -50,6 +51,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
+import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -129,6 +131,7 @@ const createInitialValues = (
                 begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
                 begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
+                beregnTilDato: virkningstidspunkt.beregnTilDato ?? null,
             };
         }),
     };
@@ -177,6 +180,74 @@ const getOpphørOptions = (
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO];
     }
 };
+
+const BeregnTilDato = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
+    const behandling = useGetBehandlingV2();
+    const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
+    const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
+    const { getValues, reset, setValue } = useFormContext();
+    const tom = useMemo(() => {
+        if (behandling.stønadstype === Stonadstype.BIDRAG)
+            return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
+        return addMonths(new Date(), 50 * 12);
+    }, []);
+
+    const updateBeregnTilDato = () => {
+        const values = getValues(`roller.${barnIndex}`);
+        oppdaterBeregnTilDato.mutation.mutate(
+            { idRolle: selectedBarn.rolle.id, beregnTil: values.beregnTil },
+            {
+                onSuccess: (response) => {
+                    oppdaterBeregnTilDato.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            ...response,
+                        };
+                    });
+                    setPreviousValues(createInitialValues(response.virkningstidspunktV2, response.stønadstype));
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateBeregnTilDato(),
+                        rollbackFn: () => {
+                            reset(previousValues, {
+                                keepIsSubmitSuccessful: true,
+                                keepDirty: true,
+                                keepIsSubmitted: true,
+                            });
+                        },
+                    });
+                },
+            }
+        );
+    }
+
+    const onSelectVarighet = (value) => {
+        updateBeregnTilDato();
+    };
+
+    console.log("HERER")
+    if (!behandling.erKlageEllerOmgjøring) return null;
+    return (
+        <FlexRow className="gap-x-8">
+            <FormControlledSelectField
+                name={`roller.${barnIndex}.beregnTil`}
+                label={text.label.varighet}
+                className="w-max"
+                onSelect={(value) => onSelectVarighet(value)}
+            >
+                {[BeregnTil.INNEVAeRENDEMANED, BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT].map((value) => (
+                    <option key={value} value={value}>
+                        {value}
+                    </option>
+                ))}
+            </FormControlledSelectField>
+        </FlexRow>
+    );
+};
+
 
 const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
@@ -437,10 +508,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-          ? årsakListe18årsBidrag
-          : selectedVirkningstidspunkt.harLøpendeBidrag
-            ? harLøpendeBidragÅrsakListe
-            : årsakListe;
+            ? årsakListe18årsBidrag
+            : selectedVirkningstidspunkt.harLøpendeBidrag
+                ? harLøpendeBidragÅrsakListe
+                : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -555,12 +626,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
+                                        ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                      : avslagsListe
+                                        : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -596,6 +667,13 @@ const VirkningstidspunktBarn = ({
                 </BehandlingAlert>
             )}
             <Opphør
+                item={item}
+                barnIndex={barnIndex}
+                initialValues={initialValues}
+                previousValues={previousValues}
+                setPreviousValues={setPreviousValues}
+            />
+            <BeregnTilDato
                 item={item}
                 barnIndex={barnIndex}
                 initialValues={initialValues}

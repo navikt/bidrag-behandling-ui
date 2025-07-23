@@ -18,4 +18,5 @@ export interface VirkningstidspunktFormValuesPerBarn {
     begrunnelseVurderingAvSkolegang?: string;
     opphørsvarighet?: OpphørsVarighet;
     opphørsdato?: string | null;
+    beregnTil?: string | null;
 }

@@ -32,6 +32,11 @@ export enum BehandlingsrefKilde {
   ALDERSJUSTERING_FORSKUDD = "ALDERSJUSTERING_FORSKUDD",
 }
 
+export enum BeregnTil {
+  OPPRINNELIG_VEDTAKSTIDSPUNKT = "OPPRINNELIG_VEDTAKSTIDSPUNKT",
+  INNEVAeRENDEMANED = "INNEVÆRENDE_MÅNED",
+}
+
 export enum Utgiftstype {
   KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
   KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
@@ -483,6 +488,7 @@ export enum Grunnlagstype {
   KOPIBARNETILSYNMEDSTONADPERIODE = "KOPI_BARNETILSYN_MED_STØNAD_PERIODE",
   KOPISAMVAeRSPERIODE = "KOPI_SAMVÆRSPERIODE",
   ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
+  RESULTAT_FRA_VEDTAK = "RESULTAT_FRA_VEDTAK",
 }
 
 export enum Engangsbeloptype {
@@ -588,6 +594,8 @@ export interface OppdatereVirkningstidspunkt {
    * @example "2025-01-25"
    */
   virkningstidspunkt?: string;
+  /** @format date */
+  beregnTilDato?: string;
   /** Oppdatere saksbehandlers begrunnelse */
   oppdatereBegrunnelse?: OppdatereBegrunnelse;
   /** Oppdatere saksbehandlers begrunnelse for vurdering av skolegang. Dette kan bare settes hvis det er 18 års bidrag */
@@ -1717,6 +1725,8 @@ export interface VirkningstidspunktDtoV2 {
   /** @format date */
   opphørsdato?: string;
   /** @format date */
+  beregnTilDato?: string;
+  /** @format date */
   globalOpphørsdato?: string;
   /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
   eksisterendeOpphør?: EksisterendeOpphorsvedtakDto;
@@ -2140,6 +2150,12 @@ export interface OppdatereBoforholdResponse {
   oppdatertNotat?: OppdatereBegrunnelse;
 }
 
+export interface OppdaterBeregnTilDatoRequestDto {
+  /** @format int64 */
+  idRolle: number;
+  beregnTil?: BeregnTil;
+}
+
 export interface AktivereGrunnlagRequestV2 {
   /** Personident tilhørende rolle i behandling grunnlag skal aktiveres for */
   personident?: string;
@@ -2311,9 +2327,9 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -3468,8 +3484,8 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -4213,6 +4229,29 @@ export class Api<
     ) =>
       this.request<OppdatereBoforholdResponse, OppdatereBoforholdResponse>({
         path: `/api/v2/behandling/${behandlingsid}/boforhold`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Oppdatere opphørsdato for behandling.
+     *
+     * @tags virkningstidspunkt-controller
+     * @name OppdatereBeregnTilDato
+     * @request PUT:/api/v2/behandling/{behandlingsid}/beregntildato
+     * @secure
+     */
+    oppdatereBeregnTilDato: (
+      behandlingsid: number,
+      data: OppdaterBeregnTilDatoRequestDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<BehandlingDtoV2, any>({
+        path: `/api/v2/behandling/${behandlingsid}/beregntildato`,
         method: "PUT",
         body: data,
         secure: true,
