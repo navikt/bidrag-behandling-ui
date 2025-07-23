@@ -2367,10 +2367,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -3074,8 +3074,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    gebyrResultatVisningsnavn: string;
     erManueltOverstyrt: boolean;
+    gebyrResultatVisningsnavn: string;
 }
 
 export interface NotatInntektDto {
@@ -3088,9 +3088,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3179,10 +3179,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
