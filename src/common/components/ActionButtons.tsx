@@ -8,7 +8,7 @@ import { Button, Link } from "@navikt/ds-react";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-export const ActionButtons = ({ onNext }) => {
+export const ActionButtons = ({ onNext }: { onNext: () => void }) => {
     const { behandlingId, vedtakId, saksnummer } = useParams<{
         behandlingId?: string;
         vedtakId?: string;

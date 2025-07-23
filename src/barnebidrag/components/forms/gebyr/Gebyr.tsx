@@ -18,7 +18,6 @@ import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "
 import AinntektLink from "../../../../common/components/inntekt/AinntektLink";
 import ModiaLink from "../../../../common/components/inntekt/ModiaLink";
 import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
-import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnUpdateGebyr } from "../../../hooks/useOnUpdateGebyr";
 import { EndeligIlagtGebyr, GebyrFormValues } from "../../../types/gebyrFormValues";
@@ -68,16 +67,9 @@ const booleanValueOfEndeligIlagtGebyr = {
 };
 
 const Side = () => {
-    const { onStepChange } = useBehandlingProvider();
-    const {
-        virkningstidspunkt: { avslag },
-    } = useGetBehandlingV2();
+    const { onStepChange, getNextStep } = useBehandlingProvider();
 
-    return (
-        <ActionButtons
-            onNext={() => onStepChange(avslag ? STEPS[BarnebidragStepper.VEDTAK] : STEPS[BarnebidragStepper.BOFORHOLD])}
-        />
-    );
+    return <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.GEBYR))} />;
 };
 
 const Main = () => {

@@ -1,6 +1,9 @@
+import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import text from "@common/constants/texts";
 import { BehandlingProvider } from "@common/context/BehandlingContext";
+import { useBehandlingV2 } from "@common/hooks/useApiData";
 import React, { PropsWithChildren, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { STEPS as ForskuddSteps } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
@@ -29,6 +32,11 @@ export type PageErrorsOrUnsavedState = {
 };
 
 function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
+    const { behandlingId, vedtakId } = useParams<{
+        behandlingId?: string;
+        vedtakId?: string;
+    }>();
+    const behandling = useBehandlingV2(behandlingId, vedtakId);
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         virkningstidspunkt: { error: false },
         boforhold: { error: false },
@@ -50,14 +58,43 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
         }
     }
 
+    const sideMenu = [
+        {
+            step: ForskuddStepper.VIRKNINGSTIDSPUNKT,
+            visible: true,
+            interactive: true,
+        },
+        {
+            step: ForskuddStepper.BOFORHOLD,
+            visible: true,
+            interactive: !behandling.virkningstidspunkt.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+        },
+        {
+            step: ForskuddStepper.INNTEKT,
+            visible: true,
+            interactive: !behandling.virkningstidspunkt.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+        },
+        {
+            step: ForskuddStepper.VEDTAK,
+            visible: true,
+            interactive: true,
+        },
+    ];
+
     const value = React.useMemo(
         () => ({
             formSteps,
             getPageErrorTexts,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
+            sideMenu,
         }),
-        [JSON.stringify(pageErrorsOrUnsavedState)]
+        [
+            JSON.stringify(pageErrorsOrUnsavedState),
+            JSON.stringify(sideMenu),
+            behandling.virkningstidspunkt.avslag,
+            behandling.vedtakstype,
+        ]
     );
 
     return <BehandlingProvider props={value}>{children}</BehandlingProvider>;

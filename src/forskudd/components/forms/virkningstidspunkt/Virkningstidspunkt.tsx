@@ -40,7 +40,6 @@ import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../../barnebi
 import { useOnSaveVirkningstidspunkt } from "../../../../barnebidrag/hooks/useOnSaveVirkningstidspunkt";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
-import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
 const årsakListe = [
@@ -378,23 +377,17 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
 };
 
 const Side = () => {
-    const { onStepChange } = useBehandlingProvider();
+    const { onStepChange, getNextStep } = useBehandlingProvider();
     const { erBisysVedtak, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
     const values = getValues(`roller.${fieldIndex}`);
-    const årsakAvslag = values.årsakAvslag;
     const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
         ({ rolle }) => rolle.ident === values.rolle.ident
     ).begrunnelseFraOpprinneligVedtak;
 
-    const onNext = () =>
-        onStepChange(
-            opphørAvslagsListe.includes(årsakAvslag as Resultatkode)
-                ? STEPS[ForskuddStepper.VEDTAK]
-                : STEPS[ForskuddStepper.BOFORHOLD]
-        );
+    const onNext = () => onStepChange(getNextStep(ForskuddStepper.VIRKNINGSTIDSPUNKT));
 
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 

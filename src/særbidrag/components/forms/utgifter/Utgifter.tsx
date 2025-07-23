@@ -9,6 +9,7 @@ import {
     Vedtakstype,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledDatePicker } from "@common/components/formFields/FormControlledDatePicker";
@@ -38,11 +39,9 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import elementIds from "../../../../common/constants/elementIds";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
-import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 import { useOnSaveUtgifter } from "../../../hooks/useOnSaveUtgifter";
 import { UtgiftFormValues, Utgiftspost } from "../../../types/utgifterFormValues";
@@ -761,17 +760,14 @@ const BeregnetUtgifter = () => {
 };
 
 const Side = () => {
-    const { onStepChange } = useBehandlingProvider();
+    const { onStepChange, getNextStep } = useBehandlingProvider();
     const {
         erBisysVedtak,
         vedtakstype,
-        utgift: { avslag, begrunnelseFraOpprinneligVedtak },
+        utgift: { begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
-    const onNext = () =>
-        onStepChange(
-            avslag === undefined ? STEPS[SærligeutgifterStepper.INNTEKT] : STEPS[SærligeutgifterStepper.VEDTAK]
-        );
+    const onNext = () => onStepChange(getNextStep(SærligeutgifterStepper.UTGIFT));
 
     return (
         <>

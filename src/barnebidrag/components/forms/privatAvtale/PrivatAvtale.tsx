@@ -10,6 +10,7 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
@@ -24,6 +25,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
@@ -32,9 +34,6 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
@@ -400,7 +399,7 @@ const PrivatAvtalePerioder = ({
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, privatAvtale, vedtakstype } = useGetBehandlingV2();
-    const { onStepChange } = useBehandlingProvider();
+    const { onStepChange, getNextStep } = useBehandlingProvider();
     const { getValues } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
     const roller = getValues("roller");
@@ -410,8 +409,6 @@ const Side = () => {
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
-
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]);
 
     return (
         <>
@@ -431,7 +428,7 @@ const Side = () => {
                     readOnly
                 />
             )}
-            <ActionButtons onNext={onNext} />
+            <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.PRIVAT_AVTALE))} />
         </>
     );
 };
