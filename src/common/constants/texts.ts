@@ -273,6 +273,7 @@ const tekster = {
         barnOver12: "Barn over 12 år",
         barnOver18: "Barn over 18 år",
         begrunnelse: "Begrunnelse",
+        begrunnelseVurderingAvSkolegang: "Vurdering av skolegang",
         beregnetTotalt: "Beregnet totalt",
         betaltAvBp: "Betalt av BP",
         boforhold: "Boforhold",

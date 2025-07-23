@@ -19,6 +19,7 @@ import {
 } from "@grafana/faro-react";
 import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
 import { BidragCommonsProvider, BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
+import useStartTracing from "@navikt/bidrag-ui-common/esm/react_components/hooks/useStartTracing";
 import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -125,6 +126,7 @@ const getSkjermbilde = (type: TypeBehandling) => {
 export default function App() {
     // const { reset } = useQueryErrorResetBoundary();
 
+    useStartTracing();
     useEffect(() => {
         try {
             const screenResolutionData = {

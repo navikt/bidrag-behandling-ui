@@ -15,6 +15,7 @@ export interface VirkningstidspunktFormValuesPerBarn {
     virkningstidspunkt?: string | null;
     årsakAvslag: TypeArsakstype | Resultatkode | string | null;
     begrunnelse?: string;
+    begrunnelseVurderingAvSkolegang?: string;
     opphørsvarighet?: OpphørsVarighet;
     opphørsdato?: string | null;
 }
