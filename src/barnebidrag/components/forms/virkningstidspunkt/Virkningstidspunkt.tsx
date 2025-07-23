@@ -50,6 +50,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -437,10 +438,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-          ? årsakListe18årsBidrag
-          : selectedVirkningstidspunkt.harLøpendeBidrag
-            ? harLøpendeBidragÅrsakListe
-            : årsakListe;
+            ? årsakListe18årsBidrag
+            : selectedVirkningstidspunkt.harLøpendeBidrag
+                ? harLøpendeBidragÅrsakListe
+                : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -555,12 +556,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
+                                        ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                      : avslagsListe
+                                        : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -609,6 +610,7 @@ const VirkningstidspunktBarn = ({
                     resize
                 />
             )}
+            <KlagetPåVedtakButton />
             <VedtaksListe item={item} />
         </>
     );
