@@ -162,7 +162,7 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         },
     };
 
-    if (values.begrunnelseVurderingAvSkolegang !== undefined && values.kanSkriveVurderingAvSkolegang) {
+    if (values.begrunnelseVurderingAvSkolegang !== undefined && !values.kanSkriveVurderingAvSkolegang) {
         payload = {
             ...payload,
             oppdaterBegrunnelseVurderingAvSkolegang: {
@@ -625,7 +625,7 @@ const VirkningstidspunktBarn = ({
                 <FormControlledCustomTextareaEditor
                     name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
                     label={text.title.begrunnelseVurderingAvSkolegang}
-                    readOnly={getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
+                    readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
                     resize
                 />
             )}
