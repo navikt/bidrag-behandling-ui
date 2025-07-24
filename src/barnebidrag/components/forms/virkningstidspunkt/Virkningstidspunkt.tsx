@@ -485,6 +485,10 @@ const VirkningstidspunktBarn = ({
                 );
                 setValue(`roller.${barnIndex}.opphørsdato`, selectedBarn.opphørsdato);
                 setValue(`roller.${barnIndex}.opphørsvarighet`, selectedBarn.opphørsvarighet);
+                setValue(
+                    `roller.${barnIndex}.kanSkriveVurderingAvSkolegang`,
+                    selectedBarn.kanSkriveVurderingAvSkolegang
+                );
                 setPreviousValues(selectedBarn);
             },
             onError: () => {
