@@ -168,6 +168,7 @@ export enum Grunnlagstype {
     KOPIBARNETILSYNMEDSTONADPERIODE = "KOPI_BARNETILSYN_MED_STØNAD_PERIODE",
     KOPISAMVAeRSPERIODE = "KOPI_SAMVÆRSPERIODE",
     ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
+    RESULTAT_FRA_VEDTAK = "RESULTAT_FRA_VEDTAK",
 }
 
 export enum Innkrevingstype {
@@ -1704,6 +1705,7 @@ export interface VirkningstidspunktDtoV2 {
      * @format int64
      */
     grunnlagFraVedtak?: number;
+    erVurderingAvSkolegangPåkrevd: boolean;
     manuelleVedtak: ManuellVedtakDto[];
     /**
      * Bruk begrunnelse
@@ -2401,10 +2403,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -3207,8 +3209,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3260,10 +3262,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3451,8 +3453,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {

@@ -122,7 +122,7 @@ const createInitialValues = (
                 stønadstype
             );
 
-            const initalValues: VirkningstidspunktFormValuesPerBarn = {
+            let initalValues: VirkningstidspunktFormValuesPerBarn = {
                 opphørsvarighet,
                 rolle: virkningstidspunkt.rolle,
                 virkningstidspunkt: virkningstidspunkt.virkningstidspunkt,
@@ -131,13 +131,13 @@ const createInitialValues = (
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
             };
 
-            // TODO: uncomment when backend is ready
-            // if (stønadstype === Stonadstype.BIDRAG18AAR) {
-            //     initalValues = {
-            //         ...initalValues,
-            //         begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
-            //     };
-            // }
+            if (stønadstype === Stonadstype.BIDRAG18AAR) {
+                initalValues = {
+                    ...initalValues,
+                    begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
+                    kanSkriveVurderingAvSkolegang: virkningstidspunkt.erVurderingAvSkolegangPåkrevd,
+                };
+            }
 
             return initalValues;
         }),
@@ -152,7 +152,7 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         (value) => value === values.årsakAvslag
     );
 
-    const payload: OppdatereVirkningstidspunkt = {
+    let payload: OppdatereVirkningstidspunkt = {
         rolleId,
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
@@ -162,15 +162,14 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         },
     };
 
-    // TODO: uncomment when backend is ready
-    // if (values.begrunnelseVurderingAvSkolegang !== undefined) {
-    //     payload = {
-    //         ...payload,
-    //         oppdaterBegrunnelseVurderingAvSkolegang: {
-    //             nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
-    //         },
-    //     };
-    // }
+    if (values.begrunnelseVurderingAvSkolegang !== undefined && values.kanSkriveVurderingAvSkolegang) {
+        payload = {
+            ...payload,
+            oppdaterBegrunnelseVurderingAvSkolegang: {
+                nyBegrunnelse: values.begrunnelseVurderingAvSkolegang,
+            },
+        };
+    }
 
     return payload;
 };
@@ -622,14 +621,14 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            {/*TODO: display boolean will come from backend */}
-            {/*{er18ÅrsBidrag && (*/}
-            {/*    <FormControlledCustomTextareaEditor*/}
-            {/*        name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}*/}
-            {/*        label={text.title.begrunnelseVurderingAvSkolegang}*/}
-            {/*        resize*/}
-            {/*    />*/}
-            {/*)}*/}
+            {er18ÅrsBidrag && (
+                <FormControlledCustomTextareaEditor
+                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
+                    label={text.title.begrunnelseVurderingAvSkolegang}
+                    readOnly={getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
+                    resize
+                />
+            )}
             <KlagetPåVedtakButton />
             <VedtaksListe item={item} />
         </>
