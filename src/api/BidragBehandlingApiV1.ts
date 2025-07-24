@@ -1705,7 +1705,7 @@ export interface VirkningstidspunktDtoV2 {
      * @format int64
      */
     grunnlagFraVedtak?: number;
-    erVurderingAvSkolegangPåkrevd: boolean;
+    kanSkriveVurderingAvSkolegang: boolean;
     manuelleVedtak: ManuellVedtakDto[];
     /**
      * Bruk begrunnelse
@@ -2403,10 +2403,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trinnskattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -3076,8 +3076,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3209,8 +3209,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -3262,10 +3262,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trinnskattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3453,8 +3453,8 @@ export interface NotatVirkningstidspunktDto {
      * @deprecated
      */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {

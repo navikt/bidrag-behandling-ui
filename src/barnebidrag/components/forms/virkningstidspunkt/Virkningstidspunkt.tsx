@@ -135,7 +135,7 @@ const createInitialValues = (
                 initalValues = {
                     ...initalValues,
                     begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
-                    kanSkriveVurderingAvSkolegang: virkningstidspunkt.erVurderingAvSkolegangPåkrevd,
+                    kanSkriveVurderingAvSkolegang: virkningstidspunkt.kanSkriveVurderingAvSkolegang,
                 };
             }
 
