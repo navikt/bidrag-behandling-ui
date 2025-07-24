@@ -7,7 +7,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Link, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
@@ -20,7 +20,6 @@ import {
     Samvaersklasse,
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
-import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";

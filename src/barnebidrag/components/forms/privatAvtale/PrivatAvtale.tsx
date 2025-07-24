@@ -14,7 +14,6 @@ import { FormControlledSwitch } from "@common/components/formFields/FormControll
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
-import PersonNavnIdent from "@common/components/PersonNavnIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
@@ -25,7 +24,7 @@ import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdF
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { TrashIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";

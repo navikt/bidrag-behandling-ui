@@ -1,6 +1,5 @@
 import { BostatusperiodeGrunnlagDto, OpplysningerType } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
-import PersonNavnIdent from "@common/components/PersonNavnIdent";
 import { RolleTag } from "@common/components/RolleTag";
 import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
@@ -9,6 +8,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnActivateGrunnlag } from "@common/hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, ExpansionCard, Heading, HStack, Table, Tag } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
 import React, { Fragment } from "react";
