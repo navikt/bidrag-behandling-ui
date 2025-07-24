@@ -138,6 +138,12 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
         }
     }, [quill, defaultValue]);
 
+    useEffect(() => {
+        if (quill) {
+            quill.enable(!readOnly);
+        }
+    }, [readOnly, quill]);
+
     return (
         <div
             className={`ql-top-container ${readOnly ? "readonly" : ""} ${resize ? "resizable" : ""} ${error ? "error" : ""}`}
