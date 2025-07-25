@@ -110,7 +110,8 @@ const getDefaultOpphørsvarighet = (opphørsdato: string, eksisterendeOpphør: s
 
 const createInitialValues = (
     response: VirkningstidspunktDtoV2[],
-    stønadstype: Stonadstype
+    stønadstype: Stonadstype,
+    vedtakstype: Vedtakstype
 ): VirkningstidspunktFormValues => {
     return {
         roller: response.map((virkningstidspunkt) => {
@@ -129,10 +130,11 @@ const createInitialValues = (
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
             };
 
-            if (stønadstype === Stonadstype.BIDRAG18AAR) {
+            if (stønadstype === Stonadstype.BIDRAG18AAR && vedtakstype !== Vedtakstype.OPPHOR) {
                 initalValues = {
                     ...initalValues,
                     begrunnelseVurderingAvSkolegang: virkningstidspunkt.begrunnelseVurderingAvSkolegang?.innhold ?? "",
+                    kanSkriveVurderingAvSkolegang: virkningstidspunkt.kanSkriveVurderingAvSkolegang,
                 };
             }
 
@@ -159,7 +161,7 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
         },
     };
 
-    if (values.begrunnelseVurderingAvSkolegang !== undefined) {
+    if (values.begrunnelseVurderingAvSkolegang !== undefined && values.kanSkriveVurderingAvSkolegang) {
         payload = {
             ...payload,
             oppdaterBegrunnelseVurderingAvSkolegang: {
@@ -220,7 +222,9 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                             ...response,
                         };
                     });
-                    setPreviousValues(createInitialValues(response.virkningstidspunktV2, response.stønadstype));
+                    setPreviousValues(
+                        createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
+                    );
                 },
                 onError: () => {
                     setSaveErrorState({
@@ -447,12 +451,20 @@ const VirkningstidspunktBarn = ({
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
-                const updatedValues = createInitialValues(response.virkningstidspunktV2, response.stønadstype);
+                const updatedValues = createInitialValues(
+                    response.virkningstidspunktV2,
+                    response.stønadstype,
+                    response.vedtakstype
+                );
                 const selectedBarn = Object.values(updatedValues.roller).find(
                     ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
                 );
                 setValue(`roller.${barnIndex}.opphørsdato`, selectedBarn.opphørsdato);
                 setValue(`roller.${barnIndex}.opphørsvarighet`, selectedBarn.opphørsvarighet);
+                setValue(
+                    `roller.${barnIndex}.kanSkriveVurderingAvSkolegang`,
+                    selectedBarn.kanSkriveVurderingAvSkolegang
+                );
                 setPreviousValues(selectedBarn);
             },
             onError: () => {
@@ -589,10 +601,11 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            {er18ÅrsBidrag && (
+            {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
                     label={text.title.begrunnelseVurderingAvSkolegang}
+                    readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
                     resize
                 />
             )}
@@ -759,9 +772,9 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
 };
 
 const VirkningstidspunktForm = () => {
-    const { virkningstidspunktV2, stønadstype } = useGetBehandlingV2();
+    const { virkningstidspunktV2, stønadstype, vedtakstype } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const initialValues = createInitialValues(virkningstidspunktV2, stønadstype);
+    const initialValues = createInitialValues(virkningstidspunktV2, stønadstype, vedtakstype);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,

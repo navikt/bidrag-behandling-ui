@@ -10,6 +10,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Label } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
@@ -17,7 +18,7 @@ import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "
 
 import AinntektLink from "../../../../common/components/inntekt/AinntektLink";
 import ModiaLink from "../../../../common/components/inntekt/ModiaLink";
-import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
+import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnUpdateGebyr } from "../../../hooks/useOnUpdateGebyr";
 import { EndeligIlagtGebyr, GebyrFormValues } from "../../../types/gebyrFormValues";
@@ -67,9 +68,16 @@ const booleanValueOfEndeligIlagtGebyr = {
 };
 
 const Side = () => {
-    const { onStepChange, getNextStep } = useBehandlingProvider();
+    const { onStepChange } = useBehandlingProvider();
+    const {
+        virkningstidspunkt: { avslag },
+    } = useGetBehandlingV2();
 
-    return <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.GEBYR))} />;
+    return (
+        <ActionButtons
+            onNext={() => onStepChange(avslag ? STEPS[BarnebidragStepper.VEDTAK] : STEPS[BarnebidragStepper.BOFORHOLD])}
+        />
+    );
 };
 
 const Main = () => {

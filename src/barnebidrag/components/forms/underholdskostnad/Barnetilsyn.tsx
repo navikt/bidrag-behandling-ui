@@ -14,13 +14,12 @@ import {
 import { useGetBehandlingV2, useGetOpplysningerBarnetilsyn } from "@common/hooks/useApiData";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, calculateAge, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { ChangeEvent, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
-import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { useOnUpdateHarTilysnsordning } from "../../../hooks/useOnUpdateHarTilysnsordning";
 import {
     Underhold,

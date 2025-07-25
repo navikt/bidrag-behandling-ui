@@ -4,11 +4,11 @@ import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { InntektFormPeriode } from "@common/types/inntektFormValues";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import elementId from "../../constants/elementIds";
-import PersonNavnIdent from "../PersonNavnIdent";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
