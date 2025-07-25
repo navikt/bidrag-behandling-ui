@@ -168,6 +168,7 @@ export enum Grunnlagstype {
     KOPIBARNETILSYNMEDSTONADPERIODE = "KOPI_BARNETILSYN_MED_STØNAD_PERIODE",
     KOPISAMVAeRSPERIODE = "KOPI_SAMVÆRSPERIODE",
     ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
+    RESULTAT_FRA_VEDTAK = "RESULTAT_FRA_VEDTAK",
 }
 
 export enum Innkrevingstype {
@@ -1704,6 +1705,7 @@ export interface VirkningstidspunktDtoV2 {
      * @format int64
      */
     grunnlagFraVedtak?: number;
+    kanSkriveVurderingAvSkolegang: boolean;
     manuelleVedtak: ManuellVedtakDto[];
     /**
      * Bruk begrunnelse
@@ -3074,8 +3076,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
