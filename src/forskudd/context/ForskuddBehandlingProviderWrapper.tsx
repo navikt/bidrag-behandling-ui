@@ -67,12 +67,12 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
         {
             step: ForskuddStepper.BOFORHOLD,
             visible: true,
-            interactive: !behandling.virkningstidspunkt.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+            interactive: !behandling.virkningstidspunktV2[0]?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: ForskuddStepper.INNTEKT,
             visible: true,
-            interactive: !behandling.virkningstidspunkt.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+            interactive: !behandling.virkningstidspunktV2[0]?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: ForskuddStepper.VEDTAK,
@@ -92,7 +92,7 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
         [
             JSON.stringify(pageErrorsOrUnsavedState),
             JSON.stringify(sideMenu),
-            behandling.virkningstidspunkt.avslag,
+            behandling.virkningstidspunktV2[0].avslag,
             behandling.vedtakstype,
         ]
     );
