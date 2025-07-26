@@ -1,6 +1,8 @@
 import { ResultatBeregningBarnDto, ResultatRolle, Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
+import { AdminButtons } from "@common/components/vedtak/AdminButtons";
+import { FatteVedtakButtons } from "@common/components/vedtak/FatteVedtakButtons";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
@@ -13,8 +15,6 @@ import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect } from "react";
 
-import { AdminButtons } from "../../../../common/components/vedtak/AdminButtons";
-import { FatteVedtakButtons } from "../../../../common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";
 import { STEPS } from "../../../constants/steps";
 

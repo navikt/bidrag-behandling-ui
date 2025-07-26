@@ -703,6 +703,14 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
+            {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
+                <FormControlledCustomTextareaEditor
+                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
+                    label={text.title.begrunnelseVurderingAvSkolegang}
+                    readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
+                    resize
+                />
+            )}
             <BeregnTilDato
                 item={item}
                 barnIndex={barnIndex}
