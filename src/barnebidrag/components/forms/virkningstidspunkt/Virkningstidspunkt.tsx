@@ -30,7 +30,6 @@ import {
 } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
     OpphørsVarighet,
@@ -46,7 +45,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import { STEPS } from "../../../constants/steps";
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
@@ -381,16 +380,8 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 };
 
 const Side = () => {
-    const { isBidragV2Enabled } = useFeatureToogle();
-    const { onStepChange } = useBehandlingProvider();
-    const {
-        erBisysVedtak,
-        virkningstidspunktV2,
-        vedtakstype,
-        gebyr,
-        erVedtakUtenBeregning,
-        lesemodus: behandlingLesemodus,
-    } = useGetBehandlingV2();
+    const { onStepChange, getNextStep } = useBehandlingProvider();
+    const { erBisysVedtak, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
@@ -399,27 +390,6 @@ const Side = () => {
         ({ rolle }) => rolle.ident === values.rolle.ident
     ).begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
-    const erAldersjusteringsVedtakstypeAndAvvist = erAldersjusteringsVedtakstype && behandlingLesemodus?.erAvvist;
-
-    const erDirekteAvslag = virkningstidspunktV2.every((b) => b.avslag != null);
-    const harGebyr = gebyr != null && gebyr.gebyrRoller.length > 0;
-    const getNextStep = () => {
-        if (erVedtakUtenBeregning || erAldersjusteringsVedtakstypeAndAvvist || (erDirekteAvslag && !harGebyr)) {
-            return STEPS[BarnebidragStepper.VEDTAK];
-        }
-
-        if (erDirekteAvslag && harGebyr) {
-            return STEPS[BarnebidragStepper.GEBYR];
-        }
-
-        if (erAldersjusteringsVedtakstype) return STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
-
-        return isBidragV2Enabled
-            ? STEPS[BarnebidragStepper.PRIVAT_AVTALE]
-            : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD];
-    };
-
-    const onNext = () => onStepChange(getNextStep());
 
     return (
         <Fragment key={activeTab}>
@@ -439,7 +409,7 @@ const Side = () => {
                     readOnly
                 />
             )}
-            <ActionButtons onNext={onNext} />
+            <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.VIRKNINGSTIDSPUNKT))} />
         </Fragment>
     );
 };

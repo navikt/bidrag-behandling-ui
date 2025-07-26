@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -10,12 +11,10 @@ import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
 export const Notat = () => {
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const {
@@ -53,7 +52,7 @@ export const Notat = () => {
                 },
             }
         );
-    const onNext = () => onStepChange(STEPS[ForskuddStepper.INNTEKT]);
+    const onNext = () => onStepChange(getNextStep(ForskuddStepper.BOFORHOLD));
 
     const debouncedOnSave = useDebounce(onSave);
 

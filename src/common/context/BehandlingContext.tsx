@@ -22,6 +22,7 @@ import React, {
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { TypeBehandling, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import { STEPS } from "../../barnebidrag/constants/steps";
 import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -67,6 +68,12 @@ interface IBehandlingContext {
     setDebouncing: React.Dispatch<React.SetStateAction<boolean>>;
     setBeregnetGebyrErEndret: React.Dispatch<React.SetStateAction<boolean>>;
     onNavigateToTab: (nextTab: string) => void;
+    sideMenu: {
+        step: BarnebidragStepper | ForskuddStepper | SærligeutgifterStepper;
+        visible: boolean;
+        interactive: boolean;
+    }[];
+    getNextStep: (currentStep: BarnebidragStepper | ForskuddStepper | SærligeutgifterStepper) => number;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
@@ -101,6 +108,11 @@ export type BehandlingProviderProps = {
                 | BarnebidragPageErrorsOrUnsavedState
             >
         >;
+        sideMenu: {
+            step: BarnebidragStepper | ForskuddStepper | SærligeutgifterStepper;
+            visible: boolean;
+            interactive: boolean;
+        }[];
     };
 };
 
@@ -110,6 +122,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         getPageErrorTexts,
         pageErrorsOrUnsavedState,
         setPageErrorsOrUnsavedState,
+        sideMenu,
     } = props;
     const { vedtaksperre } = useFeatureToogle();
     const { behandlingId, saksnummer, vedtakId } = useParams<{
@@ -123,7 +136,10 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [beregnetGebyrErEndret, setBeregnetGebyrErEndret] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
-    const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
+    const activeStep = (searchParams.get(behandlingQueryKeys.steg) ?? defaultStep) as
+        | BarnebidragStepper
+        | ForskuddStepper
+        | SærligeutgifterStepper;
     const location = useLocation();
     const navigate = useNavigate();
     const setActiveStep = useCallback((x: number, query?: Record<string, string>, hash?: string) => {
@@ -196,6 +212,15 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         }
     };
 
+    const getNextStep = (currentStep: BarnebidragStepper | ForskuddStepper | SærligeutgifterStepper) => {
+        const currentStepIndex = sideMenu.findIndex((step) => step.step === currentStep);
+        const firstNextInteractiveButton = sideMenu
+            .toSpliced(0, currentStepIndex + 1)
+            .find((step) => step.visible && step.interactive);
+
+        return STEPS[firstNextInteractiveButton.step];
+    };
+
     const onStepChange = (x: number, query?: Record<string, string>, hash?: string) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
 
@@ -236,6 +261,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             errorMessage,
             errorModalOpen,
             pageErrorsOrUnsavedState,
+            sideMenu,
             setPageErrorsOrUnsavedState,
             pendingTransitionState:
                 (navigatingToNextPage || navigatingToNextTab) && (mutationStatus === "pending" || debouncing),
@@ -247,6 +273,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             setDebouncing,
             setBeregnetGebyrErEndret,
             onNavigateToTab,
+            getNextStep,
         }),
         [
             activeStep,
@@ -266,6 +293,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             navigatingToNextTab,
             mutationStatus,
             debouncing,
+            JSON.stringify(sideMenu),
         ]
     );
 

@@ -1,11 +1,13 @@
 import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { PersonIdent } from "@common/components/PersonIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
@@ -18,15 +20,12 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { PersonIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
 const Main = () => {
@@ -100,7 +99,7 @@ const Main = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const { erBisysVedtak, roller, inntekter, vedtakstype } = useGetBehandlingV2();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -154,7 +153,6 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.GEBYR]);
 
     const debouncedOnSave = useDebounce(onSave);
 
@@ -171,8 +169,8 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-                ? text.description.inntektBegrunnelseBP
-                : undefined;
+              ? text.description.inntektBegrunnelseBP
+              : undefined;
 
     return (
         <Fragment key={selectedRolleId}>
@@ -193,7 +191,7 @@ const Side = () => {
                     readOnly
                 />
             )}
-            <ActionButtons onNext={onNext} />
+            <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.INNTEKT))} />
         </Fragment>
     );
 };

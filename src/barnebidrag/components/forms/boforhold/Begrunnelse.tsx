@@ -11,11 +11,10 @@ import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
 export const Begrunnelse = () => {
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const {
         erBisysVedtak,
         vedtakstype,
@@ -56,7 +55,6 @@ export const Begrunnelse = () => {
                 },
             }
         );
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.SAMVÆR]);
 
     const debouncedOnSave = useDebounce(onSave);
 
@@ -83,7 +81,7 @@ export const Begrunnelse = () => {
                     readOnly
                 />
             )}
-            <ActionButtons onNext={onNext} />
+            <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.BOFORHOLD))} />
         </>
     );
 };
