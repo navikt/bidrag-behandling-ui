@@ -55,8 +55,9 @@ export const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidr
 export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningPeriodeDto }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
+    console.log(periode)
     const samværsklasse =
-        periode.beregningsdetaljer.samværsfradrag?.samværsklasse === Samvaersklasse.DELT_BOSTED
+        periode.beregningsdetaljer?.samværsfradrag?.samværsklasse === Samvaersklasse.DELT_BOSTED
             ? "D"
             : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag?.samværsklasse);
     return (

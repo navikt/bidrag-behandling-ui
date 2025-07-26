@@ -46,7 +46,6 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
@@ -520,7 +519,7 @@ const VirkningstidspunktBarn = ({
     const tom = useMemo(() => {
         const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
-        if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
+        if (opprinneligVirkningstidspunkt) return addMonths(new Date(), 1);
         if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opprinneligVirkningstidspunkt, selectedVirkningstidspunkt.opphørsdato]);

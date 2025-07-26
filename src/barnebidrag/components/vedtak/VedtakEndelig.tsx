@@ -19,6 +19,7 @@ import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
+import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 
 const VedtakEndelig = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
@@ -109,9 +110,6 @@ const VedtakResultat = () => {
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
-                const avvistAldersjustering = r.perioder.every(
-                    (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
-                );
 
                 return (
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
@@ -142,28 +140,36 @@ const VedtakResultat = () => {
                             />
                         )}
                         <VStack gap="4">
-                            {r.delvedtak.map((delvedtak, i) => (
-                                <VStack>
-                                    <Heading size="small" className="mb-2">
-                                        {delvedtak.klagevedtak
-                                            ? "Klagevedtak"
-                                            : delvedtak.delvedtak === false
-                                                ? "Endelig vedtak"
-                                                : "Delvedtak"}
-                                    </Heading>
+                            {r.delvedtak.map((delvedtak, i) => {
+                                const avvistAldersjustering = delvedtak.perioder.every(
+                                    (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
+                                );
 
-                                    <ResultatTabell
-                                        key={i + "Delvedtak"}
-                                        erAvslag={erAvslag}
-                                        avvistAldersjustering={avvistAldersjustering}
-                                        resultatBarn={{
-                                            ...r,
-                                            perioder: delvedtak.perioder,
-                                        }}
-                                        erOpphor={vedtakstype === Vedtakstype.OPPHOR}
-                                    />
-                                </VStack>
-                            ))}
+                                const vedtakstype = delvedtak.type
+                                return (
+                                    <VStack>
+                                        <Heading size="small" className="mb-2">
+                                            {delvedtak.klagevedtak
+                                                ? "Klagevedtak"
+                                                : delvedtak.delvedtak === false
+                                                    ? "Endelig vedtak"
+                                                    : `Delvedtak (${hentVisningsnavn(vedtakstype)})`}
+                                        </Heading>
+
+                                        <ResultatTabell
+                                            key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
+                                            erAvslag={erAvslag}
+                                            avvistAldersjustering={avvistAldersjustering}
+                                            resultatBarn={{
+                                                ...r,
+                                                perioder: delvedtak.perioder,
+                                                resultatUtenBeregning: delvedtak.type == Vedtakstype.INDEKSREGULERING,
+                                            }}
+                                            erOpphor={vedtakstype === Vedtakstype.OPPHOR}
+                                        />
+                                    </VStack>
+                                )
+                            })}
                         </VStack>
                     </div>
                 );
