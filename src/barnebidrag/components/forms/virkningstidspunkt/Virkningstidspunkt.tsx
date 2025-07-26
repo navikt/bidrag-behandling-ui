@@ -248,7 +248,6 @@ const BeregnTilDato = ({ item, barnIndex, initialValues, previousValues, setPrev
         updateBeregnTilDato();
     };
 
-    console.log("HERER")
     if (!behandling.erKlageEllerOmgjøring) return null;
     return (
         <FlexRow className="gap-x-8">
@@ -718,14 +717,6 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
-                    label={text.title.begrunnelseVurderingAvSkolegang}
-                    readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
-                    resize
-                />
-            )}
             <KlagetPåVedtakButton />
             <VedtaksListe item={item} />
         </>

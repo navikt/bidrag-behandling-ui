@@ -8,22 +8,13 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/ho
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Link, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
-import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import {
-    ResultatBarnebidragsberegningPeriodeDto,
     ResultatBidragsberegningBarnDto,
-    ResultatRolle,
-    Rolletype,
-    Samvaersklasse,
-    Vedtakstype,
+    Vedtakstype
 } from "../../../api/BidragBehandlingApiV1";
-import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
