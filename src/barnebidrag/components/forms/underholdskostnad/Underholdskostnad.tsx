@@ -1,10 +1,13 @@
 import { Rolletype, UnderholdDto, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { PersonIdent } from "@common/components/PersonIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import { toUnderholdskostnadTabQueryParameter } from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -14,10 +17,6 @@ import { BodyShort, Tabs } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
-import { PersonIdent } from "../../../../common/components/PersonIdent";
-import { toUnderholdskostnadTabQueryParameter } from "../../../../common/constants/behandlingQueryKeys";
-import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
 import { useOnUpdateUnderholdBegrunnelse } from "../../../hooks/useOnUpdateUnderhold";
@@ -89,7 +88,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { lesemodus, onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { lesemodus, onStepChange, getNextStep, setSaveErrorState } = useBehandlingProvider();
     const { erBisysVedtak, underholdskostnader, vedtakstype } = useGetBehandlingV2();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [field, _, underholdskostnadId] = activeTab.split("-");
@@ -109,11 +108,6 @@ const Side = () => {
         (underhold) => underhold.id === Number(underholdId)
     )?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
-
-    const onNext = () =>
-        erAldersjusteringsVedtakstype
-            ? onStepChange(STEPS[BarnebidragStepper.VEDTAK])
-            : onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
 
     const onSave = () => {
         const begrunnelse = getValues(fieldName);
@@ -196,7 +190,7 @@ const Side = () => {
                     readOnly
                 />
             )}
-            <ActionButtons onNext={onNext} />
+            <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.UNDERHOLDSKOSTNAD))} />
         </Fragment>
     );
 };

@@ -1,4 +1,4 @@
-import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { PersonIdent } from "@common/components/PersonIdent";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
@@ -10,7 +10,6 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -41,14 +40,20 @@ const VedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: 
     );
 };
 
-const PrivatAvtaleMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const PrivatAvtaleMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange } = useBehandlingProvider();
-    const { vedtakstype, virkningstidspunkt, erBisysVedtak } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     return (
         <MenuButton
             step={step}
-            interactive={!erBisysVedtak && interactive}
+            interactive={interactive}
             title={text.title.privatAvtale}
             onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
             active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
@@ -56,11 +61,18 @@ const PrivatAvtaleMenuButton = ({ activeButton, step }: { activeButton: string; 
     );
 };
 
-const UnderholdskostnadMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const UnderholdskostnadMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
-    const { vedtakstype, virkningstidspunkt, underholdskostnader, erVedtakUtenBeregning } = useGetBehandlingV2();
+    const { underholdskostnader } = useGetBehandlingV2();
 
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR && !erVedtakUtenBeregning;
     const underholdskostnadHasValideringsFeil = underholdskostnader
         .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
         .some(({ valideringsfeil }) => {
@@ -298,16 +310,21 @@ const UnderholdskostnadMenuButton = ({ activeButton, step }: { activeButton: str
     );
 };
 
-const InntektMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const InntektMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
     const {
-        vedtakstype,
-        virkningstidspunkt,
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
         roller,
     } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const inntektRoller = roller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM) return -1;
         if (b.rolletype === Rolletype.BM) return 1;
@@ -579,15 +596,20 @@ const InntektMenuButton = ({ activeButton, step }: { activeButton: string; step:
     );
 };
 
-const BoforholdMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const BoforholdMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
     const {
-        vedtakstype,
-        virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
     const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
     const boforholdIkkeAktiverteEndringer =
@@ -607,7 +629,15 @@ const BoforholdMenuButton = ({ activeButton, step }: { activeButton: string; ste
     );
 };
 
-const GebyrMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const GebyrMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
     const { gebyr } = useGetBehandlingV2();
     const gebyrValideringsFeil = gebyr?.valideringsfeil?.some((valideringsfeil) => {
@@ -619,17 +649,24 @@ const GebyrMenuButton = ({ activeButton, step }: { activeButton: string; step: s
             step={step}
             title={text.title.gebyr}
             onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-            interactive={!!gebyr?.gebyrRoller.length}
+            interactive={interactive}
             active={activeButton === BarnebidragStepper.GEBYR}
             valideringsfeil={!lesemodus && gebyrValideringsFeil}
         />
     );
 };
 
-const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+const SamværMenuButton = ({
+    activeButton,
+    step,
+    interactive,
+}: {
+    activeButton: string;
+    step: string;
+    interactive: boolean;
+}) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
-    const { vedtakstype, virkningstidspunkt, samvær } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
+    const { samvær } = useGetBehandlingV2();
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
@@ -652,10 +689,19 @@ const SamværMenuButton = ({ activeButton, step }: { activeButton: string; step:
     );
 };
 
+const menuButtonMap = {
+    [BarnebidragStepper.VIRKNINGSTIDSPUNKT]: VirkingstidspunktMenuButton,
+    [BarnebidragStepper.PRIVAT_AVTALE]: PrivatAvtaleMenuButton,
+    [BarnebidragStepper.INNTEKT]: InntektMenuButton,
+    [BarnebidragStepper.BOFORHOLD]: BoforholdMenuButton,
+    [BarnebidragStepper.GEBYR]: GebyrMenuButton,
+    [BarnebidragStepper.UNDERHOLDSKOSTNAD]: UnderholdskostnadMenuButton,
+    [BarnebidragStepper.SAMVÆR]: SamværMenuButton,
+    [BarnebidragStepper.VEDTAK]: VedtakMenuButton,
+} satisfies Record<string, React.ComponentType<never>>;
+
 export const BarnebidragSideMenu = () => {
-    const { isBidragV2Enabled } = useFeatureToogle();
-    const { lesemodus } = useBehandlingProvider();
-    const { vedtakstype, erBisysVedtak, erVedtakUtenBeregning, lesemodus: behandlingLesemodus } = useGetBehandlingV2();
+    const { sideMenu } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -670,61 +716,21 @@ export const BarnebidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
-    if (erVedtakUtenBeregning && lesemodus && vedtakstype !== Vedtakstype.ALDERSJUSTERING) {
-        return (
-            <SideMenu>
-                <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
-                <VedtakMenuButton activeButton={activeButton} step="2" />
-            </SideMenu>
-        );
-    }
-
-    if (vedtakstype === Vedtakstype.ALDERSJUSTERING) {
-        if (erVedtakUtenBeregning && behandlingLesemodus && behandlingLesemodus.opprettetAvBatch) {
-            return (
-                <SideMenu>
-                    <VedtakMenuButton activeButton={activeButton} step="1" />
-                </SideMenu>
-            );
-        }
-
-        if (!erBisysVedtak && behandlingLesemodus && behandlingLesemodus.opprettetAvBatch) {
-            return (
-                <SideMenu>
-                    <UnderholdskostnadMenuButton activeButton={activeButton} step="1" />
-                    <VedtakMenuButton activeButton={activeButton} step="2" />
-                </SideMenu>
-            );
-        }
-
-        if (behandlingLesemodus && behandlingLesemodus.erAvvist) {
-            return (
-                <SideMenu>
-                    <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
-                    <VedtakMenuButton activeButton={activeButton} step="2" />
-                </SideMenu>
-            );
-        }
-
-        return (
-            <SideMenu>
-                <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
-                <UnderholdskostnadMenuButton activeButton={activeButton} step="2" />
-                <VedtakMenuButton activeButton={activeButton} step="3" />
-            </SideMenu>
-        );
-    }
-
     return (
         <SideMenu>
-            <VirkingstidspunktMenuButton activeButton={activeButton} step="1." />
-            {isBidragV2Enabled && <PrivatAvtaleMenuButton activeButton={activeButton} step={"2."} />}
-            <UnderholdskostnadMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "3." : "2"} />
-            <InntektMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "4." : "3"} />
-            <GebyrMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "5." : "4"} />
-            <BoforholdMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "6." : "5"} />
-            <SamværMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "7." : "6"} />
-            <VedtakMenuButton activeButton={activeButton} step={isBidragV2Enabled ? "8." : "7"} />
+            {sideMenu
+                .filter((menu) => menu.visible)
+                .map((menuButton, index) => {
+                    const Component = menuButtonMap[menuButton.step];
+                    return (
+                        <Component
+                            key={index + menuButton.step}
+                            activeButton={activeButton}
+                            step={index + 1}
+                            interactive={menuButton.interactive}
+                        />
+                    );
+                })}
         </SideMenu>
     );
 };

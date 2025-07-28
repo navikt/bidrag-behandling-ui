@@ -25,7 +25,6 @@ import { useSearchParams } from "react-router-dom";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
-import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
@@ -96,7 +95,7 @@ const Main = () => {
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, roller, inntekter, vedtakstype } = useGetBehandlingV2();
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
     const rolleId = searchParams.get(urlSearchParams.tab);
@@ -148,7 +147,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD]);
+    const onNext = () => onStepChange(getNextStep(SærligeutgifterStepper.INNTEKT));
 
     const debouncedOnSave = useDebounce(onSave);
 
