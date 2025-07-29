@@ -140,7 +140,17 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         },
         {
             step: BarnebidragStepper.VEDTAK,
-            visible: true,
+            visible: behandling.vedtakstype !== Vedtakstype.KLAGE,
+            interactive: true,
+        },
+        {
+            step: BarnebidragStepper.KLAGEVEDTAK,
+            visible: behandling.vedtakstype === Vedtakstype.KLAGE,
+            interactive: true,
+        },
+        {
+            step: BarnebidragStepper.VEDTAK_ENDELIG,
+            visible: behandling.vedtakstype === Vedtakstype.KLAGE,
             interactive: true,
         },
     ];

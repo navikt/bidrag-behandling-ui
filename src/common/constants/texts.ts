@@ -240,6 +240,7 @@ const tekster = {
         utgiftskategori: "Utgiftskategori",
         virkningstidspunkt: "Virkningstidspunkt",
         varighet: "Varighet",
+        beregningsperiode: "Beregningsperiode",
         årsak: "Årsak",
     },
     loading: "venter...",

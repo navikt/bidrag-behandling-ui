@@ -721,6 +721,8 @@ const menuButtonMap = {
     [BarnebidragStepper.UNDERHOLDSKOSTNAD]: UnderholdskostnadMenuButton,
     [BarnebidragStepper.SAMVÆR]: SamværMenuButton,
     [BarnebidragStepper.VEDTAK]: VedtakMenuButton,
+    [BarnebidragStepper.VEDTAK_ENDELIG]: VedtakEndeligMenuButton,
+    [BarnebidragStepper.KLAGEVEDTAK]: KlageVedtakMenuButton,
 } satisfies Record<string, React.ComponentType<never>>;
 
 export const BarnebidragSideMenu = () => {
@@ -734,7 +736,6 @@ export const BarnebidragSideMenu = () => {
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
 
-    const erKlageBidrag = vedtakstype === Vedtakstype.KLAGE && stønadstype === Stonadstype.BIDRAG;
     useEffect(() => {
         const activeButton = getActiveButtonFromParams();
         setActiveButton(activeButton);

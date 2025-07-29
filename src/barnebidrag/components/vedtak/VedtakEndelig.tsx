@@ -18,7 +18,7 @@ import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
-import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
+import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader, VelgManuellVedtakModal } from "./VedtakCommon";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 
 const VedtakEndelig = () => {
@@ -101,12 +101,6 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
 
 const VedtakResultat = () => {
     const { data: beregning } = useGetBeregningBidrag(true);
-    const {
-        virkningstidspunkt: { avslag },
-        vedtakstype,
-    } = useGetBehandlingV2();
-
-    const erAvslag = avslag !== null && avslag !== undefined;
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
@@ -158,7 +152,7 @@ const VedtakResultat = () => {
 
                                         <ResultatTabell
                                             key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
-                                            erAvslag={erAvslag}
+                                            erAvslag={false}
                                             avvistAldersjustering={avvistAldersjustering}
                                             resultatBarn={{
                                                 ...r,
@@ -186,15 +180,22 @@ type ResultatTabellProps = {
 };
 
 const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOpphor }: ResultatTabellProps) => {
+    const manuellAldersjustering = resultatBarn.perioder.some((p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt == true)
+    const periode = resultatBarn.perioder[0]
+    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear()
+    const valgtVedtak = resultatBarn.barn?.grunnlagFraVedtak?.some((v) => v.aldersjusteringForÅr == aldersjusteresForÅr && v.vedtak != null)
     return (
-        <Table size="small">
-            <VedtakTableHeader
-                avslag={erAvslag}
-                avvistAldersjustering={avvistAldersjustering}
-                resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
-            />
-            <VedtakTableBody resultatBarn={resultatBarn} avslag={erAvslag} opphør={erOpphor} />
-        </Table>
+        <div>
+            {(manuellAldersjustering || valgtVedtak) && <VelgManuellVedtakModal barnIdent={resultatBarn.barn.ident} aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()} />}
+            <Table size="small">
+                <VedtakTableHeader
+                    avslag={erAvslag}
+                    avvistAldersjustering={avvistAldersjustering}
+                    resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
+                />
+                <VedtakTableBody resultatBarn={resultatBarn} avslag={erAvslag} opphør={erOpphor} />
+            </Table>
+        </div>
     );
 };
 

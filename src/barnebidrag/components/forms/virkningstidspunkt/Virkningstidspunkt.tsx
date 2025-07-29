@@ -38,20 +38,20 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Checkbox, Label, Link, Table, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, Checkbox, HStack, Label, Link, MonthPicker, Table, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
 import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
+import { VedtaksListe, VedtaksListeVirkningstidspunkt } from "../../Vedtakliste";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -131,6 +131,7 @@ const createInitialValues = (
                 årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
                 begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
+                beregnTil: virkningstidspunkt.beregnTil ?? null,
                 beregnTilDato: virkningstidspunkt.beregnTilDato ?? null,
             };
 
@@ -200,7 +201,7 @@ const getOpphørOptions = (
     }
 };
 
-const BeregnTilDato = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
+const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
     const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
@@ -224,7 +225,9 @@ const BeregnTilDato = ({ item, barnIndex, initialValues, previousValues, setPrev
                             ...response,
                         };
                     });
-                    setPreviousValues(createInitialValues(response.virkningstidspunktV2, response.stønadstype));
+                    const initialValues = createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
+                    setValue(`roller.${barnIndex}.beregnTilDato`, initialValues.roller.find(r => r.rolle.ident == item.rolle.ident).beregnTilDato);
+                    setPreviousValues(initialValues);
                 },
                 onError: () => {
                     setSaveErrorState({
@@ -252,13 +255,13 @@ const BeregnTilDato = ({ item, barnIndex, initialValues, previousValues, setPrev
         <FlexRow className="gap-x-8">
             <FormControlledSelectField
                 name={`roller.${barnIndex}.beregnTil`}
-                label={text.label.varighet}
+                label={text.label.beregningsperiode}
                 className="w-max"
                 onSelect={(value) => onSelectVarighet(value)}
             >
                 {[BeregnTil.INNEVAeRENDEMANED, BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT].map((value) => (
                     <option key={value} value={value}>
-                        {value}
+                        {value == BeregnTil.INNEVAeRENDEMANED ? "Inneværende måned" : "Opprinnelig vedtakstidspunkt"}
                     </option>
                 ))}
             </FormControlledSelectField>
@@ -499,10 +502,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-          ? årsakListe18årsBidrag
-          : selectedVirkningstidspunkt.harLøpendeBidrag
-            ? harLøpendeBidragÅrsakListe
-            : årsakListe;
+            ? årsakListe18årsBidrag
+            : selectedVirkningstidspunkt.harLøpendeBidrag
+                ? harLøpendeBidragÅrsakListe
+                : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -625,12 +628,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
+                                        ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                      : avslagsListe
+                                        : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -649,16 +652,36 @@ const VirkningstidspunktBarn = ({
                         )}
                     </FormControlledSelectField>
                 )}
-                <FormControlledMonthPicker
-                    name={`roller.${barnIndex}.virkningstidspunkt`}
-                    label={text.label.virkningstidspunkt}
-                    placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.virkningstidspunkt}
-                    fromDate={fom}
-                    toDate={tom}
-                    readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
-                    required
-                />
+                <HStack gap={"2"}>
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.virkningstidspunkt`}
+                        label={text.label.virkningstidspunkt}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.virkningstidspunkt}
+                        fromDate={fom}
+                        toDate={tom}
+                        readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
+                        required
+                    />
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.beregnTilDato`}
+                        label={"Beregn til"}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.beregnTilDato}
+                        fromDate={fom}
+                        toDate={tom}
+                        readonly
+                        required
+                    />
+                    <BeregnTilDato
+                        item={item}
+                        barnIndex={barnIndex}
+                        previousValues={previousValues}
+                        setPreviousValues={setPreviousValues}
+                    />
+
+                </HStack>
+
             </FlexRow>
             {showChangedVirkningsDatoAlert && (
                 <BehandlingAlert variant="warning" className={"w-[488px]"}>
@@ -680,107 +703,15 @@ const VirkningstidspunktBarn = ({
                     resize
                 />
             )}
-            <BeregnTilDato
+            {/* <BeregnTilDato
                 item={item}
                 barnIndex={barnIndex}
-                initialValues={initialValues}
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
-            />
+            /> */}
             <KlagetPåVedtakButton />
-            <VedtaksListe item={item} />
+            <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />
         </>
-    );
-};
-
-const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) => {
-    const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
-    const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
-    const { lesemodus } = useBehandlingProvider();
-    const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak();
-    const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
-
-    if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
-
-    const onSelect = (vedtaksid: number, checked: boolean) => {
-        const updatedValue = checked ? vedtaksid : null;
-        setVal(updatedValue);
-        mutate({
-            barnId: selectedBarn.rolle.id,
-            vedtaksid: updatedValue,
-        });
-    };
-
-    const vedtaksLista = selectedBarn?.manuelleVedtak;
-
-    return (
-        <div>
-            <BodyShort size="small" weight="semibold" className="mb-2">
-                {text.description.velgVedtak}
-            </BodyShort>
-            <div className={`${isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}>
-                <OverlayLoader loading={isPending} />
-                <Table size="small" zebraStripes>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell scope="col"></Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Virkingsdato
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Vedtaksdato
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Søknadstype
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Resultat siste periode
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Vedtak
-                            </Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {vedtaksLista.map((vedtak) => (
-                            <Table.Row key={vedtak.vedtaksid}>
-                                <Table.HeaderCell scope="row">
-                                    <Checkbox
-                                        hideLabel
-                                        value={vedtak.vedtaksid}
-                                        checked={val === vedtak.vedtaksid}
-                                        onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
-                                        size="small"
-                                        readOnly={lesemodus}
-                                    >
-                                        {vedtak.vedtaksid}
-                                    </Checkbox>
-                                </Table.HeaderCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
-                                </Table.DataCell>
-                                <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
-                                <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
-                                <Table.DataCell>
-                                    <Link
-                                        variant="action"
-                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                    </Link>
-                                </Table.DataCell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            </div>
-            {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
-        </div>
     );
 };
 
