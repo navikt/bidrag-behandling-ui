@@ -1,5 +1,3 @@
-import { Rolletype, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
-import { PersonIdent } from "@common/components/PersonIdent";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
 import behandlingQueryKeys, {
@@ -10,12 +8,13 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
+import { Rolletype } from "../../api/BidragBehandlingApiV1";
 
 const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
@@ -130,7 +129,7 @@ const UnderholdskostnadMenuButton = ({
                         <MenuButton
                             title={
                                 <>
-                                    BA <PersonIdent ident={underhold.gjelderBarn.ident} />
+                                    BA <PersonNavnIdent ident={underhold.gjelderBarn.ident} />
                                 </>
                             }
                             onStepChange={() =>
@@ -377,7 +376,7 @@ const InntektMenuButton = ({
                     <MenuButton
                         title={
                             <div className="flex flex-row gap-1">
-                                {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                {rolle.rolletype} <PersonNavnIdent ident={rolle.ident} />
                             </div>
                         }
                         onStepChange={() =>
