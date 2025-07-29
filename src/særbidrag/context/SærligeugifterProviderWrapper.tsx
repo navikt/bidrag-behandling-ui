@@ -5,7 +5,7 @@ import { useBehandlingV2 } from "@common/hooks/useApiData";
 import React, { PropsWithChildren, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { STEPS as SærligeutgifterSteps } from "../constants/steps";
+import { STEPS, STEPS as SærligeutgifterSteps } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export type InntektTables =
@@ -72,6 +72,7 @@ function SærligeugifterProviderWrapper({ children }: PropsWithChildren) {
             visible: true,
             interactive: behandling.vedtakstype !== Vedtakstype.OPPHOR && behandling.utgift.avslag === undefined,
         },
+
         {
             step: SærligeutgifterStepper.VEDTAK,
             visible: true,
@@ -86,6 +87,7 @@ function SærligeugifterProviderWrapper({ children }: PropsWithChildren) {
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
             sideMenu,
+            stepsIndex: STEPS
         }),
         [
             JSON.stringify(pageErrorsOrUnsavedState),

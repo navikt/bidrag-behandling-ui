@@ -391,8 +391,8 @@ const VedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: 
 
 const menuButtonMap = {
     [SærligeutgifterStepper.UTGIFT]: UtgiftMenuButton,
-    [SærligeutgifterStepper.INNTEKT]: BoforholdMenuButton,
-    [SærligeutgifterStepper.BOFORHOLD]: InntektMenuButton,
+    [SærligeutgifterStepper.INNTEKT]: InntektMenuButton,
+    [SærligeutgifterStepper.BOFORHOLD]: BoforholdMenuButton,
     [SærligeutgifterStepper.VEDTAK]: VedtakMenuButton,
 };
 
