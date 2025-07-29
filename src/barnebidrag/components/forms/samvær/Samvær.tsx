@@ -90,7 +90,7 @@ const SamværForm = () => {
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, samvær, roller, vedtakstype } = useGetBehandlingV2();
-    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { getNextStep, setSaveErrorState, onStepChange } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
     const selectedRolleId = searchParams.get(urlSearchParams.tab);
@@ -139,7 +139,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.VEDTAK]);
+    const onNext = () => onStepChange(getNextStep(SærligeutgifterStepper.VEDTAK));
 
     const debouncedOnSave = useDebounce(onSave);
 
