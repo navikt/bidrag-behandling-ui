@@ -88,7 +88,7 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
             sideMenu,
-            stepsIndex: STEPS
+            stepsIndex: STEPS,
         }),
         [
             JSON.stringify(pageErrorsOrUnsavedState),

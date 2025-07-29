@@ -22,7 +22,6 @@ import React, {
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { TypeBehandling, Vedtakstype } from "../../api/BidragBehandlingApiV1";
-import { STEPS } from "../../barnebidrag/constants/steps";
 import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -52,9 +51,9 @@ interface IBehandlingContext {
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
     pageErrorsOrUnsavedState:
-    | ForskuddPageErrorsOrUnsavedState
-    | SærligeutgifterPageErrorsOrUnsavedState
-    | BarnebidragPageErrorsOrUnsavedState;
+        | ForskuddPageErrorsOrUnsavedState
+        | SærligeutgifterPageErrorsOrUnsavedState
+        | BarnebidragPageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<
         SetStateAction<
             | ForskuddPageErrorsOrUnsavedState
@@ -98,9 +97,9 @@ export type BehandlingProviderProps = {
         getPageErrorTexts: () => { title: string; description: string };
         formSteps: ForskuddSteps | SærligeutgifterSteps | BarnebidragSteps;
         pageErrorsOrUnsavedState:
-        | ForskuddPageErrorsOrUnsavedState
-        | SærligeutgifterPageErrorsOrUnsavedState
-        | BarnebidragPageErrorsOrUnsavedState;
+            | ForskuddPageErrorsOrUnsavedState
+            | SærligeutgifterPageErrorsOrUnsavedState
+            | BarnebidragPageErrorsOrUnsavedState;
         setPageErrorsOrUnsavedState: Dispatch<
             SetStateAction<
                 | ForskuddPageErrorsOrUnsavedState
@@ -124,7 +123,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         pageErrorsOrUnsavedState,
         setPageErrorsOrUnsavedState,
         sideMenu,
-        stepsIndex
+        stepsIndex,
     } = props;
     const { vedtaksperre } = useFeatureToogle();
     const { behandlingId, saksnummer, vedtakId } = useParams<{
@@ -220,7 +219,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             .toSpliced(0, currentStepIndex + 1)
             .find((step) => step.visible && step.interactive);
 
-        console.log(firstNextInteractiveButton, sideMenu, currentStepIndex, currentStep)
+        console.log(firstNextInteractiveButton, sideMenu, currentStepIndex, currentStep);
         return stepsIndex[firstNextInteractiveButton.step];
     };
 
