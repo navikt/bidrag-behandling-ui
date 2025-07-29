@@ -3,6 +3,7 @@ import { QueryKeys, useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Link, Modal, Table } from "@navikt/ds-react";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
 import {
@@ -17,9 +18,8 @@ import { RolleTag } from "../../../common/components/RolleTag";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
+import { VedtaksListeBeregning } from "../Vedtakliste";
 import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
-import { VedtaksListe, VedtaksListeBeregning } from "../Vedtakliste";
-import { useQueryClient } from "@tanstack/react-query";
 
 export const GrunnlagFraVedtakButton = () => {
     const { grunnlagFraVedtaksid, saksnummer } = useGetBehandlingV2();
@@ -57,7 +57,7 @@ export const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidr
 export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningPeriodeDto }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
-    const erDirekteAvslag = periode.erDirekteAvslag
+    const erDirekteAvslag = periode.erDirekteAvslag;
     const samværsklasse =
         periode.beregningsdetaljer?.samværsfradrag?.samværsklasse === Samvaersklasse.DELT_BOSTED
             ? "D"
@@ -69,62 +69,80 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
                 {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
             </Table.DataCell>
 
-            <Table.DataCell textSize="small">{erDirekteAvslag ? "-" : formatterBeløpForBeregning(periode.underholdskostnad)}</Table.DataCell>
             <Table.DataCell textSize="small">
-                {erDirekteAvslag ? "-" : <table>
-                    <tbody>
-                        <tr>
-                            <td className="w-[45px]" align="right">
-                                {formatterProsent(periode.bpsAndelU)}
-                            </td>
-                            <td className="w-[10px]">/</td>
-                            <td>{formatterBeløpForBeregning(periode.bpsAndelBeløp)}</td>
-                        </tr>
-                    </tbody>
-                </table>}
+                {erDirekteAvslag ? "-" : formatterBeløpForBeregning(periode.underholdskostnad)}
             </Table.DataCell>
             <Table.DataCell textSize="small">
-                {erDirekteAvslag ? "-" : <table>
-                    <tbody>
-                        {periode.beregningsdetaljer.samværsfradrag != null ? (
-                            <tr>
-                                <td className="w-[45px]" align="right">
-                                    {formatterBeløpForBeregning(periode.samværsfradrag)}
-                                </td>
-                                <td className="w-[10px]">/</td>
-                                <td>{samværsklasse}</td>
-                            </tr>
-                        ) : (
-                            <tr></tr>
-                        )}
-                    </tbody>
-                </table>}
-            </Table.DataCell>
-            {visEvne && (
-                <Table.DataCell textSize="small">
-                    {erDirekteAvslag ? "-" : <table>
+                {erDirekteAvslag ? (
+                    "-"
+                ) : (
+                    <table>
                         <tbody>
                             <tr>
                                 <td className="w-[45px]" align="right">
-                                    {formatterBeløpForBeregning(
-                                        periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
-                                    )}
+                                    {formatterProsent(periode.bpsAndelU)}
                                 </td>
                                 <td className="w-[10px]">/</td>
-                                <td>
-                                    {formatterBeløpForBeregning(
-                                        periode.beregningsdetaljer.delberegningBidragsevne?.sumInntekt25Prosent
-                                    )}
-                                </td>
+                                <td>{formatterBeløpForBeregning(periode.bpsAndelBeløp)}</td>
                             </tr>
                         </tbody>
-                    </table>}
+                    </table>
+                )}
+            </Table.DataCell>
+            <Table.DataCell textSize="small">
+                {erDirekteAvslag ? (
+                    "-"
+                ) : (
+                    <table>
+                        <tbody>
+                            {periode.beregningsdetaljer.samværsfradrag != null ? (
+                                <tr>
+                                    <td className="w-[45px]" align="right">
+                                        {formatterBeløpForBeregning(periode.samværsfradrag)}
+                                    </td>
+                                    <td className="w-[10px]">/</td>
+                                    <td>{samværsklasse}</td>
+                                </tr>
+                            ) : (
+                                <tr></tr>
+                            )}
+                        </tbody>
+                    </table>
+                )}
+            </Table.DataCell>
+            {visEvne && (
+                <Table.DataCell textSize="small">
+                    {erDirekteAvslag ? (
+                        "-"
+                    ) : (
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td className="w-[45px]" align="right">
+                                        {formatterBeløpForBeregning(
+                                            periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
+                                        )}
+                                    </td>
+                                    <td className="w-[10px]">/</td>
+                                    <td>
+                                        {formatterBeløpForBeregning(
+                                            periode.beregningsdetaljer.delberegningBidragsevne?.sumInntekt25Prosent
+                                        )}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    )}
                 </Table.DataCell>
             )}
 
-            <Table.DataCell textSize="small">{erDirekteAvslag ? "-" : formatterBeløpForBeregning(periode.beregnetBidrag)}</Table.DataCell>
+            <Table.DataCell textSize="small">
+                {erDirekteAvslag ? "-" : formatterBeløpForBeregning(periode.beregnetBidrag)}
+            </Table.DataCell>
 
-            <Table.DataCell textSize="small">{erDirekteAvslag ? "Avslag" : formatterBeløpForBeregning(periode.faktiskBidrag)}</Table.DataCell>
+            <Table.DataCell textSize="small">
+                {erDirekteAvslag ? "Avslag" : formatterBeløpForBeregning(periode.faktiskBidrag)}
+            </Table.DataCell>
 
             <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
         </>
@@ -226,22 +244,43 @@ export const VedtakTableHeader = ({
     );
 };
 
-export const VelgManuellVedtakModal = ({ barnIdent, aldersjusteringForÅr }: { barnIdent: string, aldersjusteringForÅr: number }) => {
+export const VelgManuellVedtakModal = ({
+    barnIdent,
+    aldersjusteringForÅr,
+}: {
+    barnIdent: string;
+    aldersjusteringForÅr: number;
+}) => {
     const queryClient = useQueryClient();
 
-    const [showModal, setShowModal] = useState(false)
-    return <>
-        <Button variant="tertiary" size="xsmall" onClick={() => setShowModal(true)}>Velg vedtak</Button>
-        <Modal aria-label="Velg manuell vedtak" open={showModal} onClose={() => setShowModal(false)} closeOnBackdropClick>
-            <Modal.Header closeButton>
-                <Heading size="medium">Velg vedtak for aldersjustering</Heading>
-            </Modal.Header>
-            <Modal.Body>
-                <VedtaksListeBeregning barnIdent={barnIdent} aldersjusteringForÅr={aldersjusteringForÅr} onSelectVedtak={() => queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) })} />
-            </Modal.Body>
-        </Modal>
-    </>
-}
+    const [showModal, setShowModal] = useState(false);
+    return (
+        <>
+            <Button variant="tertiary" size="xsmall" onClick={() => setShowModal(true)}>
+                Velg vedtak
+            </Button>
+            <Modal
+                aria-label="Velg manuell vedtak"
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                closeOnBackdropClick
+            >
+                <Modal.Header closeButton>
+                    <Heading size="medium">Velg vedtak for aldersjustering</Heading>
+                </Modal.Header>
+                <Modal.Body>
+                    <VedtaksListeBeregning
+                        barnIdent={barnIdent}
+                        aldersjusteringForÅr={aldersjusteringForÅr}
+                        onSelectVedtak={() =>
+                            queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) })
+                        }
+                    />
+                </Modal.Body>
+            </Modal>
+        </>
+    );
+};
 export const VedtakTableBody = ({
     resultatBarn,
     avslag,
@@ -255,7 +294,9 @@ export const VedtakTableBody = ({
 
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
-            periode.erBeregnetAvslag || periode.erDirekteAvslag || (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
+            periode.erBeregnetAvslag ||
+            periode.erDirekteAvslag ||
+            (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 
         if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
             return (

@@ -1,23 +1,31 @@
+import text from "@common/constants/texts";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Checkbox, Link, Table } from "@navikt/ds-react";
 import { useState } from "react";
+
 import { ManuellVedtakDto, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { OverlayLoader } from "../../common/components/OverlayLoader";
 import { useBehandlingProvider } from "../../common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetBeregningBidrag, useOppdaterManuelleVedtak } from "../../common/hooks/useApiData";
-import { DateToDDMMYYYYString, dateOrNull } from "../../utils/date-utils";
-import text from "@common/constants/texts";
+import { dateOrNull, DateToDDMMYYYYString } from "../../utils/date-utils";
 
-type VedtaksListeProps = { barnIdent: string, aldersjusteringForÅr?: number, onSelectVedtak?: () => void }
+type VedtaksListeProps = { barnIdent: string; aldersjusteringForÅr?: number; onSelectVedtak?: () => void };
 export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
     const { data: beregning } = useGetBeregningBidrag(true);
     const { virkningstidspunktV2 } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === props.barnIdent);
-    const barn = beregning.resultat?.resultatBarn?.find((b) => b.barn.ident == props.barnIdent)
+    const barn = beregning.resultat?.resultatBarn?.find((b) => b.barn.ident === props.barnIdent);
 
-    return <VedtaksListe {...props} valgVedtak={barn?.barn?.grunnlagFraVedtak?.find((g) => g.aldersjusteringForÅr == props.aldersjusteringForÅr)?.vedtak} vedtaksLista={selectedBarn.manuelleVedtak} />
-
-
+    return (
+        <VedtaksListe
+            {...props}
+            valgVedtak={
+                barn?.barn?.grunnlagFraVedtak?.find((g) => g.aldersjusteringForÅr === props.aldersjusteringForÅr)
+                    ?.vedtak
+            }
+            vedtaksLista={selectedBarn.manuelleVedtak}
+        />
+    );
 };
 
 export const VedtaksListeVirkningstidspunkt = (props: VedtaksListeProps) => {
@@ -26,18 +34,27 @@ export const VedtaksListeVirkningstidspunkt = (props: VedtaksListeProps) => {
 
     if (![Vedtakstype.ALDERSJUSTERING].includes(vedtakstype)) return null;
 
-    return <VedtaksListe {...props} vedtaksLista={selectedBarn.manuelleVedtak} valgVedtak={selectedBarn.grunnlagFraVedtak} />
+    return (
+        <VedtaksListe
+            {...props}
+            vedtaksLista={selectedBarn.manuelleVedtak}
+            valgVedtak={selectedBarn.grunnlagFraVedtak}
+        />
+    );
 };
 
-
-export const VedtaksListe = ({ barnIdent, aldersjusteringForÅr, onSelectVedtak, vedtaksLista, valgVedtak }: VedtaksListeProps & { vedtaksLista: ManuellVedtakDto[], valgVedtak?: number }) => {
-    const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
+export const VedtaksListe = ({
+    barnIdent,
+    aldersjusteringForÅr,
+    onSelectVedtak,
+    vedtaksLista,
+    valgVedtak,
+}: VedtaksListeProps & { vedtaksLista: ManuellVedtakDto[]; valgVedtak?: number }) => {
+    const { virkningstidspunktV2, saksnummer } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === barnIdent);
     const { lesemodus } = useBehandlingProvider();
     const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak();
     const [val, setVal] = useState<number>(valgVedtak);
-
-
 
     const onSelect = (vedtaksid: number, checked: boolean) => {
         const updatedValue = checked ? vedtaksid : null;
@@ -45,11 +62,10 @@ export const VedtaksListe = ({ barnIdent, aldersjusteringForÅr, onSelectVedtak,
         mutate({
             barnId: selectedBarn.rolle.id,
             vedtaksid: updatedValue,
-            aldersjusteringForÅr
+            aldersjusteringForÅr,
         });
-        onSelectVedtak?.()
+        onSelectVedtak?.();
     };
-
 
     return (
         <div>

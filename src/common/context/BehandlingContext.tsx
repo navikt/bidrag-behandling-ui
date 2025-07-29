@@ -51,9 +51,9 @@ interface IBehandlingContext {
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
     pageErrorsOrUnsavedState:
-    | ForskuddPageErrorsOrUnsavedState
-    | SærligeutgifterPageErrorsOrUnsavedState
-    | BarnebidragPageErrorsOrUnsavedState;
+        | ForskuddPageErrorsOrUnsavedState
+        | SærligeutgifterPageErrorsOrUnsavedState
+        | BarnebidragPageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<
         SetStateAction<
             | ForskuddPageErrorsOrUnsavedState
@@ -97,9 +97,9 @@ export type BehandlingProviderProps = {
         getPageErrorTexts: () => { title: string; description: string };
         formSteps: ForskuddSteps | SærligeutgifterSteps | BarnebidragSteps;
         pageErrorsOrUnsavedState:
-        | ForskuddPageErrorsOrUnsavedState
-        | SærligeutgifterPageErrorsOrUnsavedState
-        | BarnebidragPageErrorsOrUnsavedState;
+            | ForskuddPageErrorsOrUnsavedState
+            | SærligeutgifterPageErrorsOrUnsavedState
+            | BarnebidragPageErrorsOrUnsavedState;
         setPageErrorsOrUnsavedState: Dispatch<
             SetStateAction<
                 | ForskuddPageErrorsOrUnsavedState

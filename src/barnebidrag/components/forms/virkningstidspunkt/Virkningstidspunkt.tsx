@@ -16,7 +16,6 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
-import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -28,7 +27,7 @@ import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
 } from "@common/helpers/virkningstidspunktHelpers";
-import { useGetBehandlingV2, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
@@ -36,22 +35,21 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Checkbox, HStack, Label, Link, MonthPicker, Table, Tabs } from "@navikt/ds-react";
+import { BodyShort, HStack, Label, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
-import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
-import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
 import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
-import { VedtaksListe, VedtaksListeVirkningstidspunkt } from "../../Vedtakliste";
+import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
+import { VedtaksListeVirkningstidspunkt } from "../../Vedtakliste";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -204,14 +202,9 @@ const getOpphørOptions = (
 const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
     const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
-    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
+    const { setSaveErrorState } = useBehandlingProvider();
     const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
     const { getValues, reset, setValue } = useFormContext();
-    const tom = useMemo(() => {
-        if (behandling.stønadstype === Stonadstype.BIDRAG)
-            return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
-        return addMonths(new Date(), 50 * 12);
-    }, []);
 
     const updateBeregnTilDato = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -225,8 +218,15 @@ const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) =
                             ...response,
                         };
                     });
-                    const initialValues = createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
-                    setValue(`roller.${barnIndex}.beregnTilDato`, initialValues.roller.find(r => r.rolle.ident == item.rolle.ident).beregnTilDato);
+                    const initialValues = createInitialValues(
+                        response.virkningstidspunktV2,
+                        response.stønadstype,
+                        response.vedtakstype
+                    );
+                    setValue(
+                        `roller.${barnIndex}.beregnTilDato`,
+                        initialValues.roller.find((r) => r.rolle.ident === item.rolle.ident).beregnTilDato
+                    );
                     setPreviousValues(initialValues);
                 },
                 onError: () => {
@@ -244,10 +244,6 @@ const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) =
                 },
             }
         );
-    }
-
-    const onSelectVarighet = (value) => {
-        updateBeregnTilDato();
     };
 
     if (!behandling.erKlageEllerOmgjøring) return null;
@@ -257,18 +253,17 @@ const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) =
                 name={`roller.${barnIndex}.beregnTil`}
                 label={text.label.beregningsperiode}
                 className="w-max"
-                onSelect={(value) => onSelectVarighet(value)}
+                onSelect={updateBeregnTilDato}
             >
                 {[BeregnTil.INNEVAeRENDEMANED, BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT].map((value) => (
                     <option key={value} value={value}>
-                        {value == BeregnTil.INNEVAeRENDEMANED ? "Inneværende måned" : "Opprinnelig vedtakstidspunkt"}
+                        {value === BeregnTil.INNEVAeRENDEMANED ? "Inneværende måned" : "Opprinnelig vedtakstidspunkt"}
                     </option>
                 ))}
             </FormControlledSelectField>
         </FlexRow>
     );
 };
-
 
 const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
@@ -502,10 +497,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-            ? årsakListe18årsBidrag
-            : selectedVirkningstidspunkt.harLøpendeBidrag
-                ? harLøpendeBidragÅrsakListe
-                : årsakListe;
+          ? årsakListe18årsBidrag
+          : selectedVirkningstidspunkt.harLøpendeBidrag
+            ? harLøpendeBidragÅrsakListe
+            : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -628,12 +623,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                        ? avslagsListeOpphør.filter((value) =>
+                                      ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                        : avslagsListe
+                                      : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -679,9 +674,7 @@ const VirkningstidspunktBarn = ({
                         previousValues={previousValues}
                         setPreviousValues={setPreviousValues}
                     />
-
                 </HStack>
-
             </FlexRow>
             {showChangedVirkningsDatoAlert && (
                 <BehandlingAlert variant="warning" className={"w-[488px]"}>

@@ -80,7 +80,7 @@ export const BarnPerioder = () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onRemoveBarn(index),
-                        rollbackFn: () => { },
+                        rollbackFn: () => {},
                     });
                 },
             }

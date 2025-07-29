@@ -1,6 +1,6 @@
 import { BehandlingDtoV2 } from "@api/BidragBehandlingApiV1";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { QueryKeys, useUpdateBeregnTilDato, useUpdateOpphørsdato } from "@common/hooks/useApiData";
+import { QueryKeys, useUpdateBeregnTilDato } from "@common/hooks/useApiData";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const useOnUpdateBeregnTilDato = () => {

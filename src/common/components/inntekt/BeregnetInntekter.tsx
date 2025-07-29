@@ -189,8 +189,8 @@ export const BeregnetInntekter = () => {
                                                 {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.fom))} -{" "}
                                                 {delberegningSumInntekt.periode.til
                                                     ? DateToDDMMYYYYString(
-                                                        deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
-                                                    )
+                                                          deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
+                                                      )
                                                     : null}
                                             </Table.DataCell>
 

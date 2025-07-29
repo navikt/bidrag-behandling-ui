@@ -88,10 +88,10 @@ export const UnderholdskostnadPeriode = ({
     underhold,
 }: {
     fieldName:
-    | `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`
-    | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
-    | `underholdskostnaderMedIBehandling.${number}.tilleggsstønad.${number}`
-    | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
+        | `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`
+        | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
+        | `underholdskostnaderMedIBehandling.${number}.tilleggsstønad.${number}`
+        | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: UnderholdkostnadsFormPeriode;

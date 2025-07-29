@@ -8,13 +8,13 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { Rolletype } from "../../api/BidragBehandlingApiV1";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
-import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { Rolletype } from "../../api/BidragBehandlingApiV1";
 
 const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();

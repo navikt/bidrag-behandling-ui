@@ -15,11 +15,11 @@ import React, { useEffect } from "react";
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
+import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader, VelgManuellVedtakModal } from "./VedtakCommon";
-import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 
 const VedtakEndelig = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
@@ -104,7 +104,6 @@ const VedtakResultat = () => {
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
-
                 return (
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                         <VedtakResultatBarn barn={r.barn} />
@@ -136,18 +135,20 @@ const VedtakResultat = () => {
                         <VStack gap="4">
                             {r.delvedtak.map((delvedtak, i) => {
                                 const avvistAldersjustering = delvedtak.perioder.every(
-                                    (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
+                                    (p) =>
+                                        p.aldersjusteringDetaljer != null &&
+                                        p.aldersjusteringDetaljer?.aldersjustert === false
                                 );
 
-                                const vedtakstype = delvedtak.type
+                                const vedtakstype = delvedtak.type;
                                 return (
                                     <VStack>
                                         <Heading size="small" className="mb-2">
                                             {delvedtak.klagevedtak
                                                 ? "Klagevedtak"
                                                 : delvedtak.delvedtak === false
-                                                    ? "Endelig vedtak"
-                                                    : `Delvedtak (${hentVisningsnavn(vedtakstype)})`}
+                                                  ? "Endelig vedtak"
+                                                  : `Delvedtak (${hentVisningsnavn(vedtakstype)})`}
                                         </Heading>
 
                                         <ResultatTabell
@@ -157,12 +158,12 @@ const VedtakResultat = () => {
                                             resultatBarn={{
                                                 ...r,
                                                 perioder: delvedtak.perioder,
-                                                resultatUtenBeregning: delvedtak.type == Vedtakstype.INDEKSREGULERING,
+                                                resultatUtenBeregning: delvedtak.type === Vedtakstype.INDEKSREGULERING,
                                             }}
                                             erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                                         />
                                     </VStack>
-                                )
+                                );
                             })}
                         </VStack>
                     </div>
@@ -180,13 +181,22 @@ type ResultatTabellProps = {
 };
 
 const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOpphor }: ResultatTabellProps) => {
-    const manuellAldersjustering = resultatBarn.perioder.some((p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt == true)
-    const periode = resultatBarn.perioder[0]
-    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear()
-    const valgtVedtak = resultatBarn.barn?.grunnlagFraVedtak?.some((v) => v.aldersjusteringForÅr == aldersjusteresForÅr && v.vedtak != null)
+    const manuellAldersjustering = resultatBarn.perioder.some(
+        (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
+    );
+    const periode = resultatBarn.perioder[0];
+    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
+    const valgtVedtak = resultatBarn.barn?.grunnlagFraVedtak?.some(
+        (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
+    );
     return (
         <div>
-            {(manuellAldersjustering || valgtVedtak) && <VelgManuellVedtakModal barnIdent={resultatBarn.barn.ident} aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()} />}
+            {(manuellAldersjustering || valgtVedtak) && (
+                <VelgManuellVedtakModal
+                    barnIdent={resultatBarn.barn.ident}
+                    aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()}
+                />
+            )}
             <Table size="small">
                 <VedtakTableHeader
                     avslag={erAvslag}

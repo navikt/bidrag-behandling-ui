@@ -204,10 +204,10 @@ const Main = () => {
                                 )}
                                 {booleanValueOfEndeligIlagtGebyr[item.endeligIlagtGebyr] !==
                                     item.beregnetIlagtGebyr && (
-                                        <div>
-                                            <Begrunnelse fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
-                                        </div>
-                                    )}
+                                    <div>
+                                        <Begrunnelse fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
+                                    </div>
+                                )}
                             </div>
                         </Box>
                     </Fragment>

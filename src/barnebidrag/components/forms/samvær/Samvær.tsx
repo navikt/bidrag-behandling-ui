@@ -48,7 +48,6 @@ import { useSearchParams } from "react-router-dom";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
-import { STEPS } from "../../../constants/steps";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
 import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
 import { Samværsperiode } from "./Samværsperiode";
@@ -497,8 +496,9 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                                } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${
+                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                            } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

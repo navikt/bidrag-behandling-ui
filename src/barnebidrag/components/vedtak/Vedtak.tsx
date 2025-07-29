@@ -11,10 +11,7 @@ import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
-import {
-    ResultatBidragsberegningBarnDto,
-    Vedtakstype
-} from "../../../api/BidragBehandlingApiV1";
+import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
