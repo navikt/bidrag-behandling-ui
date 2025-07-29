@@ -22,7 +22,6 @@ import React, {
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { TypeBehandling, Vedtakstype } from "../../api/BidragBehandlingApiV1";
-import { STEPS } from "../../barnebidrag/constants/steps";
 import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -113,6 +112,7 @@ export type BehandlingProviderProps = {
             visible: boolean;
             interactive: boolean;
         }[];
+        stepsIndex: { [key: string]: number };
     };
 };
 
@@ -123,6 +123,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         pageErrorsOrUnsavedState,
         setPageErrorsOrUnsavedState,
         sideMenu,
+        stepsIndex,
     } = props;
     const { vedtaksperre } = useFeatureToogle();
     const { behandlingId, saksnummer, vedtakId } = useParams<{
@@ -218,7 +219,8 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             .toSpliced(0, currentStepIndex + 1)
             .find((step) => step.visible && step.interactive);
 
-        return STEPS[firstNextInteractiveButton.step];
+        console.log(firstNextInteractiveButton, sideMenu, currentStepIndex, currentStep);
+        return stepsIndex[firstNextInteractiveButton.step];
     };
 
     const onStepChange = (x: number, query?: Record<string, string>, hash?: string) => {
