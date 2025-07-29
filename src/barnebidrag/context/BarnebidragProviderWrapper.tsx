@@ -6,7 +6,7 @@ import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import React, { PropsWithChildren, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { STEPS as BarnebidragSteps } from "../constants/steps";
+import { STEPS as BarnebidragSteps, STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
 export type InntektTables =
@@ -159,6 +159,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
             sideMenu,
+            stepsIndex: STEPS,
         }),
         [
             JSON.stringify(pageErrorsOrUnsavedState),

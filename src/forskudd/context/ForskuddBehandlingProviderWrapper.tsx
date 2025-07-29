@@ -5,7 +5,7 @@ import { useBehandlingV2 } from "@common/hooks/useApiData";
 import React, { PropsWithChildren, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { STEPS as ForskuddSteps } from "../constants/steps";
+import { STEPS as ForskuddSteps, STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 
 export type InntektTables =
@@ -88,6 +88,7 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
             sideMenu,
+            stepsIndex: STEPS,
         }),
         [
             JSON.stringify(pageErrorsOrUnsavedState),
