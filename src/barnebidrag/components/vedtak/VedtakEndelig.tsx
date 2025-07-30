@@ -110,25 +110,28 @@ const VedtakResultat = () => {
     const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
         if (delvedtak.klagevedtak)
             return {
-                shadow: "large",
+                shadow: "medium",
                 background: "surface-transparent",
                 padding: "4",
                 borderWidth: "1",
+                borderColor: "border-subtle",
                 borderRadius: "medium",
             };
         if (delvedtak.delvedtak === false)
             return {
-                shadow: "xlarge",
+                shadow: "xsmall",
                 className: "mt-2",
                 background: "surface-transparent",
                 padding: "4",
                 borderWidth: "2",
+                borderColor: "border-subtle",
                 borderRadius: "medium",
             };
         return {
             shadow: "xsmall",
             background: "surface-transparent",
             padding: "4",
+            borderColor: "border-subtle",
             borderRadius: "small",
         };
     };
