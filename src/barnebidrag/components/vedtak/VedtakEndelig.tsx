@@ -8,11 +8,11 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/ho
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { LoggerService } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Link, Table, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, BoxProps, Heading, Link, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
-import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { DelvedtakDto, ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -101,6 +101,37 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
 
 const VedtakResultat = () => {
     const { data: beregning } = useGetBeregningBidrag(true);
+
+    const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
+        if (delvedtak.klagevedtak) return "Klagevedtak";
+        if (delvedtak.delvedtak === false) return "Endelig vedtak";
+        return `Delvedtak (${hentVisningsnavn(delvedtak.type)})`;
+    };
+    const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
+        if (delvedtak.klagevedtak)
+            return {
+                shadow: "large",
+                background: "surface-transparent",
+                padding: "4",
+                borderWidth: "1",
+                borderRadius: "medium",
+            };
+        if (delvedtak.delvedtak === false)
+            return {
+                shadow: "xlarge",
+                className: "mt-2",
+                background: "surface-transparent",
+                padding: "4",
+                borderWidth: "2",
+                borderRadius: "medium",
+            };
+        return {
+            shadow: "xsmall",
+            background: "surface-transparent",
+            padding: "4",
+            borderRadius: "small",
+        };
+    };
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
@@ -143,25 +174,24 @@ const VedtakResultat = () => {
                                 const vedtakstype = delvedtak.type;
                                 return (
                                     <VStack>
-                                        <Heading size="small" className="mb-2">
-                                            {delvedtak.klagevedtak
-                                                ? "Klagevedtak"
-                                                : delvedtak.delvedtak === false
-                                                  ? "Endelig vedtak"
-                                                  : `Delvedtak (${hentVisningsnavn(vedtakstype)})`}
-                                        </Heading>
+                                        <Box {...boxConfig(delvedtak)}>
+                                            <Heading size="small" className="mb-2">
+                                                {hentTittelVedtak(delvedtak)}
+                                            </Heading>
 
-                                        <ResultatTabell
-                                            key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
-                                            erAvslag={false}
-                                            avvistAldersjustering={avvistAldersjustering}
-                                            resultatBarn={{
-                                                ...r,
-                                                perioder: delvedtak.perioder,
-                                                resultatUtenBeregning: delvedtak.type === Vedtakstype.INDEKSREGULERING,
-                                            }}
-                                            erOpphor={vedtakstype === Vedtakstype.OPPHOR}
-                                        />
+                                            <ResultatTabell
+                                                key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
+                                                erAvslag={false}
+                                                avvistAldersjustering={avvistAldersjustering}
+                                                resultatBarn={{
+                                                    ...r,
+                                                    perioder: delvedtak.perioder,
+                                                    resultatUtenBeregning:
+                                                        delvedtak.type === Vedtakstype.INDEKSREGULERING,
+                                                }}
+                                                erOpphor={vedtakstype === Vedtakstype.OPPHOR}
+                                            />
+                                        </Box>
                                     </VStack>
                                 );
                             })}
