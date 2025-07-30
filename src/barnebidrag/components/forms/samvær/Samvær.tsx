@@ -47,7 +47,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
-import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
+import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
 import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
 import { Samværsperiode } from "./Samværsperiode";
@@ -89,7 +89,7 @@ const SamværForm = () => {
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, samvær, roller, vedtakstype } = useGetBehandlingV2();
-    const { getNextStep, setSaveErrorState, onStepChange } = useBehandlingProvider();
+    const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
     const selectedRolleId = searchParams.get(urlSearchParams.tab);
@@ -138,7 +138,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(getNextStep(SærligeutgifterStepper.VEDTAK));
+    const onNext = () => onStepChange(getNextStep(BarnebidragStepper.SAMVÆR));
 
     const debouncedOnSave = useDebounce(onSave);
 
