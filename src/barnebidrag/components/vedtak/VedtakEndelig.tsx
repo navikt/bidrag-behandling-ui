@@ -199,7 +199,8 @@ const VedtakResultat = () => {
                                                     ...r,
                                                     perioder: delvedtak.perioder,
                                                     resultatUtenBeregning:
-                                                        delvedtak.type === Vedtakstype.INDEKSREGULERING,
+                                                        delvedtak.type === Vedtakstype.INDEKSREGULERING ||
+                                                        (!delvedtak.delvedtak && !delvedtak.klagevedtak),
                                                 }}
                                                 erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                                             />

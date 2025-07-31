@@ -189,24 +189,14 @@ export const VedtakTableHeader = ({
                 </Table.Row>
             );
         }
-        if (bareVisResultat)
+
+        if (resultatUtenBeregning || bareVisResultat)
             return (
                 <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col" className="w-[70%]">
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[62%]">
                         {text.label.periode}
                     </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        Beløp
-                    </Table.HeaderCell>
-                </Table.Row>
-            );
-        if (resultatUtenBeregning)
-            return (
-                <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col">
-                        {text.label.periode}
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col">
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
                         Beløp
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col">
@@ -339,7 +329,7 @@ export const VedtakTableBody = ({
             );
         }
 
-        if (bareVisResultat) {
+        if (resultatBarn.resultatUtenBeregning || bareVisResultat) {
             return (
                 <Table.Row>
                     <Table.DataCell textSize="small">
@@ -347,22 +337,7 @@ export const VedtakTableBody = ({
                         {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
                     </Table.DataCell>
                     <Table.DataCell textSize="small">
-                        {periode.vedtakstype === Vedtakstype.OPPHOR
-                            ? "Opphør"
-                            : formatterBeløpForBeregning(periode.beregnetBidrag)}
-                    </Table.DataCell>
-                </Table.Row>
-            );
-        }
-        if (resultatBarn.resultatUtenBeregning) {
-            return (
-                <Table.Row>
-                    <Table.DataCell textSize="small">
-                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
-                    </Table.DataCell>
-                    <Table.DataCell textSize="small">
-                        {formatterBeløpForBeregning(periode.beregnetBidrag)}
+                        {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.beregnetBidrag)}
                     </Table.DataCell>
                     <Table.DataCell textSize="small" width="500px">
                         {periode.resultatkodeVisningsnavn}
