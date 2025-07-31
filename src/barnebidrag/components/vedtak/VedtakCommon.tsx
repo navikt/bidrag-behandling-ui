@@ -161,16 +161,18 @@ export const VedtakTableHeader = ({
     avslag = false,
     avvistAldersjustering = false,
     resultatUtenBeregning = false,
+    bareVisResultat = false,
 }: {
     avslag: boolean;
     avvistAldersjustering: boolean;
     resultatUtenBeregning: boolean;
+    bareVisResultat?: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
-    return (
-        <Table.Header>
-            {avvistAldersjustering ? (
+    function renderRows() {
+        if (avvistAldersjustering) {
+            return (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
@@ -185,7 +187,21 @@ export const VedtakTableHeader = ({
                         {text.label.årsak}
                     </Table.HeaderCell>
                 </Table.Row>
-            ) : resultatUtenBeregning ? (
+            );
+        }
+        if (bareVisResultat)
+            return (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[70%]">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        Beløp
+                    </Table.HeaderCell>
+                </Table.Row>
+            );
+        if (resultatUtenBeregning)
+            return (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
@@ -197,7 +213,10 @@ export const VedtakTableHeader = ({
                         {text.label.resultat}
                     </Table.HeaderCell>
                 </Table.Row>
-            ) : avslag ? (
+            );
+
+        if (avslag)
+            return (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
                         {text.label.periode}
@@ -209,39 +228,41 @@ export const VedtakTableHeader = ({
                         {text.label.årsak}
                     </Table.HeaderCell>
                 </Table.Row>
-            ) : (
-                <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
-                        {text.label.periode}
+            );
+
+        return (
+            <Table.Row>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
+                    {text.label.periode}
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
+                    U
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
+                    BPs andel U
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
+                    Samvær
+                </Table.HeaderCell>
+                {visEvne && (
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
+                        Evne / 25%
                     </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
-                        U
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
-                        BPs andel U
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
-                        Samvær
-                    </Table.HeaderCell>
-                    {visEvne && (
-                        <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
-                            Evne / 25%
-                        </Table.HeaderCell>
-                    )}
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
-                        Beregnet bidrag
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
-                        Endelig bidrag
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "390px" }}>
-                        Resultat
-                    </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
-                </Table.Row>
-            )}
-        </Table.Header>
-    );
+                )}
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
+                    Beregnet bidrag
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "210px" }}>
+                    Endelig bidrag
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "390px" }}>
+                    Resultat
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
+            </Table.Row>
+        );
+    }
+    return <Table.Header>{renderRows()}</Table.Header>;
 };
 
 export const VelgManuellVedtakModal = ({
@@ -285,10 +306,12 @@ export const VedtakTableBody = ({
     resultatBarn,
     avslag,
     opphør,
+    bareVisResultat,
 }: {
     resultatBarn: ResultatBidragsberegningBarnDto;
     avslag: boolean;
     opphør: boolean;
+    bareVisResultat: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
 
@@ -316,6 +339,21 @@ export const VedtakTableBody = ({
             );
         }
 
+        if (bareVisResultat) {
+            return (
+                <Table.Row>
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small">
+                        {periode.vedtakstype === Vedtakstype.OPPHOR
+                            ? "Opphør"
+                            : formatterBeløpForBeregning(periode.beregnetBidrag)}
+                    </Table.DataCell>
+                </Table.Row>
+            );
+        }
         if (resultatBarn.resultatUtenBeregning) {
             return (
                 <Table.Row>

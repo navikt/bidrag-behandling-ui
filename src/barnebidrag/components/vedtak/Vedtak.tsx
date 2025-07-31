@@ -128,11 +128,13 @@ const VedtakResultat = () => {
                                 avslag={erAvslag}
                                 avvistAldersjustering={avvistAldersjustering}
                                 resultatUtenBeregning={r.resultatUtenBeregning}
+                                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
                             />
                             <VedtakTableBody
                                 resultatBarn={r}
                                 avslag={erAvslag}
                                 opphør={vedtakstype === Vedtakstype.OPPHOR}
+                                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
                             />
                         </Table>
                     </div>

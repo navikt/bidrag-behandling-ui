@@ -71,22 +71,28 @@ const VedtakEndelig = () => {
     );
 };
 
-const GrunnlagFraVedtakButton = () => {
-    const { grunnlagFraVedtaksid, saksnummer } = useGetBehandlingV2();
+const VetakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean }) => {
+    const { saksnummer } = useGetBehandlingV2();
     const enhet = useQueryParams().get("enhet");
     const sessionState = useQueryParams().get("sessionState");
 
-    if (!grunnlagFraVedtaksid) return null;
+    if (!vedtaksid) return null;
     return (
         <Link
             className="ml-auto"
-            href={`/sak/${saksnummer}/vedtak/${grunnlagFraVedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+            href={`/sak/${saksnummer}/vedtak/${vedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
             target="_blank"
             rel="noreferrer"
         >
-            Grunnlag fra vedtak <ExternalLinkIcon aria-hidden />
+            {visText ? "Grunnlag fra vedtak" : ""} <ExternalLinkIcon aria-hidden />
         </Link>
     );
+};
+
+const GrunnlagFraVedtakButton = () => {
+    const { grunnlagFraVedtaksid } = useGetBehandlingV2();
+
+    return <VetakLenke vedtaksid={grunnlagFraVedtaksid} visText />;
 };
 const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
     if (!resultat.ugyldigBeregning) return null;
@@ -105,7 +111,8 @@ const VedtakResultat = () => {
     const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
         if (delvedtak.klagevedtak) return "Klagevedtak";
         if (delvedtak.delvedtak === false) return "Endelig vedtak";
-        return `Delvedtak (${hentVisningsnavn(delvedtak.type)})`;
+        if (delvedtak.gjennopprettetBeløpshistorikk) return "Gjennopprettet beløpshistorikk";
+        return `${hentVisningsnavn(delvedtak.type)}`;
     };
     const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
         if (delvedtak.klagevedtak)
@@ -178,14 +185,16 @@ const VedtakResultat = () => {
                                 return (
                                     <VStack>
                                         <Box {...boxConfig(delvedtak)}>
-                                            <Heading size="small" className="mb-2">
+                                            <Heading size="small" className="mb-2 inline-flex gap-2">
                                                 {hentTittelVedtak(delvedtak)}
+                                                <VetakLenke vedtaksid={delvedtak.vedtaksid} />
                                             </Heading>
 
                                             <ResultatTabell
                                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                                 erAvslag={false}
                                                 avvistAldersjustering={avvistAldersjustering}
+                                                gjennopprettetBeløpshistorikk={delvedtak.gjennopprettetBeløpshistorikk}
                                                 resultatBarn={{
                                                     ...r,
                                                     perioder: delvedtak.perioder,
@@ -211,9 +220,16 @@ type ResultatTabellProps = {
     erOpphor?: boolean;
     avvistAldersjustering: boolean;
     resultatBarn: ResultatBidragsberegningBarnDto;
+    gjennopprettetBeløpshistorikk?: boolean;
 };
 
-const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOpphor }: ResultatTabellProps) => {
+const ResultatTabell = ({
+    erAvslag,
+    avvistAldersjustering,
+    resultatBarn,
+    erOpphor,
+    gjennopprettetBeløpshistorikk,
+}: ResultatTabellProps) => {
     const manuellAldersjustering = resultatBarn.perioder.some(
         (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
     );
@@ -235,8 +251,14 @@ const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOppho
                     avslag={erAvslag}
                     avvistAldersjustering={avvistAldersjustering}
                     resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
+                    bareVisResultat={gjennopprettetBeløpshistorikk}
                 />
-                <VedtakTableBody resultatBarn={resultatBarn} avslag={erAvslag} opphør={erOpphor} />
+                <VedtakTableBody
+                    resultatBarn={resultatBarn}
+                    avslag={erAvslag}
+                    opphør={erOpphor}
+                    bareVisResultat={gjennopprettetBeløpshistorikk}
+                />
             </Table>
         </div>
     );
