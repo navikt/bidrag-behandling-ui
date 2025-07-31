@@ -53,7 +53,7 @@ export const VedtaksListe = ({
     const { virkningstidspunktV2, saksnummer } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === barnIdent);
     const { lesemodus } = useBehandlingProvider();
-    const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak();
+    const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak(onSelectVedtak);
     const [val, setVal] = useState<number>(valgVedtak);
 
     const onSelect = (vedtaksid: number, checked: boolean) => {
@@ -64,7 +64,6 @@ export const VedtaksListe = ({
             vedtaksid: updatedValue,
             aldersjusteringForÅr,
         });
-        onSelectVedtak?.();
     };
 
     return (

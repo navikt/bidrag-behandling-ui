@@ -182,14 +182,27 @@ const VedtakResultat = () => {
                                 );
 
                                 const vedtakstype = delvedtak.type;
+                                const periode = delvedtak.perioder[0];
+                                const manuellAldersjustering = delvedtak.perioder.some(
+                                    (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
+                                );
+                                const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
+                                const valgtVedtak = r.barn?.grunnlagFraVedtak?.some(
+                                    (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
+                                );
                                 return (
                                     <VStack>
                                         <Box {...boxConfig(delvedtak)}>
-                                            <Heading size="small" className="mb-2 inline-flex gap-2">
+                                            <Heading size="small" className="mb-2 inline-flex gap-2 mr-2">
                                                 {hentTittelVedtak(delvedtak)}
                                                 <VetakLenke vedtaksid={delvedtak.vedtaksid} />
                                             </Heading>
-
+                                            {(manuellAldersjustering || valgtVedtak) && (
+                                                <VelgManuellVedtakModal
+                                                    barnIdent={r.barn.ident}
+                                                    aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()}
+                                                />
+                                            )}
                                             <ResultatTabell
                                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                                 erAvslag={false}
@@ -231,37 +244,21 @@ const ResultatTabell = ({
     erOpphor,
     gjennopprettetBeløpshistorikk,
 }: ResultatTabellProps) => {
-    const manuellAldersjustering = resultatBarn.perioder.some(
-        (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
-    );
-    const periode = resultatBarn.perioder[0];
-    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
-    const valgtVedtak = resultatBarn.barn?.grunnlagFraVedtak?.some(
-        (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
-    );
     return (
-        <div>
-            {(manuellAldersjustering || valgtVedtak) && (
-                <VelgManuellVedtakModal
-                    barnIdent={resultatBarn.barn.ident}
-                    aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()}
-                />
-            )}
-            <Table size="small">
-                <VedtakTableHeader
-                    avslag={erAvslag}
-                    avvistAldersjustering={avvistAldersjustering}
-                    resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
-                    bareVisResultat={gjennopprettetBeløpshistorikk}
-                />
-                <VedtakTableBody
-                    resultatBarn={resultatBarn}
-                    avslag={erAvslag}
-                    opphør={erOpphor}
-                    bareVisResultat={gjennopprettetBeløpshistorikk}
-                />
-            </Table>
-        </div>
+        <Table size="small">
+            <VedtakTableHeader
+                avslag={erAvslag}
+                avvistAldersjustering={avvistAldersjustering}
+                resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
+                bareVisResultat={gjennopprettetBeløpshistorikk}
+            />
+            <VedtakTableBody
+                resultatBarn={resultatBarn}
+                avslag={erAvslag}
+                opphør={erOpphor}
+                bareVisResultat={gjennopprettetBeløpshistorikk}
+            />
+        </Table>
     );
 };
 

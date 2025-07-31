@@ -828,7 +828,7 @@ export const useDeletePrivatAvtale = () => {
     });
 };
 
-export const useOppdaterManuelleVedtak = () => {
+export const useOppdaterManuelleVedtak = (onSuccess?: () => void) => {
     const { id: behandlingId } = useGetBehandlingV2();
     const queryClient = useQueryClient();
 
@@ -839,6 +839,7 @@ export const useOppdaterManuelleVedtak = () => {
             return data;
         },
         onSuccess: async (response, payload) => {
+            onSuccess?.();
             queryClient.setQueryData<BehandlingDtoV2>(
                 QueryKeys.behandlingV2(behandlingId.toString()),
                 (currentData): BehandlingDtoV2 => {
