@@ -2593,7 +2593,7 @@ export interface DelvedtakDto {
   /** @format int32 */
   vedtaksid?: number;
   delvedtak: boolean;
-  gjennopprettetBeløpshistorikk: boolean;
+  gjenopprettetBeløpshistorikk: boolean;
   perioder: ResultatBarnebidragsberegningPeriodeDto[];
   grunnlagFraVedtak: GrunnlagFraVedtak[];
 }
@@ -2611,6 +2611,7 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   resultatKode?: Resultatkode;
   erDirekteAvslag: boolean;
   erOpphør: boolean;
+  endeligVedtak: boolean;
   erBeregnetAvslag: boolean;
   erEndringUnderGrense: boolean;
   beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;

@@ -111,7 +111,7 @@ const VedtakResultat = () => {
     const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
         if (delvedtak.klagevedtak) return "Klagevedtak";
         if (delvedtak.delvedtak === false) return "Endelig vedtak";
-        if (delvedtak.gjennopprettetBeløpshistorikk) return "Gjennopprettet beløpshistorikk";
+        if (delvedtak.gjenopprettetBeløpshistorikk) return "Gjenopprettet beløpshistorikk";
         return `${hentVisningsnavn(delvedtak.type)}`;
     };
     const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
@@ -207,7 +207,7 @@ const VedtakResultat = () => {
                                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                                 erAvslag={false}
                                                 avvistAldersjustering={avvistAldersjustering}
-                                                gjennopprettetBeløpshistorikk={delvedtak.gjennopprettetBeløpshistorikk}
+                                                gjenopprettetBeløpshistorikk={delvedtak.gjenopprettetBeløpshistorikk}
                                                 resultatBarn={{
                                                     ...r,
                                                     perioder: delvedtak.perioder,
@@ -234,7 +234,7 @@ type ResultatTabellProps = {
     erOpphor?: boolean;
     avvistAldersjustering: boolean;
     resultatBarn: ResultatBidragsberegningBarnDto;
-    gjennopprettetBeløpshistorikk?: boolean;
+    gjenopprettetBeløpshistorikk?: boolean;
 };
 
 const ResultatTabell = ({
@@ -242,7 +242,7 @@ const ResultatTabell = ({
     avvistAldersjustering,
     resultatBarn,
     erOpphor,
-    gjennopprettetBeløpshistorikk,
+    gjenopprettetBeløpshistorikk,
 }: ResultatTabellProps) => {
     return (
         <Table size="small">
@@ -250,13 +250,13 @@ const ResultatTabell = ({
                 avslag={erAvslag}
                 avvistAldersjustering={avvistAldersjustering}
                 resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
-                bareVisResultat={gjennopprettetBeløpshistorikk}
+                bareVisResultat={gjenopprettetBeløpshistorikk}
             />
             <VedtakTableBody
                 resultatBarn={resultatBarn}
                 avslag={erAvslag}
                 opphør={erOpphor}
-                bareVisResultat={gjennopprettetBeløpshistorikk}
+                bareVisResultat={gjenopprettetBeløpshistorikk}
             />
         </Table>
     );

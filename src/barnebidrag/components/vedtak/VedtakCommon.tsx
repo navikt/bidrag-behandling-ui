@@ -337,7 +337,7 @@ export const VedtakTableBody = ({
                         {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
                     </Table.DataCell>
                     <Table.DataCell textSize="small">
-                        {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.beregnetBidrag)}
+                        {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.faktiskBidrag)}
                     </Table.DataCell>
                     <Table.DataCell textSize="small" width="500px">
                         {periode.resultatkodeVisningsnavn}
