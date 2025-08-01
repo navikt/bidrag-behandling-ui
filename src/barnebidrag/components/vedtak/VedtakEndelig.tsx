@@ -207,7 +207,10 @@ const VedtakResultat = () => {
                                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                                 erAvslag={false}
                                                 avvistAldersjustering={avvistAldersjustering}
-                                                gjenopprettetBeløpshistorikk={delvedtak.gjenopprettetBeløpshistorikk}
+                                                gjenopprettetBeløpshistorikk={
+                                                    delvedtak.gjenopprettetBeløpshistorikk ||
+                                                    delvedtak.type === Vedtakstype.INNKREVING
+                                                }
                                                 resultatBarn={{
                                                     ...r,
                                                     perioder: delvedtak.perioder,
