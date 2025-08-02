@@ -209,7 +209,8 @@ const VedtakResultat = () => {
                                                 avvistAldersjustering={avvistAldersjustering}
                                                 gjenopprettetBeløpshistorikk={
                                                     delvedtak.gjenopprettetBeløpshistorikk ||
-                                                    delvedtak.type === Vedtakstype.INNKREVING
+                                                    delvedtak.type === Vedtakstype.INNKREVING ||
+                                                    delvedtak.type === Vedtakstype.OPPHOR
                                                 }
                                                 resultatBarn={{
                                                     ...r,
