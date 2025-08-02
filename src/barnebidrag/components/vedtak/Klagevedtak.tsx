@@ -1,71 +1,54 @@
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { AdminButtons } from "@common/components/vedtak/AdminButtons";
-import { FatteVedtakButtons } from "@common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "@common/components/vedtak/VedtakWrapper";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
-import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { ActionButtons } from "../../../common/components/ActionButtons";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
+import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
 import { GrunnlagFraVedtakButton, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
 
-const Vedtak = () => {
+const Klagevedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
+    const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(false))?.status === "error";
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
-        LoggerService.info("Vedtak component mounted");
     }, [activeStep]);
 
     return (
-        <React.Suspense fallback={<div></div>}>
-            <div className="grid gap-y-8  w-[1150px]">
-                {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
-                <div className="grid gap-y-2">
-                    <Heading level="2" size="medium">
-                        {text.title.vedtak}
-                    </Heading>
-                </div>
-                <div className="grid gap-y-2">
-                    {!beregning?.feil && (
-                        <div className="flex flex-row">
-                            <Heading level="3" size="small">
-                                {text.title.oppsummering}
-                            </Heading>
-                            <GrunnlagFraVedtakButton />
-                        </div>
-                    )}
-
-                    <VedtakResultat />
-                </div>
-
-                {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
-                    <FatteVedtakButtons
-                        isBeregningError={isBeregningError}
-                        disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
-                        opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
-                            (r) => r.forsendelseDistribueresAutomatisk
-                        )}
-                    />
-                )}
-                <AdminButtons />
+        <div className="grid gap-y-8  w-[1150px]">
+            {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+            <div className="grid gap-y-2">
+                <Heading level="2" size="medium">
+                    {text.title.vedtak}
+                </Heading>
             </div>
-        </React.Suspense>
+            <div className="grid gap-y-2">
+                {!beregning?.feil && (
+                    <div className="flex flex-row">
+                        <Heading level="3" size="small">
+                            {text.title.oppsummering}
+                        </Heading>
+                        <GrunnlagFraVedtakButton />
+                    </div>
+                )}
+
+                <VedtakResultat />
+            </div>
+        </div>
     );
 };
 
@@ -128,13 +111,11 @@ const VedtakResultat = () => {
                                 avslag={erAvslag}
                                 avvistAldersjustering={avvistAldersjustering}
                                 resultatUtenBeregning={r.resultatUtenBeregning}
-                                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
                             />
                             <VedtakTableBody
                                 resultatBarn={r}
                                 avslag={erAvslag}
                                 opphør={vedtakstype === Vedtakstype.OPPHOR}
-                                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
                             />
                         </Table>
                     </div>
@@ -143,11 +124,25 @@ const VedtakResultat = () => {
         </VedtakWrapper>
     );
 };
+const Side = () => {
+    const { onStepChange } = useBehandlingProvider();
+
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.VEDTAK_ENDELIG]);
+
+    return (
+        <>
+            <ActionButtons onNext={onNext} />
+        </>
+    );
+};
 
 export default () => {
     return (
         <QueryErrorWrapper>
-            <Vedtak />
+            <Klagevedtak />
+            <Side />
+            <div className="my-3" />
+            <AdminButtons />
         </QueryErrorWrapper>
     );
 };

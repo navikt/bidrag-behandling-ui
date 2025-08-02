@@ -41,7 +41,7 @@ export const useBidragBeregningPeriode = () => {
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
 
-    if (periode.erBeregnetAvslag) return null;
+    if (periode.erBeregnetAvslag || !beregningsdetaljer.sluttberegning) return null;
     return (
         <VStack gap="6" className={"w-[800px]"}>
             <BidragBeregningContext.Provider
