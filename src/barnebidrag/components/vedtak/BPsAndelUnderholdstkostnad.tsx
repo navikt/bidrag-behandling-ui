@@ -10,6 +10,7 @@ export const BPsAndelUnderholdskostnad = () => {
     const bpsAndel = beregningsdetaljer.bpsAndel;
     const inntekter = beregningsdetaljer.inntekter;
     const delberegningUnderholdskostnad = beregningsdetaljer.delberegningUnderholdskostnad;
+    if (!delberegningUnderholdskostnad) return null;
     return (
         <VStack gap="2">
             <BPsAndelInntekterTable inntekter={inntekter} forskuddssats={beregningsdetaljer.forskuddssats} />

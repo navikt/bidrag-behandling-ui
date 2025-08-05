@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import {
     ResultatBarnebidragsberegningPeriodeDto,
     ResultatBidragsberegningBarnDto,
+    Resultatkode,
     ResultatRolle,
     Rolletype,
     Samvaersklasse,
@@ -332,6 +333,7 @@ export const VedtakTableBody = ({
             periode.erBeregnetAvslag ||
             periode.beregningsdetaljer?.sluttberegning === undefined ||
             periode.erDirekteAvslag ||
+            periode.resultatKode === Resultatkode.INNVILGET_VEDTAK ||
             (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 
         if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
@@ -385,6 +387,7 @@ export const VedtakTableBody = ({
             <Table.ExpandableRow
                 togglePlacement="right"
                 expandOnRowClick
+                className={periode.resultatFraVedtak ? "bg-gray-100" : ""}
                 expansionDisabled={skjulBeregning}
                 content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
             >
