@@ -144,7 +144,12 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
                 {erDirekteAvslag ? "Avslag" : formatterBeløpForBeregning(periode.faktiskBidrag)}
             </Table.DataCell>
 
-            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+            <Table.DataCell textSize="small">
+                <div className="flex flex-row gap-1 w-max">
+                    <div>{periode.resultatkodeVisningsnavn}</div>
+                    {periode.resultatFraVedtak && <VedtakLenke vedtaksid={periode.resultatFraVedtak} />}
+                </div>
+            </Table.DataCell>
         </>
     );
 };
@@ -292,6 +297,23 @@ export const VelgManuellVedtakModal = ({
         </>
     );
 };
+export const VedtakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean }) => {
+    const { saksnummer } = useGetBehandlingV2();
+    const enhet = useQueryParams().get("enhet");
+    const sessionState = useQueryParams().get("sessionState");
+
+    if (!vedtaksid) return null;
+    return (
+        <Link
+            className="ml-auto"
+            href={`/sak/${saksnummer}/vedtak/${vedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+            target="_blank"
+            rel="noreferrer"
+        >
+            {visText ? "Grunnlag fra vedtak" : ""} <ExternalLinkIcon aria-hidden />
+        </Link>
+    );
+};
 export const VedtakTableBody = ({
     resultatBarn,
     avslag,
@@ -308,6 +330,7 @@ export const VedtakTableBody = ({
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
             periode.erBeregnetAvslag ||
+            periode.beregningsdetaljer?.sluttberegning === undefined ||
             periode.erDirekteAvslag ||
             (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 

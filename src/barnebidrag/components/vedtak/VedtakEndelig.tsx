@@ -71,7 +71,7 @@ const VedtakEndelig = () => {
     );
 };
 
-const VetakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean }) => {
+export const VedtakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean }) => {
     const { saksnummer } = useGetBehandlingV2();
     const enhet = useQueryParams().get("enhet");
     const sessionState = useQueryParams().get("sessionState");
@@ -92,7 +92,7 @@ const VetakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visTex
 const GrunnlagFraVedtakButton = () => {
     const { grunnlagFraVedtaksid } = useGetBehandlingV2();
 
-    return <VetakLenke vedtaksid={grunnlagFraVedtaksid} visText />;
+    return <VedtakLenke vedtaksid={grunnlagFraVedtaksid} visText />;
 };
 const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
     if (!resultat.ugyldigBeregning) return null;
@@ -131,7 +131,6 @@ const VedtakResultat = () => {
                 className: "mt-2",
                 background: "surface-transparent",
                 padding: "4",
-                borderWidth: "2",
                 borderColor: "border-subtle",
                 borderRadius: "medium",
             };
@@ -175,57 +174,57 @@ const VedtakResultat = () => {
                             />
                         )}
                         <VStack gap="4">
-                            {r.delvedtak.map((delvedtak, i) => {
-                                const avvistAldersjustering = delvedtak.perioder.every(
-                                    (p) =>
-                                        p.aldersjusteringDetaljer != null &&
-                                        p.aldersjusteringDetaljer?.aldersjustert === false
-                                );
+                            {r.delvedtak
+                                .filter((d) => !d.delvedtak && !d.klagevedtak)
+                                .map((delvedtak, i) => {
+                                    const avvistAldersjustering = delvedtak.perioder.every(
+                                        (p) =>
+                                            p.aldersjusteringDetaljer != null &&
+                                            p.aldersjusteringDetaljer?.aldersjustert === false
+                                    );
 
-                                const vedtakstype = delvedtak.type;
-                                const periode = delvedtak.perioder[0];
-                                const manuellAldersjustering = delvedtak.perioder.some(
-                                    (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
-                                );
-                                const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
-                                const valgtVedtak = r.barn?.grunnlagFraVedtak?.some(
-                                    (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
-                                );
-                                return (
-                                    <VStack>
-                                        <Box {...boxConfig(delvedtak)}>
-                                            <Heading size="small" className="mb-2 inline-flex gap-2 mr-2">
-                                                {hentTittelVedtak(delvedtak)}
-                                                <VetakLenke vedtaksid={delvedtak.vedtaksid} />
-                                            </Heading>
-                                            {(manuellAldersjustering || valgtVedtak) && (
-                                                <VelgManuellVedtakModal
-                                                    barnIdent={r.barn.ident}
-                                                    aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()}
+                                    const vedtakstype = delvedtak.type;
+                                    const periode = delvedtak.perioder[0];
+                                    const manuellAldersjustering = delvedtak.perioder.some(
+                                        (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
+                                    );
+                                    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
+                                    const valgtVedtak = r.barn?.grunnlagFraVedtak?.some(
+                                        (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
+                                    );
+                                    return (
+                                        <VStack>
+                                            <Box {...boxConfig(delvedtak)}>
+                                                {(manuellAldersjustering || valgtVedtak) && (
+                                                    <VelgManuellVedtakModal
+                                                        barnIdent={r.barn.ident}
+                                                        aldersjusteringForÅr={new Date(
+                                                            periode.periode.fom
+                                                        ).getFullYear()}
+                                                    />
+                                                )}
+                                                <ResultatTabell
+                                                    key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
+                                                    erAvslag={false}
+                                                    avvistAldersjustering={avvistAldersjustering}
+                                                    gjenopprettetBeløpshistorikk={
+                                                        delvedtak.gjenopprettetBeløpshistorikk ||
+                                                        delvedtak.type === Vedtakstype.INNKREVING ||
+                                                        delvedtak.type === Vedtakstype.OPPHOR
+                                                    }
+                                                    resultatBarn={{
+                                                        ...r,
+                                                        perioder: delvedtak.perioder,
+                                                        resultatUtenBeregning:
+                                                            delvedtak.type === Vedtakstype.INDEKSREGULERING,
+                                                        // (!delvedtak.delvedtak && !delvedtak.klagevedtak),
+                                                    }}
+                                                    erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                                                 />
-                                            )}
-                                            <ResultatTabell
-                                                key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
-                                                erAvslag={false}
-                                                avvistAldersjustering={avvistAldersjustering}
-                                                gjenopprettetBeløpshistorikk={
-                                                    delvedtak.gjenopprettetBeløpshistorikk ||
-                                                    delvedtak.type === Vedtakstype.INNKREVING ||
-                                                    delvedtak.type === Vedtakstype.OPPHOR
-                                                }
-                                                resultatBarn={{
-                                                    ...r,
-                                                    perioder: delvedtak.perioder,
-                                                    resultatUtenBeregning:
-                                                        delvedtak.type === Vedtakstype.INDEKSREGULERING ||
-                                                        (!delvedtak.delvedtak && !delvedtak.klagevedtak),
-                                                }}
-                                                erOpphor={vedtakstype === Vedtakstype.OPPHOR}
-                                            />
-                                        </Box>
-                                    </VStack>
-                                );
-                            })}
+                                            </Box>
+                                        </VStack>
+                                    );
+                                })}
                         </VStack>
                     </div>
                 );
