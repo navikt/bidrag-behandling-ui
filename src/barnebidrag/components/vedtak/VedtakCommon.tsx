@@ -96,7 +96,7 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
                 ) : (
                     <table>
                         <tbody>
-                            {periode.beregningsdetaljer.samværsfradrag != null ? (
+                            {periode.beregningsdetaljer?.samværsfradrag != null ? (
                                 <tr>
                                     <td className="w-[45px]" align="right">
                                         {formatterBeløpForBeregning(periode.samværsfradrag)}

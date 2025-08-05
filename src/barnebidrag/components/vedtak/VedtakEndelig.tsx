@@ -207,10 +207,10 @@ const VedtakResultat = () => {
                                                     key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                                     erAvslag={false}
                                                     avvistAldersjustering={avvistAldersjustering}
-                                                    gjenopprettetBeløpshistorikk={
-                                                        delvedtak.gjenopprettetBeløpshistorikk ||
-                                                        delvedtak.type === Vedtakstype.INNKREVING ||
-                                                        delvedtak.type === Vedtakstype.OPPHOR
+                                                    beregnet={
+                                                        delvedtak.beregnet ||
+                                                        (delvedtak.type !== Vedtakstype.INNKREVING &&
+                                                            delvedtak.type !== Vedtakstype.OPPHOR)
                                                     }
                                                     resultatBarn={{
                                                         ...r,
@@ -238,29 +238,23 @@ type ResultatTabellProps = {
     erOpphor?: boolean;
     avvistAldersjustering: boolean;
     resultatBarn: ResultatBidragsberegningBarnDto;
-    gjenopprettetBeløpshistorikk?: boolean;
+    beregnet?: boolean;
 };
 
-const ResultatTabell = ({
-    erAvslag,
-    avvistAldersjustering,
-    resultatBarn,
-    erOpphor,
-    gjenopprettetBeløpshistorikk,
-}: ResultatTabellProps) => {
+const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOpphor, beregnet }: ResultatTabellProps) => {
     return (
         <Table size="small">
             <VedtakTableHeader
                 avslag={erAvslag}
                 avvistAldersjustering={avvistAldersjustering}
                 resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
-                bareVisResultat={gjenopprettetBeløpshistorikk}
+                bareVisResultat={!beregnet}
             />
             <VedtakTableBody
                 resultatBarn={resultatBarn}
                 avslag={erAvslag}
                 opphør={erOpphor}
-                bareVisResultat={gjenopprettetBeløpshistorikk}
+                bareVisResultat={!beregnet}
             />
         </Table>
     );
