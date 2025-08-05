@@ -108,13 +108,13 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
 const VedtakResultat = () => {
     const { data: beregning } = useGetBeregningBidrag(true);
 
-    const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
-        if (delvedtak.klagevedtak) return "Klagevedtak";
-        if (delvedtak.delvedtak === false) return "Endelig vedtak";
-        if (delvedtak.gjenopprettetBeløpshistorikk)
-            return `Gjenopprettet beløpshistorikk (${hentVisningsnavn(delvedtak.type)})`;
-        return `${hentVisningsnavn(delvedtak.type)}`;
-    };
+    // const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
+    //     if (delvedtak.klagevedtak) return "Klagevedtak";
+    //     if (delvedtak.delvedtak === false) return "Endelig vedtak";
+    //     if (delvedtak.gjenopprettetBeløpshistorikk)
+    //         return `Gjenopprettet beløpshistorikk (${hentVisningsnavn(delvedtak.type)})`;
+    //     return `${hentVisningsnavn(delvedtak.type)}`;
+    // };
     const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
         if (delvedtak.klagevedtak)
             return {
