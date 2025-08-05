@@ -62,7 +62,7 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
     const samværsklasse =
         periode.beregningsdetaljer?.samværsfradrag?.samværsklasse === Samvaersklasse.DELT_BOSTED
             ? "D"
-            : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag?.samværsklasse);
+            : hentVisningsnavn(periode.beregningsdetaljer?.samværsfradrag?.samværsklasse);
     return (
         <>
             <Table.DataCell textSize="small">
