@@ -410,7 +410,7 @@ export const VedtakTableBody = ({
                 <Table.ExpandableRow
                     togglePlacement="right"
                     expandOnRowClick
-                    className={periode.resultatFraVedtak ? "bg-gray-100" : ""}
+                    className={periode.resultatFraVedtak && !periode.klagevedtak ? "bg-gray-100" : ""}
                     expansionDisabled={skjulBeregning}
                     content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
                 >
