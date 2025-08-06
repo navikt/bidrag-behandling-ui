@@ -6,8 +6,10 @@ import {
     ResultatBarnebidragsberegningPeriodeDto,
     Resultatkode,
     Rolletype,
+    Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
+import { AldersjusteringUnderholdskostnader } from "./AldersjusteringUnderholdskostnader";
 import { BarnetilleggSkatteprosent } from "./BarnetilleggSkatteprosent";
 import { BeregningBegrensetRevurdering } from "./BeregningBegrensetRevurdering";
 import { EndeligBidragTable } from "./BeregningEndeligBidrag";
@@ -27,6 +29,7 @@ type DetaljertBeregningBidragProps = {
 type BidragBeregningContextProps = {
     endeligBeløp: number;
     erEndringUnderGrense: boolean;
+    periode: ResultatBarnebidragsberegningPeriodeDto;
     beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
 };
 export const BidragBeregningContext = createContext<BidragBeregningContextProps | null>(null);
@@ -41,12 +44,30 @@ export const useBidragBeregningPeriode = () => {
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
 
+    if (periode.vedtakstype === Vedtakstype.ALDERSJUSTERING) {
+        return (
+            <VStack gap="6" className={"w-[800px]"}>
+                <BidragBeregningContext.Provider
+                    value={{
+                        beregningsdetaljer,
+                        periode,
+                        endeligBeløp: periode.faktiskBidrag,
+                        erEndringUnderGrense: periode.resultatKode === Resultatkode.INGEN_ENDRING_UNDER_GRENSE,
+                    }}
+                >
+                    <AldersjusteringUnderholdskostnader />
+                    <EndeligBidragTable />
+                </BidragBeregningContext.Provider>
+            </VStack>
+        );
+    }
     if (periode.erBeregnetAvslag || !beregningsdetaljer.sluttberegning) return null;
     return (
         <VStack gap="6" className={"w-[800px]"}>
             <BidragBeregningContext.Provider
                 value={{
                     beregningsdetaljer,
+                    periode,
                     endeligBeløp: periode.faktiskBidrag,
                     erEndringUnderGrense: periode.resultatKode === Resultatkode.INGEN_ENDRING_UNDER_GRENSE,
                 }}

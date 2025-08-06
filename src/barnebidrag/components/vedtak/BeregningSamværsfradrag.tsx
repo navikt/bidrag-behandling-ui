@@ -6,8 +6,6 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 export default function BeregningSamværsfradrag() {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 
-    console.log(beregningsdetaljer);
-
     const beregning = beregningsdetaljer.samværsfradrag;
     if (!beregning) return null;
     const samværNetterBeskrivelse = () => {

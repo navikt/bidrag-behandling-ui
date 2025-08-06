@@ -168,11 +168,13 @@ export const VedtakTableHeader = ({
     avvistAldersjustering = false,
     resultatUtenBeregning = false,
     bareVisResultat = false,
+    orkestrertVedtak = false,
 }: {
     avslag: boolean;
     avvistAldersjustering: boolean;
     resultatUtenBeregning: boolean;
     bareVisResultat?: boolean;
+    orkestrertVedtak?: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
@@ -226,6 +228,24 @@ export const VedtakTableHeader = ({
                 </Table.Row>
             );
 
+        if (orkestrertVedtak)
+            return (
+                <Table.Row>
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[62%]">
+                        {text.label.periode}
+                    </Table.HeaderCell>
+                    {/* <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
+                        Beregnet
+                    </Table.HeaderCell> */}
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
+                        Beløp
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col">
+                        {text.label.resultat}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
+                </Table.Row>
+            );
         return (
             <Table.Row>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
@@ -320,18 +340,19 @@ export const VedtakTableBody = ({
     avslag,
     opphør,
     bareVisResultat,
+    orkestrertVedtak = false,
 }: {
     resultatBarn: ResultatBidragsberegningBarnDto;
     avslag: boolean;
     opphør: boolean;
     bareVisResultat: boolean;
+    orkestrertVedtak?: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
 
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
             periode.erBeregnetAvslag ||
-            periode.beregningsdetaljer?.sluttberegning === undefined ||
             periode.erDirekteAvslag ||
             periode.resultatKode === Resultatkode.INNVILGET_VEDTAK ||
             (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
@@ -381,6 +402,32 @@ export const VedtakTableBody = ({
                     <Table.DataCell textSize="small">{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
                     <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
                 </Table.Row>
+            );
+        }
+        if (orkestrertVedtak) {
+            return (
+                <Table.ExpandableRow
+                    togglePlacement="right"
+                    expandOnRowClick
+                    className={periode.resultatFraVedtak ? "bg-gray-100" : ""}
+                    expansionDisabled={skjulBeregning}
+                    content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
+                >
+                    <Table.DataCell textSize="small">
+                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                        {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+                    </Table.DataCell>
+                    {/* <Table.DataCell textSize="small">{periode.resultatFraVedtak ? "Nei" : "Ja"}</Table.DataCell> */}
+                    <Table.DataCell textSize="small">
+                        {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.faktiskBidrag)}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small" width="500px">
+                        <div className="flex flex-row gap-1 w-max">
+                            <div>{periode.resultatkodeVisningsnavn}</div>
+                            {periode.resultatFraVedtak && <VedtakLenke vedtaksid={periode.resultatFraVedtak} />}
+                        </div>
+                    </Table.DataCell>
+                </Table.ExpandableRow>
             );
         }
         return (

@@ -249,10 +249,12 @@ const ResultatTabell = ({ erAvslag, avvistAldersjustering, resultatBarn, erOppho
                 avvistAldersjustering={avvistAldersjustering}
                 resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
                 bareVisResultat={!beregnet}
+                orkestrertVedtak
             />
             <VedtakTableBody
                 resultatBarn={resultatBarn}
                 avslag={erAvslag}
+                orkestrertVedtak
                 opphør={erOpphor}
                 bareVisResultat={!beregnet}
             />
