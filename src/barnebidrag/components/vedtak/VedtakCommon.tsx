@@ -352,6 +352,7 @@ export const VedtakTableBody = ({
 
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
+            periode.beregningsdetaljer === undefined ||
             periode.erBeregnetAvslag ||
             periode.erDirekteAvslag ||
             periode.resultatKode === Resultatkode.INNVILGET_VEDTAK ||
