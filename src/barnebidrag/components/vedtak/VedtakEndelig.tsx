@@ -184,14 +184,14 @@ const VedtakResultat = () => {
                                     );
 
                                     const vedtakstype = delvedtak.type;
-                                    const periode = delvedtak.perioder[0];
+                                    // const periode = delvedtak.perioder[0];
                                     // const manuellAldersjustering = delvedtak.perioder.some(
                                     //     (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
                                     // );
                                     const manuellAldersjustering = delvedtak.perioder.some(
                                         (p) => p?.klageOmgjøringDetaljer?.manuellAldersjustering
                                     );
-                                    const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
+                                    // const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
                                     // const valgtVedtak = r.barn?.grunnlagFraVedtak?.some(
                                     //     (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
                                     // );
