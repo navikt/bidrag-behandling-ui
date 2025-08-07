@@ -138,6 +138,7 @@ const VedtakResultat = () => {
                         )}
                         <Table size="small">
                             <VedtakTableHeader
+                                resultatBarn={r}
                                 avslag={erAvslag}
                                 avvistAldersjustering={avvistAldersjustering}
                                 resultatUtenBeregning={r.resultatUtenBeregning}

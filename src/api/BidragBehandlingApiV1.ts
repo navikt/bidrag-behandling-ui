@@ -547,6 +547,7 @@ export interface GrunnlagFraVedtak {
   aldersjusteringForÅr?: number;
   /** @format int32 */
   vedtak?: number;
+  skalAldersjusteres: boolean;
 }
 
 /** Grunnlagsinnhold (generisk) */
@@ -2458,8 +2459,8 @@ export interface Skatt {
   trinnskatt: number;
   trygdeavgift: number;
   skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2602,6 +2603,16 @@ export interface DelvedtakDto {
   grunnlagFraVedtak: GrunnlagFraVedtak[];
 }
 
+export interface KlageOmgjoringDetaljer {
+  /** @format int32 */
+  resultatFraVedtak?: number;
+  klagevedtak: boolean;
+  manuellAldersjustering: boolean;
+  delAvVedtaket: boolean;
+  kanOpprette35c: boolean;
+  skalOpprette35c: boolean;
+}
+
 export interface ResultatBarnebidragsberegningPeriodeDto {
   periode: TypeArManedsperiode;
   ugyldigBeregning?: UgyldigResultatPeriode;
@@ -2620,9 +2631,7 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   erEndringUnderGrense: boolean;
   beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
   vedtakstype: Vedtakstype;
-  /** @format int32 */
-  resultatFraVedtak?: number;
-  klagevedtak: boolean;
+  klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
   resultatkodeVisningsnavn?: string;
 }
 
@@ -3051,8 +3060,8 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   avslagVisningsnavn?: string;
-  vedtakstypeVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3267,8 +3276,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3324,8 +3333,8 @@ export interface NotatSkattBeregning {
   trinnskatt: number;
   trygdeavgift: number;
   skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 

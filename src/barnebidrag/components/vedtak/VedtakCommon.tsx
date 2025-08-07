@@ -2,7 +2,7 @@ import text from "@common/constants/texts";
 import { QueryKeys, useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { BodyShort, Button, Heading, Link, Modal, Table } from "@navikt/ds-react";
+import { BodyShort, Button, Checkbox, Heading, Link, Modal, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
@@ -148,7 +148,9 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
             <Table.DataCell textSize="small">
                 <div className="flex flex-row gap-1 w-max">
                     <div>{periode.resultatkodeVisningsnavn}</div>
-                    {periode.resultatFraVedtak && <VedtakLenke vedtaksid={periode.resultatFraVedtak} />}
+                    {periode.klageOmgjøringDetaljer?.resultatFraVedtak && (
+                        <VedtakLenke vedtaksid={periode.klageOmgjøringDetaljer?.resultatFraVedtak} />
+                    )}
                 </div>
             </Table.DataCell>
         </>
@@ -164,17 +166,21 @@ export const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     </div>
 );
 export const VedtakTableHeader = ({
+    resultatBarn,
     avslag = false,
     avvistAldersjustering = false,
     resultatUtenBeregning = false,
     bareVisResultat = false,
     orkestrertVedtak = false,
+    manuellAldersjustering = false,
 }: {
+    resultatBarn?: ResultatBidragsberegningBarnDto;
     avslag: boolean;
     avvistAldersjustering: boolean;
     resultatUtenBeregning: boolean;
     bareVisResultat?: boolean;
     orkestrertVedtak?: boolean;
+    manuellAldersjustering?: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
     const visEvne = erBisysVedtak || vedtakstype !== Vedtakstype.ALDERSJUSTERING;
@@ -228,15 +234,30 @@ export const VedtakTableHeader = ({
                 </Table.Row>
             );
 
-        if (orkestrertVedtak)
+        if (orkestrertVedtak) {
+            const inneholder35C = resultatBarn?.perioder?.some((p) => p?.klageOmgjøringDetaljer?.kanOpprette35c);
             return (
                 <Table.Row>
-                    <Table.HeaderCell textSize="small" scope="col" className="w-[62%]">
+                    {inneholder35C && (
+                        <Table.HeaderCell textSize="small" scope="col" className="w-[13%]">
+                            Opprett P35c
+                        </Table.HeaderCell>
+                    )}
+                    <Table.HeaderCell
+                        textSize="small"
+                        scope="col"
+                        className={manuellAldersjustering ? "w-[32%]" : "w-[52%]"}
+                    >
                         {text.label.periode}
                     </Table.HeaderCell>
-                    {/* <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
-                        Beregnet
-                    </Table.HeaderCell> */}
+                    {manuellAldersjustering && (
+                        <Table.HeaderCell className="w-[20%]" textSize="small">
+                            {"Manuell aldersjustering"}
+                        </Table.HeaderCell>
+                    )}
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
+                        Endring
+                    </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
                         Beløp
                     </Table.HeaderCell>
@@ -246,6 +267,7 @@ export const VedtakTableHeader = ({
                     <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
                 </Table.Row>
             );
+        }
         return (
             <Table.Row>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
@@ -341,14 +363,16 @@ export const VedtakTableBody = ({
     opphør,
     bareVisResultat,
     orkestrertVedtak = false,
+    manuellAldersjustering = false,
 }: {
     resultatBarn: ResultatBidragsberegningBarnDto;
     avslag: boolean;
     opphør: boolean;
     bareVisResultat: boolean;
     orkestrertVedtak?: boolean;
+    manuellAldersjustering?: boolean;
 }) => {
-    const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
+    const { erBisysVedtak, vedtakstype, lesemodus } = useGetBehandlingV2();
 
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
@@ -358,7 +382,7 @@ export const VedtakTableBody = ({
             periode.resultatKode === Resultatkode.INNVILGET_VEDTAK ||
             (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 
-        if (periode.aldersjusteringDetaljer?.aldersjustert === false) {
+        if (!orkestrertVedtak && periode.aldersjusteringDetaljer?.aldersjustert === false) {
             return (
                 <Table.Row>
                     <Table.DataCell textSize="small">
@@ -406,26 +430,57 @@ export const VedtakTableBody = ({
             );
         }
         if (orkestrertVedtak) {
+            const inneholder35C = resultatBarn?.perioder?.some((p) => p?.klageOmgjøringDetaljer?.kanOpprette35c);
+
             return (
                 <Table.ExpandableRow
                     togglePlacement="right"
                     expandOnRowClick
-                    className={periode.resultatFraVedtak && !periode.klagevedtak ? "bg-gray-100" : ""}
+                    className={
+                        periode.klageOmgjøringDetaljer?.kanOpprette35c
+                            ? "bg-gray-100"
+                            : periode.klageOmgjøringDetaljer?.delAvVedtaket === false
+                              ? "opacity-40"
+                              : ""
+                    }
                     expansionDisabled={skjulBeregning}
                     content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
                 >
+                    {inneholder35C && (
+                        <Table.DataCell textSize="small">
+                            {periode.klageOmgjøringDetaljer?.kanOpprette35c && !lesemodus && (
+                                <Checkbox hideLabel> </Checkbox>
+                            )}
+                        </Table.DataCell>
+                    )}
                     <Table.DataCell textSize="small">
                         {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                         {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
                     </Table.DataCell>
-                    {/* <Table.DataCell textSize="small">{periode.resultatFraVedtak ? "Nei" : "Ja"}</Table.DataCell> */}
+                    {manuellAldersjustering && (
+                        <Table.DataCell textSize="small">
+                            {periode.klageOmgjøringDetaljer?.manuellAldersjustering ? (
+                                <VelgManuellVedtakModal
+                                    barnIdent={resultatBarn.barn.ident}
+                                    aldersjusteringForÅr={new Date(periode.periode.fom).getFullYear()}
+                                />
+                            ) : (
+                                ""
+                            )}
+                        </Table.DataCell>
+                    )}
+                    <Table.DataCell textSize="small">
+                        {periode.klageOmgjøringDetaljer?.resultatFraVedtak ? "Nei" : "Ja"}
+                    </Table.DataCell>
                     <Table.DataCell textSize="small">
                         {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.faktiskBidrag)}
                     </Table.DataCell>
                     <Table.DataCell textSize="small" width="500px">
                         <div className="flex flex-row gap-1 w-max">
                             <div>{periode.resultatkodeVisningsnavn}</div>
-                            {periode.resultatFraVedtak && <VedtakLenke vedtaksid={periode.resultatFraVedtak} />}
+                            {periode.klageOmgjøringDetaljer?.resultatFraVedtak && (
+                                <VedtakLenke vedtaksid={periode.klageOmgjøringDetaljer?.resultatFraVedtak} />
+                            )}
                         </div>
                     </Table.DataCell>
                 </Table.ExpandableRow>
@@ -435,7 +490,7 @@ export const VedtakTableBody = ({
             <Table.ExpandableRow
                 togglePlacement="right"
                 expandOnRowClick
-                className={periode.resultatFraVedtak ? "bg-gray-100" : ""}
+                className={periode.klageOmgjøringDetaljer?.resultatFraVedtak ? "bg-gray-100" : ""}
                 expansionDisabled={skjulBeregning}
                 content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
             >
