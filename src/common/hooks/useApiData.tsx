@@ -25,10 +25,12 @@ import {
     OppdaterGebyrDto,
     OppdaterManuellVedtakRequest,
     OppdaterOpphorsdatoRequestDto,
+    OppdaterParagraf35CDetaljerDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
     OpprettUnderholdskostnadBarnResponse,
+    ResultatBarnebidragsberegningPeriodeDto,
     RolleDto,
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
@@ -824,6 +826,64 @@ export const useDeletePrivatAvtale = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved sletting av privat avtale", error);
+        },
+    });
+};
+
+export const useOppdaterOpprettP35c = (periode: ResultatBarnebidragsberegningPeriodeDto) => {
+    const { id: behandlingId } = useGetBehandlingV2();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId.toString()),
+        mutationFn: async (payload: OppdaterParagraf35CDetaljerDto) => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterVedtakParagraf35C(behandlingId, payload);
+            return data;
+        },
+
+        onSuccess: async (_, variables) => {
+            queryClient.setQueryData<VedtakBarnebidragBeregningResult>(
+                QueryKeys.beregnBarnebidrag(true),
+                (currentData): VedtakBarnebidragBeregningResult => {
+                    return {
+                        ...currentData,
+                        resultat: {
+                            resultatBarn: currentData.resultat.resultatBarn?.map((rb) => {
+                                if (rb.barn.ident === variables.ident) {
+                                    return {
+                                        ...rb,
+                                        delvedtak: rb.delvedtak.map((dv) => {
+                                            if (!dv.delvedtak && !dv.klagevedtak) {
+                                                return {
+                                                    ...dv,
+                                                    perioder: dv.perioder.map((p) => {
+                                                        if (
+                                                            p.klageOmgjøringDetaljer.resultatFraVedtak ===
+                                                            periode.klageOmgjøringDetaljer.resultatFraVedtak
+                                                        ) {
+                                                            return {
+                                                                ...p,
+                                                                klageOmgjøringDetaljer: {
+                                                                    ...p.klageOmgjøringDetaljer,
+                                                                    skalOpprette35c: variables.opprettP35c,
+                                                                },
+                                                            };
+                                                        }
+                                                        return p;
+                                                    }),
+                                                };
+                                            }
+                                            return dv;
+                                        }),
+                                    };
+                                } else {
+                                    return rb;
+                                }
+                            }),
+                        },
+                    };
+                }
+            );
         },
     });
 };

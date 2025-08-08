@@ -20,6 +20,7 @@ import { BeregningJusterBMsBarnetillegg } from "./BeregningJusterBMsBarnetillegg
 import { BeregningJusterBPsBarnetillegg } from "./BeregningJusterBPsBarnetillegg";
 import BeregningSamværsfradrag from "./BeregningSamværsfradrag";
 import { BPsAndelUnderholdskostnad } from "./BPsAndelUnderholdstkostnad";
+import { IndeksreguleringDetaljer } from "./IndeksreguleringDetaljer";
 import { NettoBarnetilleggTable } from "./NettoBarnetilleggTable";
 
 type DetaljertBeregningBidragProps = {
@@ -44,6 +45,22 @@ export const useBidragBeregningPeriode = () => {
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
 
+    if (periode.vedtakstype === Vedtakstype.INDEKSREGULERING) {
+        return (
+            <VStack gap="6" className={"w-[800px]"}>
+                <BidragBeregningContext.Provider
+                    value={{
+                        beregningsdetaljer,
+                        periode,
+                        endeligBeløp: periode.faktiskBidrag,
+                        erEndringUnderGrense: periode.resultatKode === Resultatkode.INGEN_ENDRING_UNDER_GRENSE,
+                    }}
+                >
+                    <IndeksreguleringDetaljer />
+                </BidragBeregningContext.Provider>
+            </VStack>
+        );
+    }
     if (periode.vedtakstype === Vedtakstype.ALDERSJUSTERING) {
         return (
             <VStack gap="6" className={"w-[800px]"}>

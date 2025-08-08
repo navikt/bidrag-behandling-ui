@@ -2347,9 +2347,9 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2424,9 +2424,9 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBMMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
 }
 
@@ -2459,8 +2459,8 @@ export interface Skatt {
   trinnskatt: number;
   trygdeavgift: number;
   skattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2548,6 +2548,7 @@ export interface BidragPeriodeBeregningsdetaljer {
   sluttberegning?: SluttberegningBarnebidrag;
   sluttberegningAldersjustering?: SluttberegningBarnebidragAldersjustering;
   delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
+  indeksreguleringDetaljer?: IndeksreguleringDetaljer;
   delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
   deltBosted: boolean;
 }
@@ -2601,6 +2602,17 @@ export interface DelvedtakDto {
   beregnet: boolean;
   perioder: ResultatBarnebidragsberegningPeriodeDto[];
   grunnlagFraVedtak: GrunnlagFraVedtak[];
+}
+
+export interface EtterfolgendeVedtakSomOverlapper {
+  /** @format int32 */
+  vedtaksid: number;
+  virkningstidspunkt: string;
+}
+
+export interface IndeksreguleringDetaljer {
+  sluttberegning?: SluttberegningIndeksregulering;
+  faktor: number;
 }
 
 export interface KlageOmgjoringDetaljer {
@@ -2692,9 +2704,17 @@ export interface SluttberegningBarnebidragAldersjustering {
   deltBosted: boolean;
 }
 
+export interface SluttberegningIndeksregulering {
+  periode: TypeArManedsperiode;
+  beløp: number;
+  originaltBeløp: number;
+  nesteIndeksreguleringsår?: string;
+}
+
 export interface UgyldigBeregningDto {
   tittel: string;
   begrunnelse: string;
+  vedtaksliste: EtterfolgendeVedtakSomOverlapper[];
   resultatPeriode: UgyldigResultatPeriode[];
   perioder: TypeArManedsperiode[];
 }
@@ -2738,6 +2758,13 @@ export interface InitalizeForsendelseRequest {
   tema?: InitalizeForsendelseRequestTemaEnum;
   roller: ForsendelseRolleDto[];
   behandlingStatus?: InitalizeForsendelseRequestBehandlingStatusEnum;
+}
+
+export interface OppdaterParagraf35CDetaljerDto {
+  ident: string;
+  /** @format int32 */
+  vedtaksid: number;
+  opprettP35c: boolean;
 }
 
 export interface BeregningValideringsfeil {
@@ -3060,8 +3087,8 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   avslagVisningsnavn?: string;
-  kategoriVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3242,9 +3269,9 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBMMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
 }
 
@@ -3276,8 +3303,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  sivilstandVisningsnavn?: string;
   resultatKodeVisningsnavn: string;
+  sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3333,8 +3360,8 @@ export interface NotatSkattBeregning {
   trinnskatt: number;
   trygdeavgift: number;
   skattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -4721,6 +4748,28 @@ export class Api<
         secure: true,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Beregn bidrag
+     *
+     * @tags behandling-beregn-controller
+     * @name OppdaterVedtakParagraf35C
+     * @request POST:/api/v1/behandling/{behandlingsid}/paragrafp35c
+     * @secure
+     */
+    oppdaterVedtakParagraf35C: (
+      behandlingsid: number,
+      data: OppdaterParagraf35CDetaljerDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/v1/behandling/${behandlingsid}/paragrafp35c`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         ...params,
       }),
 

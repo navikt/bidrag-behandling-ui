@@ -8,15 +8,16 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/ho
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { LoggerService } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Box, BoxProps, Heading, Link, Table, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, HStack, Link, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
-import { DelvedtakDto, ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
+import { dateOrNull, DateToMMYYYYString } from "../../../utils/date-utils";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
@@ -71,7 +72,7 @@ const VedtakEndelig = () => {
     );
 };
 
-export const VedtakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean }) => {
+export const VedtakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number; visText?: boolean | string }) => {
     const { saksnummer } = useGetBehandlingV2();
     const enhet = useQueryParams().get("enhet");
     const sessionState = useQueryParams().get("sessionState");
@@ -84,7 +85,8 @@ export const VedtakLenke = ({ vedtaksid, visText = false }: { vedtaksid?: number
             target="_blank"
             rel="noreferrer"
         >
-            {visText ? "Grunnlag fra vedtak" : ""} <ExternalLinkIcon aria-hidden />
+            {typeof visText == "boolean" && visText ? "Grunnlag fra vedtak" : typeof visText == "string" ? visText : ""}{" "}
+            <ExternalLinkIcon aria-hidden />
         </Link>
     );
 };
@@ -101,6 +103,24 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
             <Heading size="small">{resultat.ugyldigBeregning.tittel}</Heading>
             <BodyShort size="small">Kan ikke fatte vedtak</BodyShort>
             <BodyShort size="small">{resultat.ugyldigBeregning.begrunnelse}</BodyShort>
+            <BodyShort spacing>
+                <BodyShort size="small">Gjelder følgende vedtak:</BodyShort>
+                <HStack gap="2" className="justify-self-start">
+                    <BodyShort size="small">
+                        {resultat.ugyldigBeregning.vedtaksliste.map((v) => {
+                            return (
+                                <div className="flex flex-row gap-2">
+                                    <div>
+                                        Vedtak med virkningstidspunkt{" "}
+                                        {DateToMMYYYYString(dateOrNull(v.virkningstidspunkt))}
+                                    </div>
+                                    <VedtakLenke vedtaksid={v.vedtaksid} visText={false} />
+                                </div>
+                            );
+                        })}
+                    </BodyShort>
+                </HStack>
+            </BodyShort>
         </Alert>
     );
 };
@@ -115,33 +135,33 @@ const VedtakResultat = () => {
     //         return `Gjenopprettet beløpshistorikk (${hentVisningsnavn(delvedtak.type)})`;
     //     return `${hentVisningsnavn(delvedtak.type)}`;
     // };
-    const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
-        if (delvedtak.klagevedtak)
-            return {
-                shadow: "medium",
-                background: "surface-transparent",
-                padding: "4",
-                borderWidth: "1",
-                borderColor: "border-subtle",
-                borderRadius: "medium",
-            };
-        if (delvedtak.delvedtak === false)
-            return {
-                shadow: "xsmall",
-                className: "mt-2",
-                background: "surface-transparent",
-                padding: "4",
-                borderColor: "border-subtle",
-                borderRadius: "medium",
-            };
-        return {
-            shadow: "xsmall",
-            background: "surface-transparent",
-            padding: "4",
-            borderColor: "border-subtle",
-            borderRadius: "small",
-        };
-    };
+    // const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
+    //     if (delvedtak.klagevedtak)
+    //         return {
+    //             shadow: "medium",
+    //             background: "surface-transparent",
+    //             padding: "4",
+    //             borderWidth: "1",
+    //             borderColor: "border-subtle",
+    //             borderRadius: "medium",
+    //         };
+    //     if (delvedtak.delvedtak === false)
+    //         return {
+    //             shadow: "xsmall",
+    //             className: "mt-2",
+    //             background: "surface-transparent",
+    //             padding: "4",
+    //             borderColor: "border-subtle",
+    //             borderRadius: "medium",
+    //         };
+    //     return {
+    //         shadow: "xsmall",
+    //         background: "surface-transparent",
+    //         padding: "4",
+    //         borderColor: "border-subtle",
+    //         borderRadius: "small",
+    //     };
+    // };
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
@@ -197,8 +217,8 @@ const VedtakResultat = () => {
                                     // );
                                     return (
                                         <VStack>
-                                            <Box {...boxConfig(delvedtak)}>
-                                                {/* {(manuellAldersjustering || valgtVedtak) && (
+                                            {/* <Box {...boxConfig(delvedtak)}> */}
+                                            {/* {(manuellAldersjustering || valgtVedtak) && (
                                                     <VelgManuellVedtakModal
                                                         barnIdent={r.barn.ident}
                                                         aldersjusteringForÅr={new Date(
@@ -206,26 +226,26 @@ const VedtakResultat = () => {
                                                         ).getFullYear()}
                                                     />
                                                 )} */}
-                                                <ResultatTabell
-                                                    key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
-                                                    erAvslag={false}
-                                                    avvistAldersjustering={avvistAldersjustering}
-                                                    beregnet={
-                                                        delvedtak.beregnet ||
-                                                        (delvedtak.type !== Vedtakstype.INNKREVING &&
-                                                            delvedtak.type !== Vedtakstype.OPPHOR)
-                                                    }
-                                                    manuellAldersjustering={manuellAldersjustering}
-                                                    resultatBarn={{
-                                                        ...r,
-                                                        perioder: delvedtak.perioder,
-                                                        resultatUtenBeregning:
-                                                            delvedtak.type === Vedtakstype.INDEKSREGULERING,
-                                                        // (!delvedtak.delvedtak && !delvedtak.klagevedtak),
-                                                    }}
-                                                    erOpphor={vedtakstype === Vedtakstype.OPPHOR}
-                                                />
-                                            </Box>
+                                            <ResultatTabell
+                                                key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
+                                                erAvslag={false}
+                                                avvistAldersjustering={avvistAldersjustering}
+                                                beregnet={
+                                                    delvedtak.beregnet ||
+                                                    (delvedtak.type !== Vedtakstype.INNKREVING &&
+                                                        delvedtak.type !== Vedtakstype.OPPHOR)
+                                                }
+                                                manuellAldersjustering={manuellAldersjustering}
+                                                resultatBarn={{
+                                                    ...r,
+                                                    perioder: delvedtak.perioder,
+                                                    resultatUtenBeregning:
+                                                        delvedtak.type === Vedtakstype.INDEKSREGULERING,
+                                                    // (!delvedtak.delvedtak && !delvedtak.klagevedtak),
+                                                }}
+                                                erOpphor={vedtakstype === Vedtakstype.OPPHOR}
+                                            />
+                                            {/* </Box> */}
                                         </VStack>
                                     );
                                 })}

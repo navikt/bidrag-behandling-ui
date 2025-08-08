@@ -1,5 +1,5 @@
 import text from "@common/constants/texts";
-import { QueryKeys, useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { QueryKeys, useGetBehandlingV2, useOppdaterOpprettP35c } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Checkbox, Heading, Link, Modal, Table } from "@navikt/ds-react";
@@ -303,6 +303,35 @@ export const VedtakTableHeader = ({
     return <Table.Header>{renderRows()}</Table.Header>;
 };
 
+export const OpprettParagraf35cCheckbox = ({
+    periode,
+    resultatBarn,
+}: {
+    periode: ResultatBarnebidragsberegningPeriodeDto;
+    resultatBarn?: ResultatBidragsberegningBarnDto;
+}) => {
+    const { mutate, isError: _, isPending } = useOppdaterOpprettP35c(periode);
+
+    const detaljer = periode.klageOmgjøringDetaljer;
+    if (!detaljer) return;
+    return (
+        <Checkbox
+            hideLabel
+            readOnly={isPending}
+            size="small"
+            checked={detaljer.skalOpprette35c}
+            onChange={() =>
+                mutate({
+                    ident: resultatBarn.barn.ident,
+                    vedtaksid: detaljer.resultatFraVedtak,
+                    opprettP35c: !periode.klageOmgjøringDetaljer.skalOpprette35c,
+                })
+            }
+        >
+            {" "}
+        </Checkbox>
+    );
+};
 export const VelgManuellVedtakModal = ({
     barnIdent,
     aldersjusteringForÅr,
@@ -374,6 +403,15 @@ export const VedtakTableBody = ({
 }) => {
     const { erBisysVedtak, vedtakstype, lesemodus } = useGetBehandlingV2();
 
+    function getRowClassName(periode: ResultatBarnebidragsberegningPeriodeDto): string {
+        if (periode.klageOmgjøringDetaljer?.kanOpprette35c) {
+            return "bg-gray-100";
+        }
+        if (periode.klageOmgjøringDetaljer?.delAvVedtaket === false) {
+            return "opacity-40";
+        }
+        return "";
+    }
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
             periode.beregningsdetaljer === undefined ||
@@ -436,20 +474,14 @@ export const VedtakTableBody = ({
                 <Table.ExpandableRow
                     togglePlacement="right"
                     expandOnRowClick
-                    className={
-                        periode.klageOmgjøringDetaljer?.kanOpprette35c
-                            ? "bg-gray-100"
-                            : periode.klageOmgjøringDetaljer?.delAvVedtaket === false
-                              ? "opacity-40"
-                              : ""
-                    }
+                    className={getRowClassName(periode)}
                     expansionDisabled={skjulBeregning}
                     content={!skjulBeregning && <DetaljertBeregningBidrag periode={periode} />}
                 >
                     {inneholder35C && (
                         <Table.DataCell textSize="small">
                             {periode.klageOmgjøringDetaljer?.kanOpprette35c && !lesemodus && (
-                                <Checkbox hideLabel> </Checkbox>
+                                <OpprettParagraf35cCheckbox periode={periode} resultatBarn={resultatBarn} />
                             )}
                         </Table.DataCell>
                     )}
