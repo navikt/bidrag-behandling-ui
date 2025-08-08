@@ -1,4 +1,5 @@
 import {
+    BeregnTil,
     EksisterendeOpphorsvedtakDto,
     OppdatereVirkningstidspunkt,
     Resultatkode,
@@ -15,7 +16,6 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
-import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -27,7 +27,7 @@ import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
 } from "@common/helpers/virkningstidspunktHelpers";
-import { useGetBehandlingV2, useOppdaterManuelleVedtak } from "@common/hooks/useApiData";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
@@ -35,9 +35,8 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Checkbox, Label, Link, Table, Tabs } from "@navikt/ds-react";
+import { BodyShort, HStack, Label, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -48,7 +47,9 @@ import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtak
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
+import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
+import { VedtaksListeVirkningstidspunkt } from "../../Vedtakliste";
 
 const årsakListe = [
     TypeArsakstype.FRABARNETSFODSEL,
@@ -128,6 +129,8 @@ const createInitialValues = (
                 årsakAvslag: virkningstidspunkt.årsak ?? virkningstidspunkt.avslag ?? "",
                 begrunnelse: virkningstidspunkt.begrunnelse?.innhold ?? "",
                 opphørsdato: virkningstidspunkt.opphørsdato ?? null,
+                beregnTil: virkningstidspunkt.beregnTil ?? null,
+                beregnTilDato: virkningstidspunkt.beregnTilDato ?? null,
             };
 
             if (stønadstype === Stonadstype.BIDRAG18AAR && vedtakstype !== Vedtakstype.OPPHOR) {
@@ -194,6 +197,72 @@ const getOpphørOptions = (
     } else {
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO];
     }
+};
+
+const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
+    const behandling = useGetBehandlingV2();
+    const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
+    const { setSaveErrorState } = useBehandlingProvider();
+    const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
+    const { getValues, reset, setValue } = useFormContext();
+
+    const updateBeregnTilDato = () => {
+        const values = getValues(`roller.${barnIndex}`);
+        oppdaterBeregnTilDato.mutation.mutate(
+            { idRolle: selectedBarn.rolle.id, beregnTil: values.beregnTil },
+            {
+                onSuccess: (response) => {
+                    oppdaterBeregnTilDato.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            ...response,
+                        };
+                    });
+                    const initialValues = createInitialValues(
+                        response.virkningstidspunktV2,
+                        response.stønadstype,
+                        response.vedtakstype
+                    );
+                    setValue(
+                        `roller.${barnIndex}.beregnTilDato`,
+                        initialValues.roller.find((r) => r.rolle.ident === item.rolle.ident).beregnTilDato
+                    );
+                    setPreviousValues(initialValues);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateBeregnTilDato(),
+                        rollbackFn: () => {
+                            reset(previousValues, {
+                                keepIsSubmitSuccessful: true,
+                                keepDirty: true,
+                                keepIsSubmitted: true,
+                            });
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    if (!behandling.erKlageEllerOmgjøring) return null;
+    return (
+        <FlexRow className="gap-x-8">
+            <FormControlledSelectField
+                name={`roller.${barnIndex}.beregnTil`}
+                label={text.label.beregningsperiode}
+                className="w-max"
+                onSelect={updateBeregnTilDato}
+            >
+                {[BeregnTil.INNEVAeRENDEMANED, BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT].map((value) => (
+                    <option key={value} value={value}>
+                        {value === BeregnTil.INNEVAeRENDEMANED ? "Inneværende måned" : "Opprinnelig vedtakstidspunkt"}
+                    </option>
+                ))}
+            </FormControlledSelectField>
+        </FlexRow>
+    );
 };
 
 const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
@@ -417,12 +486,13 @@ const VirkningstidspunktBarn = ({
     const tom = useMemo(() => {
         const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
-        if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
+        if (opprinneligVirkningstidspunkt) return addMonths(new Date(), 1);
         if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opprinneligVirkningstidspunkt, selectedVirkningstidspunkt.opphørsdato]);
 
-    const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
+    const erTypeOpphør =
+        behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || selectedVirkningstidspunkt.harLøpendeBidrag;
     const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
     const virkningsårsaker = lesemodus
@@ -578,16 +648,34 @@ const VirkningstidspunktBarn = ({
                         )}
                     </FormControlledSelectField>
                 )}
-                <FormControlledMonthPicker
-                    name={`roller.${barnIndex}.virkningstidspunkt`}
-                    label={text.label.virkningstidspunkt}
-                    placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.virkningstidspunkt}
-                    fromDate={fom}
-                    toDate={tom}
-                    readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
-                    required
-                />
+                <HStack gap={"2"}>
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.virkningstidspunkt`}
+                        label={text.label.virkningstidspunkt}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.virkningstidspunkt}
+                        fromDate={fom}
+                        toDate={tom}
+                        readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
+                        required
+                    />
+                    <FormControlledMonthPicker
+                        name={`roller.${barnIndex}.beregnTilDato`}
+                        label={"Beregn til"}
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        defaultValue={initialValues.beregnTilDato}
+                        fromDate={fom}
+                        toDate={tom}
+                        readonly
+                        required
+                    />
+                    <BeregnTilDato
+                        item={item}
+                        barnIndex={barnIndex}
+                        previousValues={previousValues}
+                        setPreviousValues={setPreviousValues}
+                    />
+                </HStack>
             </FlexRow>
             {showChangedVirkningsDatoAlert && (
                 <BehandlingAlert variant="warning" className={"w-[488px]"}>
@@ -609,100 +697,15 @@ const VirkningstidspunktBarn = ({
                     resize
                 />
             )}
+            {/* <BeregnTilDato
+                item={item}
+                barnIndex={barnIndex}
+                previousValues={previousValues}
+                setPreviousValues={setPreviousValues}
+            /> */}
             <KlagetPåVedtakButton />
-            <VedtaksListe item={item} />
+            <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />
         </>
-    );
-};
-
-const VedtaksListe = ({ item }: { item: VirkningstidspunktFormValuesPerBarn }) => {
-    const { virkningstidspunktV2, vedtakstype, saksnummer } = useGetBehandlingV2();
-    const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
-    const { lesemodus } = useBehandlingProvider();
-    const { mutate, isError: mutationError, isPending } = useOppdaterManuelleVedtak();
-    const [val, setVal] = useState<number>(selectedBarn.grunnlagFraVedtak);
-
-    if (vedtakstype !== Vedtakstype.ALDERSJUSTERING) return null;
-
-    const onSelect = (vedtaksid: number, checked: boolean) => {
-        const updatedValue = checked ? vedtaksid : null;
-        setVal(updatedValue);
-        mutate({
-            barnId: selectedBarn.rolle.id,
-            vedtaksid: updatedValue,
-        });
-    };
-
-    const vedtaksLista = selectedBarn?.manuelleVedtak;
-
-    return (
-        <div>
-            <BodyShort size="small" weight="semibold" className="mb-2">
-                {text.description.velgVedtak}
-            </BodyShort>
-            <div className={`${isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}>
-                <OverlayLoader loading={isPending} />
-                <Table size="small" zebraStripes>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell scope="col"></Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Virkingsdato
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Vedtaksdato
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Søknadstype
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Resultat siste periode
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" textSize="small">
-                                Vedtak
-                            </Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {vedtaksLista.map((vedtak) => (
-                            <Table.Row key={vedtak.vedtaksid}>
-                                <Table.HeaderCell scope="row">
-                                    <Checkbox
-                                        hideLabel
-                                        value={vedtak.vedtaksid}
-                                        checked={val === vedtak.vedtaksid}
-                                        onChange={(e) => onSelect(vedtak.vedtaksid, e.target.checked)}
-                                        size="small"
-                                        readOnly={lesemodus}
-                                    >
-                                        {vedtak.vedtaksid}
-                                    </Checkbox>
-                                </Table.HeaderCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.virkningsDato))}
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(vedtak.fattetTidspunkt))}
-                                </Table.DataCell>
-                                <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
-                                <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
-                                <Table.DataCell>
-                                    <Link
-                                        variant="action"
-                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                    </Link>
-                                </Table.DataCell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            </div>
-            {mutationError && <Alert variant="error">{text.error.feilVedOppdatering}</Alert>}
-        </div>
     );
 };
 
