@@ -390,14 +390,14 @@ export const VedtakTableBody = ({
     resultatBarn,
     avslag,
     opphør,
-    bareVisResultat,
+    bareVisResultat = false,
     orkestrertVedtak = false,
     manuellAldersjustering = false,
 }: {
     resultatBarn: ResultatBidragsberegningBarnDto;
     avslag: boolean;
     opphør: boolean;
-    bareVisResultat: boolean;
+    bareVisResultat?: boolean;
     orkestrertVedtak?: boolean;
     manuellAldersjustering?: boolean;
 }) => {

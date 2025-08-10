@@ -4,7 +4,7 @@ import VedtakWrapper from "@common/components/vedtak/VedtakWrapper";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
-import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
@@ -65,19 +65,10 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
 
 const VedtakResultat = () => {
     const { data: beregning } = useGetBeregningBidrag(false);
-    const {
-        virkningstidspunkt: { avslag },
-        vedtakstype,
-    } = useGetBehandlingV2();
 
-    const erAvslag = avslag !== null && avslag !== undefined;
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => {
-                const avvistAldersjustering = r.perioder.every(
-                    (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
-                );
-
                 return (
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                         <VedtakResultatBarn barn={r.barn} />
@@ -106,24 +97,51 @@ const VedtakResultat = () => {
                                 ].filter((d) => d)}
                             />
                         )}
-                        <Table size="small">
-                            <VedtakTableHeader
-                                avslag={erAvslag}
-                                avvistAldersjustering={avvistAldersjustering}
-                                resultatUtenBeregning={r.resultatUtenBeregning}
-                            />
-                            <VedtakTableBody
-                                resultatBarn={r}
-                                avslag={erAvslag}
-                                opphør={vedtakstype === Vedtakstype.OPPHOR}
-                            />
-                        </Table>
+                        <BeregningTabellBarn resultatBarn={r} />
                     </div>
                 );
             })}
         </VedtakWrapper>
     );
 };
+const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsberegningBarnDto }) => {
+    const { isFetching, isLoading } = useGetBeregningBidrag(false);
+
+    const {
+        virkningstidspunkt: { avslag },
+        vedtakstype,
+    } = useGetBehandlingV2();
+
+    const erAvslag = avslag !== null && avslag !== undefined;
+    const avvistAldersjustering = resultatBarn.perioder.every(
+        (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
+    );
+    if (isFetching && !isLoading) {
+        return (
+            <VStack gap="2" className="w-full">
+                <BodyShort size="small">Beregner</BodyShort>
+                <Skeleton variant="rectangle" width="100%" height={20} />
+                <Skeleton variant="rectangle" width="100%" height={20} />
+                <Skeleton variant="rectangle" width="100%" height={20} />
+            </VStack>
+        );
+    }
+    return (
+        <Table size="small">
+            <VedtakTableHeader
+                avslag={erAvslag}
+                avvistAldersjustering={avvistAldersjustering}
+                resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
+            />
+            <VedtakTableBody
+                resultatBarn={resultatBarn}
+                avslag={erAvslag}
+                opphør={vedtakstype === Vedtakstype.OPPHOR}
+            />
+        </Table>
+    );
+};
+
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
 

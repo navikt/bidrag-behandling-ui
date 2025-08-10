@@ -697,12 +697,7 @@ const VirkningstidspunktBarn = ({
                     resize
                 />
             )}
-            {/* <BeregnTilDato
-                item={item}
-                barnIndex={barnIndex}
-                previousValues={previousValues}
-                setPreviousValues={setPreviousValues}
-            /> */}
+
             <KlagetPåVedtakButton />
             <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />
         </>

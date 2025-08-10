@@ -33,6 +33,47 @@ export enum BehandlingsrefKilde {
   ALDERSJUSTERING_FORSKUDD = "ALDERSJUSTERING_FORSKUDD",
 }
 
+export enum Valutakode {
+  ALL = "ALL",
+  ANG = "ANG",
+  AUD = "AUD",
+  BAM = "BAM",
+  BGN = "BGN",
+  BRL = "BRL",
+  CAD = "CAD",
+  CHF = "CHF",
+  CNY = "CNY",
+  CZK = "CZK",
+  DKK = "DKK",
+  EEK = "EEK",
+  EUR = "EUR",
+  GBP = "GBP",
+  HKD = "HKD",
+  HRK = "HRK",
+  HUF = "HUF",
+  INR = "INR",
+  ISK = "ISK",
+  JPY = "JPY",
+  LTL = "LTL",
+  LVL = "LVL",
+  MAD = "MAD",
+  NOK = "NOK",
+  NZD = "NZD",
+  PKR = "PKR",
+  PLN = "PLN",
+  RON = "RON",
+  RSD = "RSD",
+  SEK = "SEK",
+  THB = "THB",
+  TND = "TND",
+  TRY = "TRY",
+  UAH = "UAH",
+  USD = "USD",
+  VND = "VND",
+  ZAR = "ZAR",
+  PHP = "PHP",
+}
+
 export enum Utgiftstype {
   KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
   KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
@@ -2424,10 +2465,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  inntektBMMånedlig?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
-  inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2458,9 +2499,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2523,6 +2564,11 @@ export interface BarnetilleggDetaljerDto {
   bruttoBeløp: number;
   nettoBeløp: number;
   visningsnavn: string;
+}
+
+export interface Belop {
+  verdi: number;
+  valutakode?: Valutakode;
 }
 
 export interface BeregningsdetaljerSamvaersfradrag {
@@ -2706,8 +2752,8 @@ export interface SluttberegningBarnebidragAldersjustering {
 
 export interface SluttberegningIndeksregulering {
   periode: TypeArManedsperiode;
-  beløp: number;
-  originaltBeløp: number;
+  beløp: Belop;
+  originaltBeløp: Belop;
   nesteIndeksreguleringsår?: string;
 }
 
@@ -3086,9 +3132,9 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  avslagVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3170,8 +3216,8 @@ export interface NotatGebyrRolleDto {
   begrunnelse?: string;
   beløpGebyrsats: number;
   rolle: NotatPersonDto;
-  erManueltOverstyrt: boolean;
   gebyrResultatVisningsnavn: string;
+  erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3269,10 +3315,10 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  inntektBMMånedlig?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
-  inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3328,8 +3374,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
   enesteVoksenIHusstandenErEgetBarn?: boolean;
   erDirekteAvslag: boolean;
   bpHarEvne: boolean;
-  beløpSomInnkreves: number;
   resultatVisningsnavn: string;
+  beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -3359,9 +3405,9 @@ export interface NotatSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3550,8 +3596,8 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
