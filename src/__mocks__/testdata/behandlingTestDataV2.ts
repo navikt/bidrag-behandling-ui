@@ -10,6 +10,8 @@ import {
 
 export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     id: 1,
+    erVedtakUtenBeregning: false,
+    erDelvedtakFattet: false,
     innkrevingstype: Innkrevingstype.MED_INNKREVING,
     type: TypeBehandling.FORSKUDD,
     søknadsid: 1234,
@@ -24,6 +26,10 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     søktAv: SoktAvType.BIDRAGSMOTTAKER,
     erKlageEllerOmgjøring: false,
     opprettetTidspunkt: "2019-04-01",
+    erBisysVedtak: false,
+    medInnkreving: false,
+    kanBehandlesINyLøsning: true,
+    underholdskostnader: [],
     roller: [
         {
             id: 1,
@@ -60,6 +66,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
             innhold: "",
         },
         valideringsfeil: null,
+        beregnetBoforhold: [],
     },
     inntekter: {
         månedsinntekter: [],
@@ -75,6 +82,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
                 innhold: "",
             },
         ],
+        begrunnelserFraOpprinneligVedtak: [],
         notat: {
             kunINotat: "",
             innhold: "",
@@ -92,16 +100,45 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
             kunINotat: "",
             innhold: "",
         },
+        opphør: {
+            opphørsdato: null,
+            opphørRoller: [],
+        },
+        harLøpendeBidrag: false,
     },
+    virkningstidspunktV2: [
+        {
+            rolle: {
+                id: 1,
+                rolletype: Rolletype.BA,
+                ident: "03522150877",
+            },
+            virkningstidspunkt: "",
+            årsak: null,
+            begrunnelse: {
+                kunINotat: "",
+                innhold: "",
+            },
+            notat: {
+                kunINotat: "",
+                innhold: "",
+            },
+            harLøpendeBidrag: false,
+            kanSkriveVurderingAvSkolegang: false,
+            manuelleVedtak: [],
+        },
+    ],
     aktiveGrunnlagsdata: {
         arbeidsforhold: [],
         husstandsbarn: [],
         husstandsmedlem: [],
+        husstandsmedlemBM: [],
     },
     ikkeAktiverteEndringerIGrunnlagsdata: {
         arbeidsforhold: [],
         inntekter: null,
         husstandsbarn: [],
         husstandsmedlem: [],
+        husstandsmedlemBM: [],
     },
 };

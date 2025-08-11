@@ -10,6 +10,8 @@ import {
 
 export const behandlingMockApiData: BehandlingDtoV2 = {
     id: 1,
+    erVedtakUtenBeregning: false,
+    erDelvedtakFattet: false,
     innkrevingstype: Innkrevingstype.MED_INNKREVING,
     type: TypeBehandling.FORSKUDD,
     søknadsid: 1234,
@@ -99,6 +101,10 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
             innhold: "",
         },
         harLøpendeBidrag: false,
+        opphør: {
+            opphørsdato: null,
+            opphørRoller: [],
+        },
     },
     virkningstidspunktV2: [
         {
@@ -118,6 +124,8 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
                 innhold: "",
             },
             harLøpendeBidrag: false,
+            kanSkriveVurderingAvSkolegang: false,
+            manuelleVedtak: [],
         },
     ],
     aktiveGrunnlagsdata: {

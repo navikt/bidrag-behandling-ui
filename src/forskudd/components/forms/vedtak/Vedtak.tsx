@@ -27,7 +27,7 @@ const Vedtak = () => {
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.resetQueries({ queryKey: QueryKeys.beregningForskudd() });
+        queryClient.refetchQueries({ queryKey: QueryKeys.beregningForskudd() });
     }, [activeStep]);
 
     return (
