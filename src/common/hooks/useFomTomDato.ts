@@ -7,12 +7,10 @@ import { addMonthsIgnoreDay } from "@utils/date-utils";
 export const useFomTomDato = (isDatepickerTom: boolean, datoFra?: Date) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
     const {
-        virkningstidspunkt: {
-            opphør: { opphørsdato },
-        },
+        virkningstidspunkt: { opphør },
         virkningstidspunktV2,
     } = useGetBehandlingV2();
-    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const opphørsTomDato = opphør?.opphørsdato ? new Date(opphør.opphørsdato) : undefined;
     const beregnTilDato = virkningstidspunktV2[0].beregnTilDato
         ? new Date(virkningstidspunktV2[0].beregnTilDato)
         : undefined;

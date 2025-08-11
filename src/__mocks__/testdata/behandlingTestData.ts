@@ -101,7 +101,10 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
             innhold: "",
         },
         harLøpendeBidrag: false,
-        opphør: null,
+        opphør: {
+            opphørsdato: null,
+            opphørRoller: [],
+        },
     },
     virkningstidspunktV2: [
         {

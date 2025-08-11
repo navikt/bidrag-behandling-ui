@@ -130,6 +130,8 @@ const VirkningstidspunktRolle = ({
         [fom]
     );
 
+    console.log("fom", fom);
+
     useEffect(() => {
         if (
             initialVirkningsdato &&
