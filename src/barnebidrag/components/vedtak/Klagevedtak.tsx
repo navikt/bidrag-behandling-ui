@@ -6,7 +6,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import { Alert, BodyShort, Heading, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { ActionButtons } from "../../../common/components/ActionButtons";
@@ -22,12 +22,14 @@ const Klagevedtak = () => {
     const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
-
+    const lastetFørstegang = useRef(false);
     useEffect(() => {
-        queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
+        if (lastetFørstegang.current) {
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+            queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
+        }
+        lastetFørstegang.current = true;
     }, [activeStep]);
-
     return (
         <div className="grid gap-y-8  w-[1150px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}

@@ -6,10 +6,9 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
-import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
@@ -28,11 +27,14 @@ const Vedtak = () => {
     const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(false))?.status === "error";
+    const lastetFørstegang = useRef(false);
 
     useEffect(() => {
-        queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
-        LoggerService.info("Vedtak component mounted");
+        if (lastetFørstegang.current) {
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+            queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
+        }
+        lastetFørstegang.current = true;
         if (lesemodusBehandling?.erOrkestrertVedtak) {
             const searchParams = new URLSearchParams(location.search);
 
