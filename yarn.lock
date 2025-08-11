@@ -1684,10 +1684,10 @@
   resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/7.18.0/908bbec38e98476c6ac0e67db1bb533525a43d9d#908bbec38e98476c6ac0e67db1bb533525a43d9d"
   integrity sha512-H8GPopgL86zGMSk651iv33nmMcrgjXrxTA/tPFbe49fS4GDEGDErj3te1hl5ykWsnLdjcJQG1fY55CEO9FNCeg==
 
-"@navikt/bidrag-ui-common@^1.14.6":
-  version "1.14.6"
-  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.14.6/c682a5317dc03c450fdb2d9452f199d7a6c48136#c682a5317dc03c450fdb2d9452f199d7a6c48136"
-  integrity sha512-RsQE54jIC7o//AFmn+NvK/x/AIQCrMR3Y8LMfv0SnRNReiw4R+aSoOBg/K+4POMWGhuETfHr00tvO1nfCCgoBg==
+"@navikt/bidrag-ui-common@^1.14.11":
+  version "1.14.11"
+  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.14.11/9e8a397a20b0b20fb03c60eb91a6a00654abc908#9e8a397a20b0b20fb03c60eb91a6a00654abc908"
+  integrity sha512-/DCV0Qip1iLTduLtk/GHSTeQL7oNs0idXpCHMMGg1ULGfmVx0veucfB+BRI+oByfrmiTIFE43VFGtZGPGvs40g==
   dependencies:
     axios "^1.8.2"
     echarts "^5.4.3"
