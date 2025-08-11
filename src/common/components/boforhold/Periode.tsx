@@ -2,14 +2,12 @@ import { BostatusperiodeDto, HusstandsmedlemDtoV2, TypeBehandling } from "@api/B
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import {
-    getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
-    getFomAndTomForMonthPicker,
-} from "@common/helpers/virkningstidspunktHelpers";
+import { getEitherFirstDayOfFoedselsOrVirkingsdatoMonth } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -31,18 +29,12 @@ export const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const {
-        type,
-        virkningstidspunkt: {
-            opphør: { opphørsdato },
-        },
-    } = useGetBehandlingV2();
+    const { type } = useGetBehandlingV2();
     const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
-    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra, opphørsTomDato);
     const fieldIsDatoTom = field === "datoTom";
+    const [fom, tom] = useFomTomDato(fieldIsDatoTom, datoFra);
     const isSærbidragTypeAndFieldIsDatoFom = type === TypeBehandling.SAeRBIDRAG && !fieldIsDatoTom;
 
     const validateFomOgTom = () => {
@@ -67,7 +59,7 @@ export const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={tom}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             readonly={lesemodus}

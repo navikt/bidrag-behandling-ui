@@ -23,12 +23,10 @@ import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears, isOver18YearsOld } from "@common/helpers/boforholdFormHelpers";
-import {
-    aarsakToVirkningstidspunktMapper,
-    getFomAndTomForMonthPicker,
-} from "@common/helpers/virkningstidspunktHelpers";
+import { aarsakToVirkningstidspunktMapper } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
     OpphørsVarighet,
@@ -481,7 +479,7 @@ const VirkningstidspunktBarn = ({
     };
     const erÅrsakAvslagIkkeValgt = getValues(`roller.${barnIndex}.årsakAvslag`) === "";
 
-    const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
+    const [fom] = useFomTomDato(false, new Date(behandling.søktFomDato));
 
     const tom = useMemo(() => {
         const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);

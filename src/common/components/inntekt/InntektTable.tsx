@@ -15,20 +15,20 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { createPayload, transformInntekt } from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { Buildings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { InntektTables } from "../../../forskudd/context/ForskuddBehandlingProviderWrapper";
-import { getFomAndTomForMonthPicker } from "../../helpers/virkningstidspunktHelpers";
 import { useInntektTableProvider } from "./InntektTableContext";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -141,17 +141,10 @@ export const Periode = ({
     field: "datoFom" | "datoTom";
     item: InntektFormPeriode;
 }) => {
-    const virkningsdato = useVirkningsdato();
-    const {
-        type,
-        virkningstidspunkt: {
-            opphør: { opphørsdato },
-        },
-    } = useGetBehandlingV2();
-    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato, opphørsTomDato);
-    const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
+    const { type } = useGetBehandlingV2();
     const fieldIsDatoTom = field === "datoTom";
+    const [fom, tom] = useFomTomDato(fieldIsDatoTom);
+    const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const isSærbidragTypeAndFieldIsDatoFom = type === TypeBehandling.SAeRBIDRAG && !fieldIsDatoTom;
 
@@ -180,7 +173,7 @@ export const Periode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={tom}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={item.taMed && !fieldIsDatoTom}
             readonly={lesemodus}

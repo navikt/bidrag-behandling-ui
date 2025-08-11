@@ -18,12 +18,10 @@ import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import {
-    aarsakToVirkningstidspunktMapper,
-    getFomAndTomForMonthPicker,
-} from "@common/helpers/virkningstidspunktHelpers";
+import { aarsakToVirkningstidspunktMapper } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import {
     VirkningstidspunktFormValues,
@@ -126,7 +124,7 @@ const VirkningstidspunktRolle = ({
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
 
-    const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
+    const [fom] = useFomTomDato(false);
     const tom = useMemo(
         () => dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
         [fom]
