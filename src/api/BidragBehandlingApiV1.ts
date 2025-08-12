@@ -1390,9 +1390,9 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
+  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
-  gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1427,9 +1427,9 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
+  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
-  gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2388,9 +2388,9 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2465,10 +2465,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
-  inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
+  inntektBPMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2499,9 +2499,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
+  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2667,6 +2667,9 @@ export interface IndeksreguleringDetaljer {
 export interface KlageOmgjoringDetaljer {
   /** @format int32 */
   resultatFraVedtak?: number;
+  /** @format date-time */
+  resultatFraVedtakVedtakstidspunkt?: string;
+  innkrevesFraDato?: string;
   klagevedtak: boolean;
   manuellAldersjustering: boolean;
   delAvVedtaket: boolean;
@@ -2693,6 +2696,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
   vedtakstype: Vedtakstype;
   klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
+  resultatFraVedtak?: ResultatFraVedtakGrunnlag;
+  delvedtakstypeVisningsnavn: string;
   resultatkodeVisningsnavn?: string;
 }
 
@@ -2702,6 +2707,7 @@ export interface ResultatBidragberegningDto {
 
 export interface ResultatBidragsberegningBarnDto {
   barn: ResultatRolle;
+  innkrevesFraDato?: string;
   resultatUtenBeregning: boolean;
   /** @format int32 */
   indeksår?: number;
@@ -2709,6 +2715,16 @@ export interface ResultatBidragsberegningBarnDto {
   forsendelseDistribueresAutomatisk: boolean;
   perioder: ResultatBarnebidragsberegningPeriodeDto[];
   delvedtak: DelvedtakDto[];
+}
+
+export interface ResultatFraVedtakGrunnlag {
+  /** @format int32 */
+  vedtaksid?: number;
+  klagevedtak: boolean;
+  beregnet: boolean;
+  opprettParagraf35c: boolean;
+  /** @format date-time */
+  vedtakstidspunkt?: string;
 }
 
 export interface SluttberegningBarnebidrag {
@@ -2849,10 +2865,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
   type: OpplysningerType;
   rolle: RolleDto;
-  /** @format int64 */
-  underholdskostnadId?: number;
   /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
   gjelderBarn?: HusstandsmedlemDto;
+  /** @format int64 */
+  underholdskostnadId?: number;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -3136,8 +3152,8 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   vedtakstypeVisningsnavn?: string;
-  avslagVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3318,10 +3334,10 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
-  inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
+  inntektBPMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3377,8 +3393,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
   enesteVoksenIHusstandenErEgetBarn?: boolean;
   erDirekteAvslag: boolean;
   bpHarEvne: boolean;
-  beløpSomInnkreves: number;
   resultatVisningsnavn: string;
+  beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -3408,9 +3424,9 @@ export interface NotatSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
+  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3599,8 +3615,8 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3909,8 +3925,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL:
-        axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+      baseURL: axiosConfig.baseURL || "http://localhost:8990",
     });
     this.secure = secure;
     this.format = format;
@@ -4024,7 +4039,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<
   SecurityDataType extends unknown,

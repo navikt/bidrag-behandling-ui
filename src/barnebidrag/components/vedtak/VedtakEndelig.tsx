@@ -15,7 +15,6 @@ import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/Bidra
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
-import environment from "../../../environment";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { dateOrNull, DateToMMYYYYString } from "../../../utils/date-utils";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
@@ -34,11 +33,7 @@ const VedtakEndelig = () => {
     useEffect(() => {
         if (lastetFørstegang.current) {
             queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-            if (environment.system.isDevelopment) {
-                queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
-            } else {
-                queryClient.resetQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
-            }
+            queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
         }
         lastetFørstegang.current = true;
     }, [activeStep]);
@@ -176,40 +171,6 @@ const VedtakResultat = () => {
 function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsberegningBarnDto }) {
     const { isFetching, isLoading } = useGetBeregningBidrag(true);
 
-    // const hentTittelVedtak = (delvedtak: DelvedtakDto) => {
-    //     if (delvedtak.klagevedtak) return "Klagevedtak";
-    //     if (delvedtak.delvedtak === false) return "Endelig vedtak";
-    //     if (delvedtak.gjenopprettetBeløpshistorikk)
-    //         return `Gjenopprettet beløpshistorikk (${hentVisningsnavn(delvedtak.type)})`;
-    //     return `${hentVisningsnavn(delvedtak.type)}`;
-    // };
-    // const boxConfig = (delvedtak: DelvedtakDto): BoxProps => {
-    //     if (delvedtak.klagevedtak)
-    //         return {
-    //             shadow: "medium",
-    //             background: "surface-transparent",
-    //             padding: "4",
-    //             borderWidth: "1",
-    //             borderColor: "border-subtle",
-    //             borderRadius: "medium",
-    //         };
-    //     if (delvedtak.delvedtak === false)
-    //         return {
-    //             shadow: "xsmall",
-    //             className: "mt-2",
-    //             background: "surface-transparent",
-    //             padding: "4",
-    //             borderColor: "border-subtle",
-    //             borderRadius: "medium",
-    //         };
-    //     return {
-    //         shadow: "xsmall",
-    //         background: "surface-transparent",
-    //         padding: "4",
-    //         borderColor: "border-subtle",
-    //         borderRadius: "small",
-    //     };
-    // };
     if (isFetching && !isLoading) {
         return (
             <VStack gap="2" className="w-full">
@@ -230,28 +191,13 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                     );
 
                     const vedtakstype = delvedtak.type;
-                    // const periode = delvedtak.perioder[0];
-                    // const manuellAldersjustering = delvedtak.perioder.some(
-                    //     (p) => p.aldersjusteringDetaljer?.aldersjusteresManuelt === true
-                    // );
+
                     const manuellAldersjustering = delvedtak.perioder.some(
                         (p) => p?.klageOmgjøringDetaljer?.manuellAldersjustering
                     );
-                    // const aldersjusteresForÅr = new Date(periode.periode.fom).getFullYear();
-                    // const valgtVedtak = r.barn?.grunnlagFraVedtak?.some(
-                    //     (v) => v.aldersjusteringForÅr === aldersjusteresForÅr && v.vedtak != null
-                    // );
+
                     return (
                         <VStack>
-                            {/* <Box {...boxConfig(delvedtak)}> */}
-                            {/* {(manuellAldersjustering || valgtVedtak) && (
-                                                    <VelgManuellVedtakModal
-                                                        barnIdent={r.barn.ident}
-                                                        aldersjusteringForÅr={new Date(
-                                                            periode.periode.fom
-                                                        ).getFullYear()}
-                                                    />
-                                                )} */}
                             <ResultatTabell
                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
                                 erAvslag={false}
@@ -265,11 +211,15 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                                     ...resultatBarn,
                                     perioder: delvedtak.perioder,
                                     resultatUtenBeregning: delvedtak.type === Vedtakstype.INDEKSREGULERING,
-                                    // (!delvedtak.delvedtak && !delvedtak.klagevedtak),
                                 }}
                                 erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                             />
-                            {/* </Box> */}
+                            <BodyShort size="small">
+                                <HStack gap="2">
+                                    <div>Innkreves fra</div>
+                                    <div>{DateToMMYYYYString(dateOrNull(resultatBarn.innkrevesFraDato))}</div>
+                                </HStack>
+                            </BodyShort>
                         </VStack>
                     );
                 })}

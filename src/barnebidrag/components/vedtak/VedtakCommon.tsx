@@ -240,7 +240,7 @@ export const VedtakTableHeader = ({
                 <Table.Row>
                     {inneholder35C && (
                         <Table.HeaderCell textSize="small" scope="col" className="w-[13%]">
-                            Opprett P35c
+                            Opprett § 35c
                         </Table.HeaderCell>
                     )}
                     <Table.HeaderCell
@@ -255,8 +255,8 @@ export const VedtakTableHeader = ({
                             {"Manuell aldersjustering"}
                         </Table.HeaderCell>
                     )}
-                    <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
-                        Endring
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[20%]">
+                        Type
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
                         Beløp
@@ -501,9 +501,7 @@ export const VedtakTableBody = ({
                             )}
                         </Table.DataCell>
                     )}
-                    <Table.DataCell textSize="small">
-                        {periode.klageOmgjøringDetaljer?.resultatFraVedtak ? "Nei" : "Ja"}
-                    </Table.DataCell>
+                    <Table.DataCell textSize="small">{periode.delvedtakstypeVisningsnavn}</Table.DataCell>
                     <Table.DataCell textSize="small">
                         {periode.erOpphør ? "-" : formatterBeløpForBeregning(periode.faktiskBidrag)}
                     </Table.DataCell>
