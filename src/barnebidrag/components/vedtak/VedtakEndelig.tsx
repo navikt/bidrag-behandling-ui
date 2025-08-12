@@ -7,7 +7,6 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, HStack, Link, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
@@ -16,6 +15,7 @@ import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/Bidra
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
+import environment from "../../../environment";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { dateOrNull, DateToMMYYYYString } from "../../../utils/date-utils";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
@@ -34,8 +34,11 @@ const VedtakEndelig = () => {
     useEffect(() => {
         if (lastetFørstegang.current) {
             queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-            queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
-            LoggerService.info("Vedtak component mounted");
+            if (environment.system.isDevelopment) {
+                queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
+            } else {
+                queryClient.resetQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) });
+            }
         }
         lastetFørstegang.current = true;
     }, [activeStep]);

@@ -20,7 +20,12 @@ import { GrunnlagFraVedtakButton, VedtakResultatBarn, VedtakTableBody, VedtakTab
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet, kanBehandlesINyLøsning, lesemodus: lesemodusBehandling } = useGetBehandlingV2();
+    const {
+        erVedtakFattet,
+        kanBehandlesINyLøsning,
+        lesemodus: lesemodusBehandling,
+        vedtakstype,
+    } = useGetBehandlingV2();
     const location = useLocation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -35,7 +40,7 @@ const Vedtak = () => {
             queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
         }
         lastetFørstegang.current = true;
-        if (lesemodusBehandling?.erOrkestrertVedtak) {
+        if (lesemodusBehandling?.erOrkestrertVedtak || vedtakstype === Vedtakstype.KLAGE) {
             const searchParams = new URLSearchParams(location.search);
 
             searchParams.set("steg", "vedtak_endelig");
