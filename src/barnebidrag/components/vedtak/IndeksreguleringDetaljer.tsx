@@ -16,17 +16,17 @@ export const IndeksreguleringDetaljer = () => {
                     {
                         label: "Indeksregulert beløp",
                         labelBold: true,
-                        value: `${formatterBeløpForBeregning(indeksreguleringDetaljer.sluttberegning?.originaltBeløp?.verdi, true)}`,
+                        result: `${formatterBeløpForBeregning(indeksreguleringDetaljer.sluttberegning?.originaltBeløp?.verdi, true)}`,
                     },
                     {
-                        label: "Indeksfaktor",
+                        label: "Indeksprosent",
                         labelBold: true,
-                        value: `${formatterProsent(indeksreguleringDetaljer.faktor)}`,
+                        result: `${formatterProsent(indeksreguleringDetaljer.faktor)}`,
                     },
                     {
                         label: "Beregning",
                         labelBold: true,
-                        value: `${formatterBeløpForBeregning(indeksreguleringDetaljer.sluttberegning?.originaltBeløp?.verdi, true)} x ${formatterProsent(100 + indeksreguleringDetaljer.faktor)}`,
+                        value: `${formatterBeløpForBeregning(indeksreguleringDetaljer.sluttberegning?.originaltBeløp?.verdi, true)} x ${1 + indeksreguleringDetaljer.faktor / 100}`,
                         result: formatterBeløpForBeregning(indeksreguleringDetaljer.sluttberegning?.beløp?.verdi),
                     },
                 ].filter((d) => d)}
