@@ -214,12 +214,14 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                                 }}
                                 erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                             />
-                            <BodyShort size="small">
-                                <HStack gap="2">
-                                    <div>Innkreves fra</div>
-                                    <div>{DateToMMYYYYString(dateOrNull(resultatBarn.innkrevesFraDato))}</div>
-                                </HStack>
-                            </BodyShort>
+                            {resultatBarn.innkrevesFraDato !== null && (
+                                <BodyShort size="small">
+                                    <HStack gap="2">
+                                        <div>Innkreves fra: </div>
+                                        <div>{DateToMMYYYYString(dateOrNull(resultatBarn.innkrevesFraDato))}</div>
+                                    </HStack>
+                                </BodyShort>
+                            )}
                         </VStack>
                     );
                 })}
