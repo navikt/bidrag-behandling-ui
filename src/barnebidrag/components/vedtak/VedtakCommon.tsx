@@ -311,13 +311,14 @@ export const OpprettParagraf35cCheckbox = ({
     resultatBarn?: ResultatBidragsberegningBarnDto;
 }) => {
     const { mutate, isError: _, isPending } = useOppdaterOpprettP35c(periode);
+    const { lesemodus } = useGetBehandlingV2();
 
     const detaljer = periode.klageOmgjøringDetaljer;
     if (!detaljer) return;
     return (
         <Checkbox
             hideLabel
-            readOnly={isPending}
+            readOnly={isPending || lesemodus !== undefined}
             size="small"
             checked={detaljer.skalOpprette35c}
             onChange={() =>
@@ -401,7 +402,7 @@ export const VedtakTableBody = ({
     orkestrertVedtak?: boolean;
     manuellAldersjustering?: boolean;
 }) => {
-    const { erBisysVedtak, vedtakstype, lesemodus } = useGetBehandlingV2();
+    const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
 
     function getRowClassName(periode: ResultatBarnebidragsberegningPeriodeDto): string {
         if (periode.klageOmgjøringDetaljer?.kanOpprette35c) {
@@ -480,7 +481,7 @@ export const VedtakTableBody = ({
                 >
                     {inneholder35C && (
                         <Table.DataCell textSize="small">
-                            {periode.klageOmgjøringDetaljer?.kanOpprette35c && !lesemodus && (
+                            {periode.klageOmgjøringDetaljer?.kanOpprette35c && (
                                 <OpprettParagraf35cCheckbox periode={periode} resultatBarn={resultatBarn} />
                             )}
                         </Table.DataCell>
