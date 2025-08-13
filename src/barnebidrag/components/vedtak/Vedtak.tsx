@@ -40,7 +40,7 @@ const Vedtak = () => {
             queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
         }
         lastetFørstegang.current = true;
-        if (lesemodusBehandling?.erOrkestrertVedtak || vedtakstype === Vedtakstype.KLAGE) {
+        if (lesemodusBehandling?.erOrkestrertVedtak || (vedtakstype === Vedtakstype.KLAGE && !lesemodus)) {
             const searchParams = new URLSearchParams(location.search);
 
             searchParams.set("steg", "vedtak_endelig");
