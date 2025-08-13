@@ -214,7 +214,7 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                                 }}
                                 erOpphor={vedtakstype === Vedtakstype.OPPHOR}
                             />
-                            {resultatBarn.innkrevesFraDato !== null && (
+                            {resultatBarn.innkrevesFraDato && (
                                 <BodyShort size="small">
                                     <HStack gap="2">
                                         <div>Innkreves fra: </div>
