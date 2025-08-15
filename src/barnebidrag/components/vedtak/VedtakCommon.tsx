@@ -239,8 +239,8 @@ export const VedtakTableHeader = ({
             return (
                 <Table.Row>
                     {inneholder35C && (
-                        <Table.HeaderCell textSize="small" scope="col" className="w-[13%]">
-                            Opprett § 35c
+                        <Table.HeaderCell textSize="small" scope="col" className="w-[16%]">
+                            Vurder ugyldighet
                         </Table.HeaderCell>
                     )}
                     <Table.HeaderCell
