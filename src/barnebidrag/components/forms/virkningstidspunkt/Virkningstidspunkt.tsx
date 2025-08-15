@@ -734,7 +734,7 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            <Tidslinje virkningstidspunkt={selectedVirkningstidspunkt} />
+            {/* <Tidslinje virkningstidspunkt={selectedVirkningstidspunkt} /> */}
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
