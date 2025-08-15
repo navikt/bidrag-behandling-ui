@@ -22,6 +22,7 @@ const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
     const {
         erVedtakFattet,
+        erDelvedtakFattet,
         kanBehandlesINyLøsning,
         lesemodus: lesemodusBehandling,
         vedtakstype,
@@ -56,6 +57,12 @@ const Vedtak = () => {
         <React.Suspense fallback={<div></div>}>
             <div className="grid gap-y-8  w-[1150px]">
                 {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+                {!erVedtakFattet && erDelvedtakFattet && !lesemodus && (
+                    <Alert variant="warning">
+                        Vedtak er delvis fattet og kan derfor ikke endres. Det har skjedd en feil ved fatting av vedtak.
+                        Prøv å på nytt eller opprett fagsystemsak
+                    </Alert>
+                )}
                 <div className="grid gap-y-2">
                     <Heading level="2" size="medium">
                         {text.title.vedtak}

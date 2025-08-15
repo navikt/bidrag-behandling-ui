@@ -33,8 +33,9 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
+import { PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, HStack, Label, Tabs } from "@navikt/ds-react";
+import { BodyShort, HStack, Label, Tabs, Timeline } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -195,6 +196,52 @@ const getOpphørOptions = (
     } else {
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO];
     }
+};
+
+const Tidslinje = ({ virkningstidspunkt }: { virkningstidspunkt: VirkningstidspunktDtoV2 }) => {
+    console.log(virkningstidspunkt);
+    return (
+        <Timeline>
+            <Timeline.Pin date={dateOrNull(virkningstidspunkt.beregnTilDato)}>
+                <p>Periode: 01.03.2022 - 01.04.2022</p>
+                <p>Utbetalt: 12 345,00 kr</p>
+                <p style={{ color: "red" }}>Dager igjen: 0</p>
+            </Timeline.Pin>
+            <Timeline.Row label="Opprinnelig virkningstidspunkt" icon={<PersonIcon aria-hidden />}>
+                <Timeline.Period
+                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
+                    end={new Date("Jul 31 2024")}
+                    status={"neutral"}
+                >
+                    Beregningsperiode
+                </Timeline.Period>
+            </Timeline.Row>
+            <Timeline.Row label="Inneværende måned" icon={<PersonIcon aria-hidden />}>
+                <Timeline.Period
+                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
+                    end={new Date("Aug 31 2025")}
+                    status={"success"}
+                >
+                    Beregningsperiode
+                </Timeline.Period>
+                <Timeline.Period start={new Date("Sep 02 2025")} end={new Date("Jan 01 2026")} status={"neutral"}>
+                    Beregningsperiode
+                </Timeline.Period>
+                <Timeline.Period start={new Date("Dec 01 2025")} end={new Date("Dec 31 2025")} status={"danger"}>
+                    Opphør
+                </Timeline.Period>
+            </Timeline.Row>
+            <Timeline.Row label="Etterfølgende vedtak" icon={<PersonIcon aria-hidden />}>
+                <Timeline.Period
+                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
+                    end={new Date("May 01 2025")}
+                    status={"neutral"}
+                >
+                    Beregningsperiode
+                </Timeline.Period>
+            </Timeline.Row>
+        </Timeline>
+    );
 };
 
 const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
@@ -687,6 +734,7 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
+            <Tidslinje virkningstidspunkt={selectedVirkningstidspunkt} />
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}

@@ -1390,9 +1390,9 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1427,9 +1427,9 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2388,9 +2388,9 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
-  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
+  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2405,6 +2405,11 @@ export interface FatteVedtakRequestDto {
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
+}
+
+export interface FatteVedtakFeil {
+  feilmelding: string;
+  ugyldigPerioder: TypeArManedsperiode[];
 }
 
 export interface BeregnetBidragPerBarn {
@@ -2466,9 +2471,9 @@ export interface ResultatBeregningInntekterDto {
   inntektBarn?: number;
   barnEndeligInntekt?: number;
   inntektBarnMånedlig?: number;
-  inntektBMMånedlig?: number;
-  inntektBPMånedlig?: number;
   totalEndeligInntekt: number;
+  inntektBPMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2648,6 +2653,8 @@ export interface DelvedtakDto {
   beregnet: boolean;
   /** @format int32 */
   indeksår: number;
+  /** @format date-time */
+  resultatFraVedtakVedtakstidspunkt?: string;
   perioder: ResultatBarnebidragsberegningPeriodeDto[];
   grunnlagFraVedtak: GrunnlagFraVedtak[];
   endeligVedtak: boolean;
@@ -2669,7 +2676,7 @@ export interface KlageOmgjoringDetaljer {
   resultatFraVedtak?: number;
   /** @format date-time */
   resultatFraVedtakVedtakstidspunkt?: string;
-  innkrevesFraDato?: string;
+  beregnTilDato?: string;
   klagevedtak: boolean;
   manuellAldersjustering: boolean;
   delAvVedtaket: boolean;
@@ -3151,8 +3158,8 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  vedtakstypeVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
   avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3335,9 +3342,9 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBarn?: number;
   barnEndeligInntekt?: number;
   inntektBarnMånedlig?: number;
-  inntektBMMånedlig?: number;
-  inntektBPMånedlig?: number;
   totalEndeligInntekt: number;
+  inntektBPMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3615,8 +3622,8 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3764,6 +3771,7 @@ export enum OpprettBehandlingRequestSoknadstypeEnum {
   OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
   OMGJORING = "OMGJØRING",
   OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+  PARAGRAF_35_C = "PARAGRAF_35_C",
 }
 
 export enum OpprettBehandlingFraVedtakRequestSoknadstypeEnum {
@@ -3785,6 +3793,7 @@ export enum OpprettBehandlingFraVedtakRequestSoknadstypeEnum {
   OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
   OMGJORING = "OMGJØRING",
   OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+  PARAGRAF_35_C = "PARAGRAF_35_C",
 }
 
 export enum KanBehandlesINyLosningRequestSoknadstypeEnum {
@@ -3806,6 +3815,7 @@ export enum KanBehandlesINyLosningRequestSoknadstypeEnum {
   OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
   OMGJORING = "OMGJØRING",
   OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+  PARAGRAF_35_C = "PARAGRAF_35_C",
 }
 
 export enum UgyldigResultatPeriodeTypeEnum {
@@ -4647,7 +4657,7 @@ export class Api<
       data: FatteVedtakRequestDto,
       params: RequestParams = {},
     ) =>
-      this.request<number, any>({
+      this.request<number, FatteVedtakFeil>({
         path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
         method: "POST",
         body: data,
