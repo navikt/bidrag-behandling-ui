@@ -79,16 +79,21 @@ export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) 
     return [fom, tom];
 };
 
-export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, opphørsdato?: Date) => {
+export const getFomAndTomForMonthPicker = (
+    virkningstidspunkt: Date | string,
+    opphørsdato?: Date,
+    beregnTilDato?: Date
+) => {
     const lastDayOfPreviousMonth = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
     const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(deductMonths(firstDayOfMonth(opphørsdato), 1));
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
-    const tom =
+    const opphørsdatoTom =
         lastDayOfOpphørsdatoMonth && isBeforeOrEqualsDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
             ? lastDayOfOpphørsdatoMonth
             : opphørsdato
               ? lastDayOfMonth(addMonths(lastDayOfPreviousMonth, 1))
               : lastDayOfPreviousMonth;
+    const tom = beregnTilDato ? beregnTilDato : opphørsdatoTom;
 
     return [fom, tom];
 };

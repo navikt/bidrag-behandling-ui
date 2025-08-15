@@ -10,7 +10,8 @@ import FormWrapper from "../components/forms/FormWrapper";
 import { BarnebidragSideMenu } from "./BarnebidragSideMenu";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const BarnebidragPage = () => {
-    const { erVedtakFattet, kanBehandlesINyLøsning, kanIkkeBehandlesBegrunnelse } = useGetBehandlingV2();
+    const { erVedtakFattet, erDelvedtakFattet, kanBehandlesINyLøsning, kanIkkeBehandlesBegrunnelse } =
+        useGetBehandlingV2();
     const { vedtaksperre } = useFeatureToogle();
     const ref = useRef<HTMLDivElement>(null);
     const [rootElement, setRootElement] = React.useState<HTMLDivElement | null>(null);
@@ -34,6 +35,15 @@ export const BarnebidragPage = () => {
                                     Vedtak er fattet
                                 </Heading>
                                 Vedtak er fattet for behandlingen og kan derfor ikke endres
+                            </Alert>
+                        )}
+                        {!erVedtakFattet && erDelvedtakFattet && (
+                            <Alert variant="warning" size="small" className="mb-4 w-max m-auto">
+                                <Heading level="3" size="small">
+                                    Vedtak er delvis fattet
+                                </Heading>
+                                Vedtak er delvis fattet og kan derfor ikke endres. Det har skjedd en feil ved fatting av
+                                vedtak. Prøv å fatte på nytt eller opprett fagsystemsak
                             </Alert>
                         )}
                         {!vedtaksperre && !kanBehandlesINyLøsning && (

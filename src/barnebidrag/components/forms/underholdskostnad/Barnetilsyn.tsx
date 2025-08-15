@@ -7,16 +7,14 @@ import { RolleTag } from "@common/components/RolleTag";
 import StatefulAlert from "@common/components/StatefulAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import {
-    getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
-    getFomAndTomForMonthPicker,
-} from "@common/helpers/virkningstidspunktHelpers";
+import { getEitherFirstDayOfFoedselsOrVirkingsdatoMonth } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2, useGetOpplysningerBarnetilsyn } from "@common/hooks/useApiData";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, calculateAge, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { calculateAge, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { ChangeEvent, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -98,16 +96,10 @@ export const UnderholdskostnadPeriode = ({
     underhold: Underhold;
 }) => {
     const virkningsdato = useVirkningsdato();
-    const {
-        virkningstidspunkt: {
-            opphør: { opphørsdato },
-        },
-    } = useGetBehandlingV2();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(underhold.gjelderBarn.fødselsdato, virkningsdato);
-    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<UnderholdskostnadFormValues>();
     const fieldIsDatoTom = field === "datoTom";
+    const [fom, tom] = useFomTomDato(fieldIsDatoTom, datoFra);
     const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
 
     const validateFomOgTom = () => {
@@ -132,7 +124,7 @@ export const UnderholdskostnadPeriode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={tom}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             readonly={lesemodus}

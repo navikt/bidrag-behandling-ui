@@ -4,7 +4,9 @@ import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
 import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
+import Klagevedtak from "../vedtak/Klagevedtak";
 import Vedtak from "../vedtak/Vedtak";
+import VedtakEndelig from "../vedtak/VedtakEndelig";
 import Boforhold from "./boforhold/Boforhold";
 import Gebyr from "./gebyr/Gebyr";
 import Inntekt from "./inntekt/Inntekt";
@@ -31,6 +33,10 @@ const BarnebidragForm = memo(({ activeStep }: { activeStep: string }) => {
             return <Boforhold />;
         case BarnebidragStepper.VEDTAK:
             return <Vedtak />;
+        case BarnebidragStepper.KLAGEVEDTAK:
+            return <Klagevedtak />;
+        case BarnebidragStepper.VEDTAK_ENDELIG:
+            return <VedtakEndelig />;
         default:
             return null;
     }

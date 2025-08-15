@@ -16,6 +16,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect } from "react";
 
 import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";
+import environment from "../../../../environment";
 import { STEPS } from "../../../constants/steps";
 
 const Vedtak = () => {
@@ -26,8 +27,13 @@ const Vedtak = () => {
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
 
     useEffect(() => {
-        queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        queryClient.resetQueries({ queryKey: QueryKeys.beregningForskudd() });
+        if (environment.system.isDevelopment) {
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+            queryClient.refetchQueries({ queryKey: QueryKeys.beregningForskudd() });
+        } else {
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+            queryClient.resetQueries({ queryKey: QueryKeys.beregningForskudd() });
+        }
     }, [activeStep]);
 
     return (

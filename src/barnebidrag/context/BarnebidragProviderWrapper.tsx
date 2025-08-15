@@ -69,6 +69,10 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
     });
     const formSteps = { defaultStep: BarnebidragStepper.VIRKNINGSTIDSPUNKT, steps: BarnebidragSteps };
 
+    const orkestrertVedtak =
+        behandling.lesemodus != null
+            ? behandling.lesemodus.erOrkestrertVedtak
+            : behandling.vedtakstype === Vedtakstype.KLAGE;
     const sideMenu = [
         {
             step: BarnebidragStepper.VIRKNINGSTIDSPUNKT,
@@ -140,7 +144,17 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         },
         {
             step: BarnebidragStepper.VEDTAK,
-            visible: true,
+            visible: !orkestrertVedtak,
+            interactive: true,
+        },
+        {
+            step: BarnebidragStepper.KLAGEVEDTAK,
+            visible: orkestrertVedtak,
+            interactive: true,
+        },
+        {
+            step: BarnebidragStepper.VEDTAK_ENDELIG,
+            visible: orkestrertVedtak,
             interactive: true,
         },
     ];

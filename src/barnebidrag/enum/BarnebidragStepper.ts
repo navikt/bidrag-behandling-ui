@@ -7,4 +7,6 @@ export enum BarnebidragStepper {
     UNDERHOLDSKOSTNAD = "underholdskostnad",
     SAMVÆR = "samvær",
     VEDTAK = "vedtak",
+    KLAGEVEDTAK = "klagevedtak",
+    VEDTAK_ENDELIG = "vedtak_endelig",
 }
