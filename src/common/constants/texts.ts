@@ -226,6 +226,7 @@ const tekster = {
         søknadstype: "Søknadstype",
         søknadfra: "Søknad fra",
         søktfradato: "Søkt fra dato",
+        opprinneligvedtakstidspunkt: "Opprinnelig vedtakstidspunkt",
         taMed: "Ta med",
         tilbakeTilUtfylling: "Tilbake til utfylling",
         tilleggstønad: "Tilleggstønad",
