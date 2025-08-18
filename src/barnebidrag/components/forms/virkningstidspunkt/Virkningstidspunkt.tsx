@@ -198,6 +198,7 @@ const getOpphørOptions = (
     }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Tidslinje = ({ virkningstidspunkt }: { virkningstidspunkt: VirkningstidspunktDtoV2 }) => {
     console.log(dateOrNull(virkningstidspunkt.virkningstidspunkt));
     const opprinneligVirkningPerioder = () => {
