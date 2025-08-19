@@ -796,7 +796,7 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            <Beregningsperiode initialValues={initialValues} />
+            {behandling.erKlageEllerOmgjøring && <Beregningsperiode initialValues={initialValues} />}
 
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
