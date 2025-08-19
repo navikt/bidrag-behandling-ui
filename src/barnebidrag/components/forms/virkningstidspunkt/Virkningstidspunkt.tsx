@@ -765,16 +765,7 @@ const VirkningstidspunktBarn = ({
                         readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
                         required
                     />
-                    <FormControlledMonthPicker
-                        name={`roller.${barnIndex}.beregnTilDato`}
-                        label={"Beregn til"}
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        defaultValue={initialValues.beregnTilDato}
-                        fromDate={fom}
-                        toDate={tom}
-                        readonly
-                        required
-                    />
+
                     <BeregnTilDato
                         item={item}
                         barnIndex={barnIndex}
