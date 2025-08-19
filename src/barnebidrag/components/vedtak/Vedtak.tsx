@@ -54,45 +54,43 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <React.Suspense fallback={<div></div>}>
-            <div className="grid gap-y-8  w-[1150px]">
-                {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
-                {!erVedtakFattet && erDelvedtakFattet && !lesemodus && (
-                    <Alert variant="warning">
-                        Vedtak er delvis fattet og kan derfor ikke endres. Det har skjedd en feil ved fatting av vedtak.
-                        Prøv å på nytt eller opprett fagsystemsak
-                    </Alert>
-                )}
-                <div className="grid gap-y-2">
-                    <Heading level="2" size="medium">
-                        {text.title.vedtak}
-                    </Heading>
-                </div>
-                <div className="grid gap-y-2">
-                    {!beregning?.feil && (
-                        <div className="flex flex-row">
-                            <Heading level="3" size="small">
-                                {text.title.oppsummering}
-                            </Heading>
-                            <GrunnlagFraVedtakButton />
-                        </div>
-                    )}
-
-                    <VedtakResultat />
-                </div>
-
-                {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
-                    <FatteVedtakButtons
-                        isBeregningError={isBeregningError}
-                        disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
-                        opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
-                            (r) => r.forsendelseDistribueresAutomatisk
-                        )}
-                    />
-                )}
-                <AdminButtons />
+        <div className="grid gap-y-8  w-[1150px]">
+            {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+            {!erVedtakFattet && erDelvedtakFattet && !lesemodus && (
+                <Alert variant="warning">
+                    Vedtak er delvis fattet og kan derfor ikke endres. Det har skjedd en feil ved fatting av vedtak.
+                    Prøv å på nytt eller opprett fagsystemsak
+                </Alert>
+            )}
+            <div className="grid gap-y-2">
+                <Heading level="2" size="medium">
+                    {text.title.vedtak}
+                </Heading>
             </div>
-        </React.Suspense>
+            <div className="grid gap-y-2">
+                {!beregning?.feil && (
+                    <div className="flex flex-row">
+                        <Heading level="3" size="small">
+                            {text.title.oppsummering}
+                        </Heading>
+                        <GrunnlagFraVedtakButton />
+                    </div>
+                )}
+
+                <VedtakResultat />
+            </div>
+
+            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
+                <FatteVedtakButtons
+                    isBeregningError={isBeregningError}
+                    disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
+                    opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
+                        (r) => r.forsendelseDistribueresAutomatisk
+                    )}
+                />
+            )}
+            <AdminButtons />
+        </div>
     );
 };
 

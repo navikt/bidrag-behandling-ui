@@ -34,8 +34,8 @@ import {
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
 import { PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, HStack, Label, Tabs, Timeline } from "@navikt/ds-react";
+import { deductDays, firstDayOfMonth, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, HStack, Label, Tabs, Timeline, VStack } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -201,65 +201,97 @@ const getOpphørOptions = (
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Tidslinje = ({ virkningstidspunkt }: { virkningstidspunkt: VirkningstidspunktDtoV2 }) => {
     console.log(dateOrNull(virkningstidspunkt.virkningstidspunkt));
+    const nestePeriodeFom = Math.min(
+        ...virkningstidspunkt.etterfølgendeVedtak
+            .map((e) => new Date(e.virkningstidspunkt).getTime())
+            .filter(Number.isFinite)
+    );
     const opprinneligVirkningPerioder = () => {
         return virkningstidspunkt.etterfølgendeVedtak
             .map((e) => {
-                console.log(e, dateOrNull(e.virkningstidspunkt));
                 return (
                     <Timeline.Period
                         start={dateOrNull(e.virkningstidspunkt)}
-                        end={e.opphørsdato ? dateOrNull(e.opphørsdato) : addMonths(dateOrNull(e.virkningstidspunkt), 1)}
+                        end={
+                            e.opphørsdato ? dateOrNull(e.opphørsdato) : addMonths(dateOrNull(e.sistePeriodeDatoFom), 1)
+                        }
                         status={"neutral"}
+                        statusLabel={`Vedtak fattet ${e.vedtaksttidspunkt}`}
                     >
-                        {e.vedtaksid}
+                        {hentVisningsnavn(e.vedtakstype)}
                     </Timeline.Period>
                 );
             })
             .concat(
                 <Timeline.Period
                     start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={addMonths(dateOrNull(virkningstidspunkt.virkningstidspunkt), 4)}
-                    status={"neutral"}
+                    end={dateOrNull(nestePeriodeFom)}
+                    status={"success"}
                     icon={<PencilIcon aria-hidden />}
-                    statusLabel={"asdsad"}
                 >
                     Beregningsperiode
                 </Timeline.Period>
             );
     };
+
     return (
-        <Timeline>
-            <Timeline.Row label="Opprinnelig virkningstidspunkt" icon={<PersonIcon aria-hidden />}>
+        <Timeline startDate={dateOrNull(virkningstidspunkt.virkningstidspunkt)} endDate={new Date()}>
+            <Timeline.Row label="Opprinnelig vedtakstidspunkt" icon={<PersonIcon aria-hidden />}>
                 {opprinneligVirkningPerioder().map((d) => d)}
             </Timeline.Row>
             <Timeline.Row label="Inneværende måned" icon={<PersonIcon aria-hidden />}>
                 <Timeline.Period
                     start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={new Date("Aug 31 2025")}
+                    end={firstDayOfMonth(addMonths(new Date(), 1))}
                     status={"success"}
                 >
                     Beregningsperiode
-                </Timeline.Period>
-                <Timeline.Period start={new Date("Sep 02 2025")} end={new Date("Jan 01 2026")} status={"neutral"}>
-                    Beregningsperiode
-                </Timeline.Period>
-                <Timeline.Period start={new Date("Dec 01 2025")} end={new Date("Dec 31 2025")} status={"danger"}>
-                    Opphør
                 </Timeline.Period>
             </Timeline.Row>
             <Timeline.Row label="Etterfølgende vedtak" icon={<PersonIcon aria-hidden />}>
                 <Timeline.Period
                     start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={new Date("May 01 2025")}
-                    status={"neutral"}
+                    end={dateOrNull(nestePeriodeFom)}
+                    status={"success"}
                 >
                     Beregningsperiode
+                </Timeline.Period>
+                <Timeline.Period
+                    start={dateOrNull(nestePeriodeFom)}
+                    end={firstDayOfMonth(addMonths(new Date(), 1))}
+                    status={"neutral"}
+                >
+                    Etterfølgende vedtak
                 </Timeline.Period>
             </Timeline.Row>
         </Timeline>
     );
 };
 
+const Beregningsperiode = ({ initialValues }: { initialValues: VirkningstidspunktFormValuesPerBarn }) => {
+    return (
+        <VStack>
+            <Label spacing size="small">
+                Beregningsperiode
+            </Label>
+            <Box
+                background="surface-transparent"
+                padding="1"
+                className="p-[5px] w-max"
+                borderRadius="small"
+                shadow="small"
+            >
+                <BodyShort size="small">
+                    <HStack gap="2">
+                        <div>{DateToDDMMYYYYString(dateOrNull(initialValues.virkningstidspunkt))}</div>
+                        <div> -</div>
+                        <div>{DateToDDMMYYYYString(deductDays(dateOrNull(initialValues.beregnTilDato), 1))}</div>
+                    </HStack>
+                </BodyShort>
+            </Box>
+        </VStack>
+    );
+};
 const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
     const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
@@ -316,9 +348,13 @@ const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) =
                 className="w-max"
                 onSelect={updateBeregnTilDato}
             >
-                {[BeregnTil.INNEVAeRENDEMANED, BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT].map((value) => (
+                {[
+                    BeregnTil.INNEVAeRENDEMANED,
+                    BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT,
+                    BeregnTil.ETTERFOLGENDEMANUELLVEDTAK,
+                ].map((value) => (
                     <option key={value} value={value}>
-                        {value === BeregnTil.INNEVAeRENDEMANED ? "Inneværende måned" : "Opprinnelig vedtakstidspunkt"}
+                        {hentVisningsnavn(value)}
                     </option>
                 ))}
             </FormControlledSelectField>
@@ -747,6 +783,7 @@ const VirkningstidspunktBarn = ({
                     />
                 </HStack>
             </FlexRow>
+
             {showChangedVirkningsDatoAlert && (
                 <BehandlingAlert variant="warning" className={"w-[488px]"}>
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
@@ -759,7 +796,8 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            {/* <Tidslinje virkningstidspunkt={selectedVirkningstidspunkt} /> */}
+            <Beregningsperiode initialValues={initialValues} />
+
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
