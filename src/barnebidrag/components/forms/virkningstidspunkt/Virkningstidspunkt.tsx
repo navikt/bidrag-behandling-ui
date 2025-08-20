@@ -208,7 +208,7 @@ const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
             <Label spacing size="small">
                 Beregningsperiode
             </Label>
-            <Box background="surface-transparent" padding="1" className="p-[5px] w-max" borderRadius="small">
+            <Box background="surface-transparent" className="w-max" borderRadius="small">
                 <BodyShort size="small">
                     <HStack gap="2">
                         <div>{DateToDDMMYYYYString(dateOrNull(virkningstidspunkt))}</div>
@@ -679,12 +679,13 @@ const VirkningstidspunktBarn = ({
                 setPreviousValues={setPreviousValues}
             />
 
-            {!behandling.erKlageEllerOmgjøring && (
+            {behandling.erKlageEllerOmgjøring && (
                 <>
                     <RadioGroup
                         name={`roller.${barnIndex}.beregnTil`}
-                        legend="Velg hvilken periode vedtaket skal vurderes (fungerer ikke)"
+                        legend="Velg hvilken periode vedtaket skal vurderes"
                         size="small"
+                        defaultValue={initialValues.beregnTil}
                         onChange={updateBeregnTilDato}
                         readOnly={lesemodus}
                         value={getValues(`roller.${barnIndex}.beregnTil`)}
@@ -693,12 +694,13 @@ const VirkningstidspunktBarn = ({
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
                             description="Beregnes til og med måneden påklaget vedtak ble fattet"
                         >
-                            Ut måned påklagd vedtak ble fattet
+                            Ut måneden påklagd vedtak ble fattet
                         </Radio>
                         <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
                         <Radio
                             value={BeregnTil.ETTERFOLGENDEMANUELLVEDTAK}
-                            description="Beregnes fram til etterfølgende vedtak med virkningstidspunkt 01.2022"
+                            readOnly={selectedVirkningstidspunkt.etterfølgendeVedtak !== undefined}
+                            description={`Beregnes fram til etterfølgende vedtak med virkningstidspunkt ${DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt))}`}
                         >
                             Til etterfølgende vedtak
                         </Radio>
