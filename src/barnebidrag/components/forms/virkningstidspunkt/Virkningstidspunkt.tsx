@@ -685,10 +685,9 @@ const VirkningstidspunktBarn = ({
                         name={`roller.${barnIndex}.beregnTil`}
                         legend="Velg hvilken periode vedtaket skal vurderes"
                         size="small"
-                        defaultValue={initialValues.beregnTil}
                         onChange={updateBeregnTilDato}
                         readOnly={lesemodus}
-                        value={getValues(`roller.${barnIndex}.beregnTil`)}
+                        defaultValue={initialValues.beregnTil}
                     >
                         <Radio
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
