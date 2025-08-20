@@ -35,7 +35,7 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { deductDays, firstDayOfMonth, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, HStack, Label, Tabs, Timeline, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, HStack, Label, Radio, RadioGroup, Tabs, Timeline, VStack } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -274,13 +274,7 @@ const Beregningsperiode = ({ initialValues }: { initialValues: Virkningstidspunk
             <Label spacing size="small">
                 Beregningsperiode
             </Label>
-            <Box
-                background="surface-transparent"
-                padding="1"
-                className="p-[5px] w-max"
-                borderRadius="small"
-                shadow="small"
-            >
+            <Box background="surface-transparent" padding="1" className="p-[5px] w-max" borderRadius="small">
                 <BodyShort size="small">
                     <HStack gap="2">
                         <div>{DateToDDMMYYYYString(dateOrNull(initialValues.virkningstidspunkt))}</div>
@@ -584,7 +578,7 @@ const VirkningstidspunktBarn = ({
     const tom = useMemo(() => {
         const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
-        if (opprinneligVirkningstidspunkt) return addMonths(new Date(), 1);
+        //if (opprinneligVirkningstidspunkt) return addMonths(new Date(), 1);
         if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opprinneligVirkningstidspunkt, selectedVirkningstidspunkt.opphørsdato]);
@@ -596,10 +590,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-          ? årsakListe18årsBidrag
-          : selectedVirkningstidspunkt.harLøpendeBidrag
-            ? harLøpendeBidragÅrsakListe
-            : årsakListe;
+            ? årsakListe18årsBidrag
+            : selectedVirkningstidspunkt.harLøpendeBidrag
+                ? harLøpendeBidragÅrsakListe
+                : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -655,32 +649,37 @@ const VirkningstidspunktBarn = ({
 
     return (
         <>
-            <FlexRow className="gap-x-12">
-                <div className="flex gap-x-2">
-                    <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
-                </div>
-                <div className="flex gap-x-2">
-                    <Label size="small">{text.label.søknadfra}:</Label>
-                    <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
-                </div>
-                <div className="flex gap-x-2">
-                    <Label size="small">{text.label.mottattdato}:</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
-                </div>
-                <div className="flex gap-x-2">
-                    <Label size="small">{text.label.søktfradato}:</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
-                </div>
-                {behandling.erKlageEllerOmgjøring && (
+            <Box padding={"2"} borderRadius="small" shadow="small">
+                <FlexRow className="gap-x-12">
                     <div className="flex gap-x-2">
-                        <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
-                        <BodyShort size="small">
-                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt))}
-                        </BodyShort>
+                        <Label size="small">{text.label.søknadstype}:</Label>
+                        <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
                     </div>
-                )}
-            </FlexRow>
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.søknadfra}:</Label>
+                        <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
+                    </div>
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.mottattdato}:</Label>
+                        <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
+                    </div>
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.søktfradato}:</Label>
+                        <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
+                    </div>
+                    {behandling.erKlageEllerOmgjøring && (
+                        <div className="flex gap-x-2">
+                            <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
+                            <BodyShort size="small">
+                                {DateToDDMMYYYYString(
+                                    dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt)
+                                )}
+                            </BodyShort>
+                        </div>
+                    )}
+                </FlexRow>
+            </Box>
+
             <FlexRow className="gap-x-8">
                 {behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
                     <FormControlledSelectField
@@ -730,12 +729,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
+                                        ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                      : avslagsListe
+                                        : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -780,6 +779,7 @@ const VirkningstidspunktBarn = ({
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
                 </BehandlingAlert>
             )}
+
             <Opphør
                 item={item}
                 barnIndex={barnIndex}
@@ -787,6 +787,16 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
+            <RadioGroup legend="Velg hvilken periode vedtaket skal vurderes (fungerer ikke)" size="small">
+                <Radio value="" description="Beregnes til og med måneden påklaget vedtak ble fattet">
+                    Ut måned påklagd vedtak ble fattet
+                </Radio>
+                <Radio value="">Ut nåværende måned</Radio>
+                <Radio value="" description="Beregnes fram til etterfølgende vedtak med virkningstidspunkt 01.2022">
+                    Til etterfølgende vedtak
+                </Radio>
+            </RadioGroup>
+
             {behandling.erKlageEllerOmgjøring && <Beregningsperiode initialValues={initialValues} />}
 
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
