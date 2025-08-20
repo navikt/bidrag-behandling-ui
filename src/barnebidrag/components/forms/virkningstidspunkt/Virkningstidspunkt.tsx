@@ -33,9 +33,8 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
-import { PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { deductDays, firstDayOfMonth, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, HStack, Label, Radio, RadioGroup, Tabs, Timeline, VStack } from "@navikt/ds-react";
+import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, HStack, Label, Radio, RadioGroup, Tabs, VStack } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -196,76 +195,6 @@ const getOpphørOptions = (
     } else {
         return [OpphørsVarighet.LØPENDE, OpphørsVarighet.VELG_OPPHØRSDATO];
     }
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Tidslinje = ({ virkningstidspunkt }: { virkningstidspunkt: VirkningstidspunktDtoV2 }) => {
-    console.log(dateOrNull(virkningstidspunkt.virkningstidspunkt));
-    const nestePeriodeFom = Math.min(
-        ...virkningstidspunkt.etterfølgendeVedtak
-            .map((e) => new Date(e.virkningstidspunkt).getTime())
-            .filter(Number.isFinite)
-    );
-    const opprinneligVirkningPerioder = () => {
-        return virkningstidspunkt.etterfølgendeVedtak
-            .map((e) => {
-                return (
-                    <Timeline.Period
-                        start={dateOrNull(e.virkningstidspunkt)}
-                        end={
-                            e.opphørsdato ? dateOrNull(e.opphørsdato) : addMonths(dateOrNull(e.sistePeriodeDatoFom), 1)
-                        }
-                        status={"neutral"}
-                        statusLabel={`Vedtak fattet ${e.vedtaksttidspunkt}`}
-                    >
-                        {hentVisningsnavn(e.vedtakstype)}
-                    </Timeline.Period>
-                );
-            })
-            .concat(
-                <Timeline.Period
-                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={dateOrNull(nestePeriodeFom)}
-                    status={"success"}
-                    icon={<PencilIcon aria-hidden />}
-                >
-                    Beregningsperiode
-                </Timeline.Period>
-            );
-    };
-
-    return (
-        <Timeline startDate={dateOrNull(virkningstidspunkt.virkningstidspunkt)} endDate={new Date()}>
-            <Timeline.Row label="Opprinnelig vedtakstidspunkt" icon={<PersonIcon aria-hidden />}>
-                {opprinneligVirkningPerioder().map((d) => d)}
-            </Timeline.Row>
-            <Timeline.Row label="Inneværende måned" icon={<PersonIcon aria-hidden />}>
-                <Timeline.Period
-                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={firstDayOfMonth(addMonths(new Date(), 1))}
-                    status={"success"}
-                >
-                    Beregningsperiode
-                </Timeline.Period>
-            </Timeline.Row>
-            <Timeline.Row label="Etterfølgende vedtak" icon={<PersonIcon aria-hidden />}>
-                <Timeline.Period
-                    start={dateOrNull(virkningstidspunkt.virkningstidspunkt)}
-                    end={dateOrNull(nestePeriodeFom)}
-                    status={"success"}
-                >
-                    Beregningsperiode
-                </Timeline.Period>
-                <Timeline.Period
-                    start={dateOrNull(nestePeriodeFom)}
-                    end={firstDayOfMonth(addMonths(new Date(), 1))}
-                    status={"neutral"}
-                >
-                    Etterfølgende vedtak
-                </Timeline.Period>
-            </Timeline.Row>
-        </Timeline>
-    );
 };
 
 const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
@@ -754,13 +683,14 @@ const VirkningstidspunktBarn = ({
                 setPreviousValues={setPreviousValues}
             />
 
-            {!behandling.erKlageEllerOmgjøring && (
+            {behandling.erKlageEllerOmgjøring && (
                 <>
                     <RadioGroup
                         name={`roller.${barnIndex}.beregnTil`}
                         legend="Velg hvilken periode vedtaket skal vurderes (fungerer ikke)"
                         size="small"
                         onChange={updateBeregnTilDato}
+                        readOnly={lesemodus}
                     >
                         <Radio
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
