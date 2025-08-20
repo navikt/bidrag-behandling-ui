@@ -551,36 +551,32 @@ const VirkningstidspunktBarn = ({
 
     return (
         <>
-            <Box padding={"2"} borderRadius="small" shadow="small">
-                <FlexRow className="gap-x-12">
+            <FlexRow className="gap-x-12">
+                <div className="flex gap-x-2">
+                    <Label size="small">{text.label.søknadstype}:</Label>
+                    <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                </div>
+                <div className="flex gap-x-2">
+                    <Label size="small">{text.label.søknadfra}:</Label>
+                    <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
+                </div>
+                <div className="flex gap-x-2">
+                    <Label size="small">{text.label.mottattdato}:</Label>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
+                </div>
+                <div className="flex gap-x-2">
+                    <Label size="small">{text.label.søktfradato}:</Label>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
+                </div>
+                {behandling.erKlageEllerOmgjøring && (
                     <div className="flex gap-x-2">
-                        <Label size="small">{text.label.søknadstype}:</Label>
-                        <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                        <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
+                        <BodyShort size="small">
+                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt))}
+                        </BodyShort>
                     </div>
-                    <div className="flex gap-x-2">
-                        <Label size="small">{text.label.søknadfra}:</Label>
-                        <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
-                    </div>
-                    <div className="flex gap-x-2">
-                        <Label size="small">{text.label.mottattdato}:</Label>
-                        <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
-                    </div>
-                    <div className="flex gap-x-2">
-                        <Label size="small">{text.label.søktfradato}:</Label>
-                        <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
-                    </div>
-                    {behandling.erKlageEllerOmgjøring && (
-                        <div className="flex gap-x-2">
-                            <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
-                            <BodyShort size="small">
-                                {DateToDDMMYYYYString(
-                                    dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt)
-                                )}
-                            </BodyShort>
-                        </div>
-                    )}
-                </FlexRow>
-            </Box>
+                )}
+            </FlexRow>
 
             <FlexRow className="gap-x-8">
                 {behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
