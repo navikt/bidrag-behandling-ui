@@ -5,7 +5,6 @@ import VedtakWrapper from "@common/components/vedtak/VedtakWrapper";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { Alert, BodyShort, Heading, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
@@ -30,7 +29,6 @@ const Vedtak = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(false))?.status === "error";
     const lastetFørstegang = useRef(false);
@@ -80,10 +78,10 @@ const Vedtak = () => {
                 <VedtakResultat />
             </div>
 
-            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
+            {!beregning?.feil && !lesemodus && !beregning?.ugyldigBeregning && (
                 <FatteVedtakButtons
                     isBeregningError={isBeregningError}
-                    disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
+                    disabled={!kanBehandlesINyLøsning}
                     opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
                         (r) => r.forsendelseDistribueresAutomatisk
                     )}

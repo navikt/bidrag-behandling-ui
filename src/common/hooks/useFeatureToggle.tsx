@@ -7,7 +7,7 @@ export default function useFeatureToogle() {
     const enhet = new URLSearchParams(window.location.search).get("enhet");
 
     const isMockEnabled = process.env.ENABLE_MOCK === "true";
-    const enableFatteVedtak = useFlag("behandling.fattevedtak");
+    const enableFatteVedtak = useFlag("behandling.fattevedtak_klage");
     const enableAdmin = useFlag("behandling.admin");
     const enableOpphørsdato = useFlag("behandling.opphorsdato");
     const enableBidragV2 = useFlag("behandling.v2_endring");

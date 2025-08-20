@@ -1,6 +1,6 @@
 import { faro } from "@grafana/faro-react";
 import { RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Select } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Checkbox, CheckboxGroup, Heading, Select } from "@navikt/ds-react";
 import { useIsMutating, useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { debounce } from "lodash";
@@ -110,15 +110,9 @@ export const FatteVedtakButtons = ({
                     </Select>
                 )}
             {skalBekrefteNotatOpplysninger && (
-                <ConfirmationPanel
-                    className="pb-2"
-                    checked={bekreftetVedtak}
-                    label={tekster.varsel.bekreftFatteVedtak}
-                    onChange={() => {
-                        setBekreftetVedtak((x) => !x);
-                        fatteVedtakFn.reset();
-                    }}
-                    error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
+                <Alert
+                    className="pb-2 mb-2"
+                    variant={måBekrefteAtOpplysningerStemmerFeil ? "error" : bekreftetVedtak ? "success" : "warning"}
                 >
                     <Heading spacing level="2" size="xsmall">
                         {tekster.title.sjekkNotatOgOpplysninger}
@@ -126,7 +120,25 @@ export const FatteVedtakButtons = ({
                     <div className="text-wrap">
                         {tekster.varsel.vedtakNotat} <NotatButton />
                     </div>
-                </ConfirmationPanel>
+                    <CheckboxGroup
+                        legend=""
+                        hideLegend
+                        error={
+                            måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined
+                        }
+                    >
+                        <Checkbox
+                            checked={bekreftetVedtak}
+                            error={måBekrefteAtOpplysningerStemmerFeil}
+                            onChange={() => {
+                                setBekreftetVedtak((x) => !x);
+                                fatteVedtakFn.reset();
+                            }}
+                        >
+                            {tekster.varsel.bekreftFatteVedtak}
+                        </Checkbox>
+                    </CheckboxGroup>
+                </Alert>
             )}
             {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
                 <Alert variant="error" className="mt-2 mb-2">
@@ -145,8 +157,8 @@ export const FatteVedtakButtons = ({
                         {opprettesForsendelse
                             ? tekster.varsel.vedtakFattetUtenNotatDistribuert
                             : erAldersjustering
-                              ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
-                              : tekster.varsel.vedtakFattet}
+                                ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
+                                : tekster.varsel.vedtakFattet}
                     </BodyShort>
                 </Alert>
             )}
