@@ -268,7 +268,12 @@ const Tidslinje = ({ virkningstidspunkt }: { virkningstidspunkt: Virkningstidspu
     );
 };
 
-const Beregningsperiode = ({ initialValues }: { initialValues: VirkningstidspunktFormValuesPerBarn }) => {
+const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
+    const { getValues } = useFormContext<VirkningstidspunktFormValues>();
+    const [virkningstidspunkt, beregnTilDato] = getValues([
+        `roller.${barnIndex}.virkningstidspunkt`,
+        `roller.${barnIndex}.beregnTilDato`,
+    ]);
     return (
         <VStack>
             <Label spacing size="small">
@@ -277,82 +282,13 @@ const Beregningsperiode = ({ initialValues }: { initialValues: Virkningstidspunk
             <Box background="surface-transparent" padding="1" className="p-[5px] w-max" borderRadius="small">
                 <BodyShort size="small">
                     <HStack gap="2">
-                        <div>{DateToDDMMYYYYString(dateOrNull(initialValues.virkningstidspunkt))}</div>
+                        <div>{DateToDDMMYYYYString(dateOrNull(virkningstidspunkt))}</div>
                         <div> -</div>
-                        <div>{DateToDDMMYYYYString(deductDays(dateOrNull(initialValues.beregnTilDato), 1))}</div>
+                        <div>{DateToDDMMYYYYString(deductDays(dateOrNull(beregnTilDato), 1))}</div>
                     </HStack>
                 </BodyShort>
             </Box>
         </VStack>
-    );
-};
-const BeregnTilDato = ({ item, barnIndex, previousValues, setPreviousValues }) => {
-    const behandling = useGetBehandlingV2();
-    const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
-    const { setSaveErrorState } = useBehandlingProvider();
-    const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
-    const { getValues, reset, setValue } = useFormContext();
-
-    const updateBeregnTilDato = () => {
-        const values = getValues(`roller.${barnIndex}`);
-        oppdaterBeregnTilDato.mutation.mutate(
-            { idRolle: selectedBarn.rolle.id, beregnTil: values.beregnTil },
-            {
-                onSuccess: (response) => {
-                    oppdaterBeregnTilDato.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            ...response,
-                        };
-                    });
-                    const initialValues = createInitialValues(
-                        response.virkningstidspunktV2,
-                        response.stønadstype,
-                        response.vedtakstype
-                    );
-                    setValue(
-                        `roller.${barnIndex}.beregnTilDato`,
-                        initialValues.roller.find((r) => r.rolle.ident === item.rolle.ident).beregnTilDato
-                    );
-                    setPreviousValues(initialValues);
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => updateBeregnTilDato(),
-                        rollbackFn: () => {
-                            reset(previousValues, {
-                                keepIsSubmitSuccessful: true,
-                                keepDirty: true,
-                                keepIsSubmitted: true,
-                            });
-                        },
-                    });
-                },
-            }
-        );
-    };
-
-    if (!behandling.erKlageEllerOmgjøring) return null;
-    return (
-        <FlexRow className="gap-x-8">
-            <FormControlledSelectField
-                name={`roller.${barnIndex}.beregnTil`}
-                label={text.label.beregningsperiode}
-                className="w-max"
-                onSelect={updateBeregnTilDato}
-            >
-                {[
-                    BeregnTil.INNEVAeRENDEMANED,
-                    BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT,
-                    BeregnTil.ETTERFOLGENDEMANUELLVEDTAK,
-                ].map((value) => (
-                    <option key={value} value={value}>
-                        {hentVisningsnavn(value)}
-                    </option>
-                ))}
-            </FormControlledSelectField>
-        </FlexRow>
     );
 };
 
@@ -516,11 +452,11 @@ const VirkningstidspunktBarn = ({
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
+    const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
     const kunEtBarnIBehandlingen = behandling.virkningstidspunktV2.length === 1;
     const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(
         ({ rolle }) => rolle.ident === item.rolle.ident
     );
-    console.log(selectedVirkningstidspunkt);
     const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
@@ -576,12 +512,10 @@ const VirkningstidspunktBarn = ({
     const [fom] = useFomTomDato(false, new Date(behandling.søktFomDato));
 
     const tom = useMemo(() => {
-        const opprinneligVirkningstidspunkt = dateOrNull(selectedVirkningstidspunkt.opprinneligVirkningstidspunkt);
         const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
-        //if (opprinneligVirkningstidspunkt) return addMonths(new Date(), 1);
         if (opphørsdato) return deductMonths(opphørsdato, 1);
         return addMonths(new Date(), 50 * 12);
-    }, [selectedVirkningstidspunkt.opprinneligVirkningstidspunkt, selectedVirkningstidspunkt.opphørsdato]);
+    }, [selectedVirkningstidspunkt.opphørsdato]);
 
     const erTypeOpphør =
         behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
@@ -590,10 +524,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-            ? årsakListe18årsBidrag
-            : selectedVirkningstidspunkt.harLøpendeBidrag
-                ? harLøpendeBidragÅrsakListe
-                : årsakListe;
+          ? årsakListe18årsBidrag
+          : selectedVirkningstidspunkt.harLøpendeBidrag
+            ? harLøpendeBidragÅrsakListe
+            : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -643,6 +577,45 @@ const VirkningstidspunktBarn = ({
                 });
             },
         });
+    };
+
+    const updateBeregnTilDato = (beregnTil: BeregnTil) => {
+        oppdaterBeregnTilDato.mutation.mutate(
+            { idRolle: selectedVirkningstidspunkt.rolle.id, beregnTil: beregnTil },
+            {
+                onSuccess: (response) => {
+                    oppdaterBeregnTilDato.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            ...response,
+                        };
+                    });
+                    const updatedValues = createInitialValues(
+                        response.virkningstidspunktV2,
+                        response.stønadstype,
+                        response.vedtakstype
+                    );
+                    const selectedBarn = Object.values(updatedValues.roller).find(
+                        ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
+                    );
+                    setValue(`roller.${barnIndex}.beregnTilDato`, selectedBarn.beregnTilDato);
+                    setPreviousValues(selectedBarn);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateBeregnTilDato(beregnTil),
+                        rollbackFn: () => {
+                            reset(previousValues, {
+                                keepIsSubmitSuccessful: true,
+                                keepDirty: true,
+                                keepIsSubmitted: true,
+                            });
+                        },
+                    });
+                },
+            }
+        );
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -729,12 +702,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                        ? avslagsListeOpphør.filter((value) =>
+                                      ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                        : avslagsListe
+                                      : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -764,13 +737,6 @@ const VirkningstidspunktBarn = ({
                         readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
                         required
                     />
-
-                    <BeregnTilDato
-                        item={item}
-                        barnIndex={barnIndex}
-                        previousValues={previousValues}
-                        setPreviousValues={setPreviousValues}
-                    />
                 </HStack>
             </FlexRow>
 
@@ -787,17 +753,32 @@ const VirkningstidspunktBarn = ({
                 previousValues={previousValues}
                 setPreviousValues={setPreviousValues}
             />
-            <RadioGroup legend="Velg hvilken periode vedtaket skal vurderes (fungerer ikke)" size="small">
-                <Radio value="" description="Beregnes til og med måneden påklaget vedtak ble fattet">
-                    Ut måned påklagd vedtak ble fattet
-                </Radio>
-                <Radio value="">Ut nåværende måned</Radio>
-                <Radio value="" description="Beregnes fram til etterfølgende vedtak med virkningstidspunkt 01.2022">
-                    Til etterfølgende vedtak
-                </Radio>
-            </RadioGroup>
 
-            {behandling.erKlageEllerOmgjøring && <Beregningsperiode initialValues={initialValues} />}
+            {!behandling.erKlageEllerOmgjøring && (
+                <>
+                    <RadioGroup
+                        name={`roller.${barnIndex}.beregnTil`}
+                        legend="Velg hvilken periode vedtaket skal vurderes (fungerer ikke)"
+                        size="small"
+                        onChange={updateBeregnTilDato}
+                    >
+                        <Radio
+                            value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
+                            description="Beregnes til og med måneden påklaget vedtak ble fattet"
+                        >
+                            Ut måned påklagd vedtak ble fattet
+                        </Radio>
+                        <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
+                        <Radio
+                            value={BeregnTil.ETTERFOLGENDEMANUELLVEDTAK}
+                            description="Beregnes fram til etterfølgende vedtak med virkningstidspunkt 01.2022"
+                        >
+                            Til etterfølgende vedtak
+                        </Radio>
+                    </RadioGroup>
+                    <Beregningsperiode barnIndex={barnIndex} />
+                </>
+            )}
 
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
                 <FormControlledCustomTextareaEditor
