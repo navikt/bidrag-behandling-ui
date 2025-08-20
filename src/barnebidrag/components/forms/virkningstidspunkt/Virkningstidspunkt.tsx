@@ -683,7 +683,7 @@ const VirkningstidspunktBarn = ({
                 setPreviousValues={setPreviousValues}
             />
 
-            {behandling.erKlageEllerOmgjøring && (
+            {!behandling.erKlageEllerOmgjøring && (
                 <>
                     <RadioGroup
                         name={`roller.${barnIndex}.beregnTil`}
@@ -691,6 +691,7 @@ const VirkningstidspunktBarn = ({
                         size="small"
                         onChange={updateBeregnTilDato}
                         readOnly={lesemodus}
+                        value={getValues(`roller.${barnIndex}.beregnTil`)}
                     >
                         <Radio
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
