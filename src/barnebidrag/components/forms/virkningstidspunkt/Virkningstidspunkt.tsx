@@ -699,8 +699,12 @@ const VirkningstidspunktBarn = ({
                         <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
                         <Radio
                             value={BeregnTil.ETTERFOLGENDEMANUELLVEDTAK}
-                            readOnly={selectedVirkningstidspunkt.etterfølgendeVedtak !== undefined}
-                            description={`Beregnes fram til etterfølgende vedtak med virkningstidspunkt ${DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt))}`}
+                            readOnly={selectedVirkningstidspunkt.etterfølgendeVedtak === undefined}
+                            description={
+                                selectedVirkningstidspunkt.etterfølgendeVedtak
+                                    ? `Beregnes fram til etterfølgende vedtak med virkningstidspunkt ${DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt))}`
+                                    : ""
+                            }
                         >
                             Til etterfølgende vedtak
                         </Radio>
