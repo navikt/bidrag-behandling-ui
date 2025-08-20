@@ -157,8 +157,8 @@ export const FatteVedtakButtons = ({
                         {opprettesForsendelse
                             ? tekster.varsel.vedtakFattetUtenNotatDistribuert
                             : erAldersjustering
-                                ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
-                                : tekster.varsel.vedtakFattet}
+                              ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
+                              : tekster.varsel.vedtakFattet}
                     </BodyShort>
                 </Alert>
             )}
