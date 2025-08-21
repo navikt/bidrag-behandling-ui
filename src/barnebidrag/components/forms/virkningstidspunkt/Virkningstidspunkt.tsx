@@ -268,6 +268,16 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                             ...response,
                         };
                     });
+                    const updatedValues = createInitialValues(
+                        response.virkningstidspunktV2,
+                        response.stønadstype,
+                        response.vedtakstype
+                    );
+                    const updatedBarn = Object.values(updatedValues.roller).find(
+                        ({ rolle }) => rolle.ident === selectedBarn.rolle.ident
+                    );
+                    setValue(`roller.${barnIndex}.beregnTilDato`, updatedBarn.beregnTilDato);
+
                     setPreviousValues(
                         createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
                     );
@@ -518,6 +528,8 @@ const VirkningstidspunktBarn = ({
                     `roller.${barnIndex}.kanSkriveVurderingAvSkolegang`,
                     selectedBarn.kanSkriveVurderingAvSkolegang
                 );
+                console.log(selectedBarn.beregnTilDato);
+                setValue(`roller.${barnIndex}.beregnTilDato`, selectedBarn.beregnTilDato);
                 setPreviousValues(selectedBarn);
             },
             onError: () => {
