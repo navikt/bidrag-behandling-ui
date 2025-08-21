@@ -90,19 +90,9 @@ describe("VirkningstidspunktFormHelpers", () => {
         );
     });
 
-    it("getFomAndTomForMonthPicker should set fom to first day of month of virkningstidspunkt and tom to last day of previous month is in future", () => {
+    it("getFomAndTomForMonthPicker should set fom to first day of month of virkningstidspunkt and tom to last day of previous month if virkningsdato is in future", () => {
         const virkningsDato = addMonthsIgnoreDay(new Date(), 3);
         const [fom, tom] = getFomAndTomForMonthPicker(virkningsDato);
-        expect(fom.toLocaleDateString()).equals(firstDayOfMonth(virkningsDato).toLocaleDateString());
-        expect(tom.toLocaleDateString()).equals(
-            lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
-        );
-    });
-
-    it("getFomAndTomForMonthPicker should set tom to the last day of previous month if opphørsdato is in current month ", () => {
-        const virkningsDato = addMonthsIgnoreDay(new Date(), 3);
-        const opphørsdato = new Date();
-        const [fom, tom] = getFomAndTomForMonthPicker(virkningsDato, opphørsdato);
         expect(fom.toLocaleDateString()).equals(firstDayOfMonth(virkningsDato).toLocaleDateString());
         expect(tom.toLocaleDateString()).equals(
             lastDayOfMonth(deductMonthsIgnoreday(new Date(), 1)).toLocaleDateString()
