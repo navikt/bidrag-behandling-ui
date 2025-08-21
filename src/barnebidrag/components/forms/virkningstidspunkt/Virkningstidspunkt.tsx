@@ -33,15 +33,17 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, HStack, Label, Radio, RadioGroup, Tabs, VStack } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import KlagetPåVedtakButton from "../../../../common/components/KlagetPåVedtakButton";
+import { useQueryParams } from "../../../../common/hooks/useQueryParams";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
@@ -203,12 +205,31 @@ const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
         `roller.${barnIndex}.virkningstidspunkt`,
         `roller.${barnIndex}.beregnTilDato`,
     ]);
+    const [flash, setFlash] = useState(false);
+    const prevValues = useRef([virkningstidspunkt, beregnTilDato]);
+
+    useEffect(() => {
+        if (prevValues.current[0] !== virkningstidspunkt || prevValues.current[1] !== beregnTilDato) {
+            setFlash(true);
+            prevValues.current = [virkningstidspunkt, beregnTilDato];
+            const timeout = setTimeout(() => setFlash(false), 800);
+            return () => clearTimeout(timeout);
+        }
+    }, [virkningstidspunkt, beregnTilDato]);
+
     return (
         <VStack>
             <Label spacing size="small">
                 Beregningsperiode
             </Label>
-            <Box background="surface-transparent" className="w-max" borderRadius="small">
+            <Box
+                background="surface-default"
+                padding="2"
+                borderRadius="medium"
+                borderColor="border-subtle"
+                borderWidth="2"
+                className={`w-max border-gray-500 transition-all duration-700${flash ? " border-green-500 ring-2 ring-green-300" : ""}`}
+            >
                 <BodyShort size="small">
                     <HStack gap="2">
                         <div>{DateToDDMMYYYYString(dateOrNull(virkningstidspunkt))}</div>
@@ -247,6 +268,16 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                             ...response,
                         };
                     });
+                    const updatedValues = createInitialValues(
+                        response.virkningstidspunktV2,
+                        response.stønadstype,
+                        response.vedtakstype
+                    );
+                    const updatedBarn = Object.values(updatedValues.roller).find(
+                        ({ rolle }) => rolle.ident === selectedBarn.rolle.ident
+                    );
+                    setValue(`roller.${barnIndex}.beregnTilDato`, updatedBarn.beregnTilDato);
+
                     setPreviousValues(
                         createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
                     );
@@ -377,6 +408,8 @@ const VirkningstidspunktBarn = ({
     barnIndex: number;
     initialValues: VirkningstidspunktFormValuesPerBarn;
 }) => {
+    const enhet = useQueryParams().get("enhet");
+    const sessionState = useQueryParams().get("sessionState");
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
@@ -441,8 +474,13 @@ const VirkningstidspunktBarn = ({
     const [fom] = useFomTomDato(false, new Date(behandling.søktFomDato));
 
     const tom = useMemo(() => {
+        const etterfølgendeVedtak =
+            selectedVirkningstidspunkt.etterfølgendeVedtak && behandling.erKlageEllerOmgjøring
+                ? dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt)
+                : null;
         const opphørsdato = dateOrNull(selectedVirkningstidspunkt.opphørsdato);
         if (opphørsdato) return deductMonths(opphørsdato, 1);
+        if (etterfølgendeVedtak) return deductMonths(etterfølgendeVedtak, 1);
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opphørsdato]);
 
@@ -490,6 +528,8 @@ const VirkningstidspunktBarn = ({
                     `roller.${barnIndex}.kanSkriveVurderingAvSkolegang`,
                     selectedBarn.kanSkriveVurderingAvSkolegang
                 );
+                console.log(selectedBarn.beregnTilDato);
+                setValue(`roller.${barnIndex}.beregnTilDato`, selectedBarn.beregnTilDato);
                 setPreviousValues(selectedBarn);
             },
             onError: () => {
@@ -555,6 +595,7 @@ const VirkningstidspunktBarn = ({
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                    <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
@@ -705,9 +746,25 @@ const VirkningstidspunktBarn = ({
                                     : ""
                             }
                         >
-                            Til etterfølgende vedtak
+                            <div className="flex flex-row gap-2">
+                                {" "}
+                                <div>Til etterfølgende vedtak</div>
+                                {selectedVirkningstidspunkt.etterfølgendeVedtak && (
+                                    <Link
+                                        className="w-max"
+                                        to={`/sak/${behandling.saksnummer}/vedtak/${selectedVirkningstidspunkt.etterfølgendeVedtak?.vedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <BodyShort size="small">
+                                            <ExternalLinkIcon aria-hidden />
+                                        </BodyShort>
+                                    </Link>
+                                )}
+                            </div>
                         </Radio>
                     </RadioGroup>
+
                     <Beregningsperiode barnIndex={barnIndex} />
                 </>
             )}
@@ -721,7 +778,6 @@ const VirkningstidspunktBarn = ({
                 />
             )}
 
-            <KlagetPåVedtakButton />
             <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />
         </>
     );
