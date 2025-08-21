@@ -26,7 +26,7 @@
     "api:bidragAdmin": "swagger-typescript-api generate -p https://bidrag-admin.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragAdminApiV1.ts -o src/api"
   },
   "dependencies": {
-    "@babel/runtime": "^7.27.0",
+    "@babel/runtime": "^7.28.3",
     "@emotion/react": "11.14.0",
     "@grafana/faro-react": "^1.12.2",
     "@mdx-js/react": "^3.1.0",
