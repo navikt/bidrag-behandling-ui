@@ -1,6 +1,5 @@
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { AdminButtons } from "@common/components/vedtak/AdminButtons";
-import { FatteVedtakButtons } from "@common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "@common/components/vedtak/VedtakWrapper";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -8,58 +7,32 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag } from "@common/ho
 import { Alert, BodyShort, Heading, Skeleton, Table, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { ActionButtons } from "../../../common/components/ActionButtons";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
+import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
 import { GrunnlagFraVedtakButton, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
 
-const Vedtak = () => {
+const Klagevedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const {
-        erVedtakFattet,
-        erDelvedtakFattet,
-        kanBehandlesINyLøsning,
-        lesemodus: lesemodusBehandling,
-        vedtakstype,
-    } = useGetBehandlingV2();
-    const location = useLocation();
-    const navigate = useNavigate();
+    const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag(false));
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregnBarnebidrag(false))?.status === "error";
     const lastetFørstegang = useRef(false);
-
     useEffect(() => {
         if (lastetFørstegang.current) {
             queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
             queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(false) });
         }
         lastetFørstegang.current = true;
-        if (lesemodusBehandling?.erOrkestrertVedtak || (vedtakstype === Vedtakstype.KLAGE && !lesemodus)) {
-            const searchParams = new URLSearchParams(location.search);
-
-            searchParams.set("steg", "vedtak_endelig");
-
-            navigate({
-                pathname: location.pathname,
-                search: searchParams.toString(),
-            });
-        }
     }, [activeStep]);
-
     return (
         <div className="grid gap-y-8  w-[1150px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
-            {!erVedtakFattet && erDelvedtakFattet && !lesemodus && (
-                <Alert variant="warning">
-                    Vedtak er delvis fattet og kan derfor ikke endres. Det har skjedd en feil ved fatting av vedtak.
-                    Prøv å på nytt eller opprett fagsystemsak
-                </Alert>
-            )}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
                     {text.title.vedtak}
@@ -77,17 +50,6 @@ const Vedtak = () => {
 
                 <VedtakResultat />
             </div>
-
-            {!beregning?.feil && !lesemodus && !beregning?.ugyldigBeregning && (
-                <FatteVedtakButtons
-                    isBeregningError={isBeregningError}
-                    disabled={!kanBehandlesINyLøsning}
-                    opprettesForsendelse={beregning?.resultat?.resultatBarn?.some(
-                        (r) => r.forsendelseDistribueresAutomatisk
-                    )}
-                />
-            )}
-            <AdminButtons />
         </div>
     );
 };
@@ -169,25 +131,38 @@ const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsbe
     return (
         <Table size="small">
             <VedtakTableHeader
-                resultatBarn={resultatBarn}
                 avslag={erAvslag}
                 avvistAldersjustering={avvistAldersjustering}
                 resultatUtenBeregning={resultatBarn.resultatUtenBeregning}
-                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
             />
             <VedtakTableBody
                 resultatBarn={resultatBarn}
                 avslag={erAvslag}
                 opphør={vedtakstype === Vedtakstype.OPPHOR}
-                bareVisResultat={vedtakstype === Vedtakstype.INDEKSREGULERING}
             />
         </Table>
     );
 };
+
+const Side = () => {
+    const { onStepChange } = useBehandlingProvider();
+
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.VEDTAK_ENDELIG]);
+
+    return (
+        <>
+            <ActionButtons onNext={onNext} />
+        </>
+    );
+};
+
 export default () => {
     return (
         <QueryErrorWrapper>
-            <Vedtak />
+            <Klagevedtak />
+            <Side />
+            <div className="my-3" />
+            <AdminButtons />
         </QueryErrorWrapper>
     );
 };

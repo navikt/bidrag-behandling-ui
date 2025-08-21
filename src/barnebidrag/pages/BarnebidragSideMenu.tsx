@@ -1,5 +1,3 @@
-import { Rolletype } from "@api/BidragBehandlingApiV1";
-import { PersonIdent } from "@common/components/PersonIdent";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
 import behandlingQueryKeys, {
@@ -10,9 +8,11 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { Rolletype } from "../../api/BidragBehandlingApiV1";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
@@ -28,6 +28,28 @@ const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: str
     );
 };
 
+const VedtakEndeligMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+    const { onStepChange } = useBehandlingProvider();
+    return (
+        <MenuButton
+            step={step}
+            title={text.title.vedtak}
+            onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK_ENDELIG])}
+            active={activeButton === BarnebidragStepper.VEDTAK_ENDELIG}
+        />
+    );
+};
+const KlageVedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
+    const { onStepChange } = useBehandlingProvider();
+    return (
+        <MenuButton
+            step={step}
+            title={text.title.klagevedtak}
+            onStepChange={() => onStepChange(STEPS[BarnebidragStepper.KLAGEVEDTAK])}
+            active={activeButton === BarnebidragStepper.KLAGEVEDTAK}
+        />
+    );
+};
 const VedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
     return (
@@ -107,7 +129,7 @@ const UnderholdskostnadMenuButton = ({
                         <MenuButton
                             title={
                                 <>
-                                    BA <PersonIdent ident={underhold.gjelderBarn.ident} />
+                                    BA <PersonNavnIdent ident={underhold.gjelderBarn.ident} />
                                 </>
                             }
                             onStepChange={() =>
@@ -354,7 +376,7 @@ const InntektMenuButton = ({
                     <MenuButton
                         title={
                             <div className="flex flex-row gap-1">
-                                {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                {rolle.rolletype} <PersonNavnIdent ident={rolle.ident} />
                             </div>
                         }
                         onStepChange={() =>
@@ -698,6 +720,8 @@ const menuButtonMap = {
     [BarnebidragStepper.UNDERHOLDSKOSTNAD]: UnderholdskostnadMenuButton,
     [BarnebidragStepper.SAMVÆR]: SamværMenuButton,
     [BarnebidragStepper.VEDTAK]: VedtakMenuButton,
+    [BarnebidragStepper.VEDTAK_ENDELIG]: VedtakEndeligMenuButton,
+    [BarnebidragStepper.KLAGEVEDTAK]: KlageVedtakMenuButton,
 } satisfies Record<string, React.ComponentType<never>>;
 
 export const BarnebidragSideMenu = () => {

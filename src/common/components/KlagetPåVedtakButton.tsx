@@ -12,7 +12,7 @@ const KlagetPåVedtakButton = () => {
     if (!vedtakRefId) return null;
     return (
         <Link
-            className=""
+            className="w-max"
             to={`/sak/${saksnummer}/vedtak/${vedtakRefId}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
             target="_blank"
             rel="noreferrer"

@@ -1,13 +1,14 @@
 import { faro } from "@grafana/faro-react";
 import { RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Select } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Checkbox, CheckboxGroup, Heading, Select } from "@navikt/ds-react";
 import { useIsMutating, useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
-import { TypeBehandling, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { FatteVedtakFeil, TypeBehandling, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
@@ -47,11 +48,28 @@ export const FatteVedtakButtons = ({
     const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
         mutationKey: fatteVedtakMutationKey,
-        mutationFn: () => {
+        mutationFn: async () => {
             if (!bekreftetVedtak && skalBekrefteNotatOpplysninger) {
                 throw new MåBekrefteOpplysningerStemmerError();
             }
-            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager, enhet });
+
+            try {
+                return await BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), {
+                    innkrevingUtsattAntallDager,
+                    enhet,
+                });
+            } catch (error) {
+                if (error instanceof AxiosError && error.response.status === 400) {
+                    if (error.response?.data) {
+                        const data = error.response.data as FatteVedtakFeil;
+                        throw {
+                            melding: data.feilmelding,
+                            detaljer: data,
+                        };
+                    }
+                }
+                throw new Error();
+            }
         },
         onSuccess: () => {
             faro.api.pushEvent(`fatte.vedtak`, {
@@ -70,34 +88,31 @@ export const FatteVedtakButtons = ({
 
     return (
         <div>
-            {erBarnebidrag && vedtakstype !== Vedtakstype.OPPHOR && vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
-                <Select
-                    size="small"
-                    onChange={(e) =>
-                        setInnkrevingUtsattAntallDager(e.target.value === "" ? null : Number(e.target.value))
-                    }
-                    defaultValue={innkrevingUtsattAntallDager}
-                    label="Utsett overføring til regnskap"
-                    className="w-max pb-2"
-                >
-                    <option value="">Ikke utsett</option>
-                    {utsettDagerListe.map((dager, index) => (
-                        <option value={dager} key={dager + "-" + index}>
-                            {dager} dager
-                        </option>
-                    ))}
-                </Select>
-            )}
+            {erBarnebidrag &&
+                vedtakstype !== Vedtakstype.OPPHOR &&
+                vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
+                vedtakstype !== Vedtakstype.KLAGE && (
+                    <Select
+                        size="small"
+                        onChange={(e) =>
+                            setInnkrevingUtsattAntallDager(e.target.value === "" ? null : Number(e.target.value))
+                        }
+                        defaultValue={innkrevingUtsattAntallDager}
+                        label="Utsett overføring til regnskap"
+                        className="w-max pb-2"
+                    >
+                        <option value="">Ikke utsett</option>
+                        {utsettDagerListe.map((dager, index) => (
+                            <option value={dager} key={dager + "-" + index}>
+                                {dager} dager
+                            </option>
+                        ))}
+                    </Select>
+                )}
             {skalBekrefteNotatOpplysninger && (
-                <ConfirmationPanel
-                    className="pb-2"
-                    checked={bekreftetVedtak}
-                    label={tekster.varsel.bekreftFatteVedtak}
-                    onChange={() => {
-                        setBekreftetVedtak((x) => !x);
-                        fatteVedtakFn.reset();
-                    }}
-                    error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
+                <Alert
+                    className="pb-2 mb-2"
+                    variant={måBekrefteAtOpplysningerStemmerFeil ? "error" : bekreftetVedtak ? "success" : "warning"}
                 >
                     <Heading spacing level="2" size="xsmall">
                         {tekster.title.sjekkNotatOgOpplysninger}
@@ -105,14 +120,32 @@ export const FatteVedtakButtons = ({
                     <div className="text-wrap">
                         {tekster.varsel.vedtakNotat} <NotatButton />
                     </div>
-                </ConfirmationPanel>
+                    <CheckboxGroup
+                        legend=""
+                        hideLegend
+                        error={
+                            måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined
+                        }
+                    >
+                        <Checkbox
+                            checked={bekreftetVedtak}
+                            error={måBekrefteAtOpplysningerStemmerFeil}
+                            onChange={() => {
+                                setBekreftetVedtak((x) => !x);
+                                fatteVedtakFn.reset();
+                            }}
+                        >
+                            {tekster.varsel.bekreftFatteVedtak}
+                        </Checkbox>
+                    </CheckboxGroup>
+                </Alert>
             )}
             {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
                 <Alert variant="error" className="mt-2 mb-2">
                     <Heading spacing size="small" level="3">
                         {tekster.error.kunneIkkFatteVedtak}
                     </Heading>
-                    <BodyShort>{tekster.error.fatteVedtak}</BodyShort>
+                    <BodyShort>{fatteVedtakFn.error?.melding || tekster.error.fatteVedtak}</BodyShort>
                 </Alert>
             )}
             {fatteVedtakFn.isSuccess && (

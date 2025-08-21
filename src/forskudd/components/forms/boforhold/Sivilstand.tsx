@@ -18,12 +18,12 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { calculateFraDato, sivilstandForskuddOptions } from "@common/helpers/boforholdFormHelpers";
-import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHelpers";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
     useGetOpplysningerSivilstandV2,
 } from "@common/hooks/useApiData";
+import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { useOnActivateGrunnlag } from "@common/hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
@@ -31,7 +31,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -125,17 +125,10 @@ const Periode = ({
     field: "datoFom" | "datoTom";
     label: string;
 }) => {
-    const {
-        virkningstidspunkt: {
-            opphør: { opphørsdato },
-        },
-    } = useGetBehandlingV2();
-    const virkningsOrSoktFraDato = useVirkningsdato();
     const { erVirkningstidspunktNåværendeMånedEllerFramITid, lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
-    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato, opphørsTomDato);
     const fieldIsDatoTom = field === "datoTom";
+    const [fom, tom] = useFomTomDato(fieldIsDatoTom);
 
     const validateFomOgTom = () => {
         const periode = getValues(fieldName);
@@ -159,7 +152,7 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={tom}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             readonly={lesemodus}

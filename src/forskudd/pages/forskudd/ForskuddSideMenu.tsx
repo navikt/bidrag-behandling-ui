@@ -5,10 +5,10 @@ import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { PersonIdent } from "@navikt/bidrag-ui-common";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { PersonIdent } from "../../../common/components/PersonIdent";
 import { STEPS } from "../../constants/steps";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 

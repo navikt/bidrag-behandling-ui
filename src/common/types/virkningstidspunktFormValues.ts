@@ -1,4 +1,4 @@
-import { Resultatkode, RolleDto, TypeArsakstype } from "@api/BidragBehandlingApiV1";
+import { BeregnTil, Resultatkode, RolleDto, TypeArsakstype } from "@api/BidragBehandlingApiV1";
 
 export enum OpphørsVarighet {
     LØPENDE = "Løpende",
@@ -19,4 +19,6 @@ export interface VirkningstidspunktFormValuesPerBarn {
     kanSkriveVurderingAvSkolegang?: boolean;
     opphørsvarighet?: OpphørsVarighet;
     opphørsdato?: string | null;
+    beregnTil?: BeregnTil | null;
+    beregnTilDato?: string | null;
 }

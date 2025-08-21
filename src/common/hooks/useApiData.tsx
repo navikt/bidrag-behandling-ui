@@ -10,6 +10,7 @@ import {
     FaktiskTilsynsutgiftDto,
     GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
+    OppdaterBeregnTilDatoRequestDto,
     OppdatereBegrunnelseRequest,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -24,10 +25,12 @@ import {
     OppdaterGebyrDto,
     OppdaterManuellVedtakRequest,
     OppdaterOpphorsdatoRequestDto,
+    OppdaterParagraf35CDetaljerDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
     OpprettUnderholdskostnadBarnResponse,
+    ResultatBarnebidragsberegningPeriodeDto,
     RolleDto,
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
@@ -86,7 +89,7 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
-    beregnBarnebidrag: () => ["beregning_barnebidrag", QueryKeys.behandlingVersion],
+    beregnBarnebidrag: (endelig: boolean) => ["beregning_barnebidrag", QueryKeys.behandlingVersion, endelig],
     beregningInnteksgrenseSærbidrag: () => ["beregning_særbidrag_innteksgrense", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
@@ -98,7 +101,7 @@ export const QueryKeys = {
     ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
-    person: (ident: string) => ["person2", ident],
+    person: (ident: string) => ["person", ident],
     manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
@@ -434,18 +437,20 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
         },
     });
 };
-export const useGetBeregningBidrag = () => {
+export const useGetBeregningBidrag = (endelig: boolean) => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 
     return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
-        queryKey: QueryKeys.beregnBarnebidrag(),
+        queryKey: QueryKeys.beregnBarnebidrag(endelig),
         queryFn: async () => {
             try {
                 if (vedtakId) {
                     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatBidrag(Number(vedtakId));
                     return { resultat: response.data };
                 }
-                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId), {
+                    endeligBeregning: endelig,
+                });
                 const ugyldigBeregning = response.data.resultatBarn.some((barn) => barn.ugyldigBeregning);
                 return { resultat: response.data, ugyldigBeregning: ugyldigBeregning };
             } catch (error) {
@@ -759,6 +764,22 @@ export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
     });
 };
 
+export const useUpdateBeregnTilDato = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
+        mutationFn: async (payload: OppdaterBeregnTilDatoRequestDto): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBeregnTilDato(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av opphørsdato", error);
+        },
+    });
+};
 export const useUpdateOpphørsdato = () => {
     const { behandlingId } = useBehandlingProvider();
 
@@ -809,7 +830,65 @@ export const useDeletePrivatAvtale = () => {
     });
 };
 
-export const useOppdaterManuelleVedtak = () => {
+export const useOppdaterOpprettP35c = (periode: ResultatBarnebidragsberegningPeriodeDto) => {
+    const { id: behandlingId } = useGetBehandlingV2();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId.toString()),
+        mutationFn: async (payload: OppdaterParagraf35CDetaljerDto) => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterVedtakParagraf35C(behandlingId, payload);
+            return data;
+        },
+
+        onSuccess: async (_, variables) => {
+            queryClient.setQueryData<VedtakBarnebidragBeregningResult>(
+                QueryKeys.beregnBarnebidrag(true),
+                (currentData): VedtakBarnebidragBeregningResult => {
+                    return {
+                        ...currentData,
+                        resultat: {
+                            resultatBarn: currentData.resultat.resultatBarn?.map((rb) => {
+                                if (rb.barn.ident === variables.ident) {
+                                    return {
+                                        ...rb,
+                                        delvedtak: rb.delvedtak.map((dv) => {
+                                            if (!dv.delvedtak && !dv.klagevedtak) {
+                                                return {
+                                                    ...dv,
+                                                    perioder: dv.perioder.map((p) => {
+                                                        if (
+                                                            p.klageOmgjøringDetaljer.resultatFraVedtak ===
+                                                            periode.klageOmgjøringDetaljer.resultatFraVedtak
+                                                        ) {
+                                                            return {
+                                                                ...p,
+                                                                klageOmgjøringDetaljer: {
+                                                                    ...p.klageOmgjøringDetaljer,
+                                                                    skalOpprette35c: variables.opprettP35c,
+                                                                },
+                                                            };
+                                                        }
+                                                        return p;
+                                                    }),
+                                                };
+                                            }
+                                            return dv;
+                                        }),
+                                    };
+                                } else {
+                                    return rb;
+                                }
+                            }),
+                        },
+                    };
+                }
+            );
+        },
+    });
+};
+
+export const useOppdaterManuelleVedtak = (onSuccess?: () => void) => {
     const { id: behandlingId } = useGetBehandlingV2();
     const queryClient = useQueryClient();
 
@@ -820,6 +899,7 @@ export const useOppdaterManuelleVedtak = () => {
             return data;
         },
         onSuccess: async (response, payload) => {
+            onSuccess?.();
             queryClient.setQueryData<BehandlingDtoV2>(
                 QueryKeys.behandlingV2(behandlingId.toString()),
                 (currentData): BehandlingDtoV2 => {
