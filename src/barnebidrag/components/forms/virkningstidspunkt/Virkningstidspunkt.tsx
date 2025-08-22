@@ -227,7 +227,7 @@ const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
                 padding="2"
                 borderRadius="medium"
                 borderColor="border-subtle"
-                borderWidth="2"
+                borderWidth="1"
                 className={`w-max border-gray-500 transition-all duration-700${flash ? " border-green-500 ring-2 ring-green-300" : ""}`}
             >
                 <BodyShort size="small">
@@ -528,7 +528,6 @@ const VirkningstidspunktBarn = ({
                     `roller.${barnIndex}.kanSkriveVurderingAvSkolegang`,
                     selectedBarn.kanSkriveVurderingAvSkolegang
                 );
-                console.log(selectedBarn.beregnTilDato);
                 setValue(`roller.${barnIndex}.beregnTilDato`, selectedBarn.beregnTilDato);
                 setPreviousValues(selectedBarn);
             },
