@@ -853,7 +853,7 @@ export const useOppdaterOpprettP35c = (periode: ResultatBarnebidragsberegningPer
                                     return {
                                         ...rb,
                                         delvedtak: rb.delvedtak.map((dv) => {
-                                            if (!dv.delvedtak && !dv.klagevedtak) {
+                                            if (!dv.delvedtak && !dv.omgjøringsvedtak) {
                                                 return {
                                                     ...dv,
                                                     perioder: dv.perioder.map((p) => {

@@ -181,7 +181,7 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
     return (
         <VStack gap="4">
             {resultatBarn.delvedtak
-                .filter((d) => !d.delvedtak && !d.klagevedtak)
+                .filter((d) => !d.delvedtak && !d.omgjøringsvedtak)
                 .map((delvedtak, i) => {
                     const avvistAldersjustering = delvedtak.perioder.every(
                         (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
