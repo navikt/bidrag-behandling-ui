@@ -74,12 +74,13 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
     const sideMenu = [
         {
             step: BarnebidragStepper.VIRKNINGSTIDSPUNKT,
-            visible: !(
-                behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING &&
-                behandling.lesemodus &&
-                behandling.lesemodus?.opprettetAvBatch &&
-                (behandling.erVedtakUtenBeregning || !behandling.erBisysVedtak)
-            ),
+            visible:
+                !(
+                    behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING &&
+                    behandling.lesemodus &&
+                    behandling.lesemodus?.opprettetAvBatch &&
+                    (behandling.erVedtakUtenBeregning || !behandling.erBisysVedtak)
+                ) && behandling.vedtakstype !== Vedtakstype.INDEKSREGULERING,
             interactive: true,
         },
         {
