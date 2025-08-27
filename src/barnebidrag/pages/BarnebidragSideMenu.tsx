@@ -689,7 +689,7 @@ const SamværMenuButton = ({
 }) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
     const { samvær } = useGetBehandlingV2();
-    const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
+    const samværValideringsFeil = samvær?.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
             valideringsfeil?.manglerBegrunnelse ||

@@ -1,7 +1,7 @@
 import { BeregnetPrivatAvtalePeriodeDto } from "@api/BidragBehandlingApiV1";
 import text from "@common/constants/texts";
 import { BodyShort, Table } from "@navikt/ds-react";
-import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils";
 import { formatterBeløpForBeregning, formatterProsent } from "@utils/number-utils";
 import React from "react";
 
@@ -31,7 +31,13 @@ export const BeregnetTabel = ({ perioder }: { perioder: BeregnetPrivatAvtalePeri
                             <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.periode.fom))}</BodyShort>
                         </Table.DataCell>
                         <Table.DataCell>
-                            <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(periode.periode.til))}</BodyShort>
+                            <BodyShort size="small">
+                                {DateToDDMMYYYYString(
+                                    dateOrNull(periode.periode.til)
+                                        ? deductDays(dateOrNull(periode.periode.til), 1)
+                                        : null
+                                )}
+                            </BodyShort>
                         </Table.DataCell>
                         <Table.DataCell align="right">
                             <BodyShort size="small">{formatterProsent(periode.indeksprosent)}</BodyShort>
