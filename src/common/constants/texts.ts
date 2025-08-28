@@ -307,6 +307,7 @@ const tekster = {
         utgift: "Utgift",
         vedtak: "Vedtak",
         klagevedtak: "Klagevedtak",
+        omgjøringsvedtak: "Omgjøringsvedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",
         kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles i ny løsning",

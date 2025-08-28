@@ -12,7 +12,7 @@ import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { Rolletype } from "../../api/BidragBehandlingApiV1";
+import { Rolletype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
@@ -41,10 +41,11 @@ const VedtakEndeligMenuButton = ({ activeButton, step }: { activeButton: string;
 };
 const KlageVedtakMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
+    const { vedtakstype } = useGetBehandlingV2();
     return (
         <MenuButton
             step={step}
-            title={text.title.klagevedtak}
+            title={vedtakstype === Vedtakstype.KLAGE ? text.title.klagevedtak : text.title.omgjøringsvedtak}
             onStepChange={() => onStepChange(STEPS[BarnebidragStepper.KLAGEVEDTAK])}
             active={activeButton === BarnebidragStepper.KLAGEVEDTAK}
         />
