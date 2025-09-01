@@ -418,6 +418,7 @@ export const VedtakTableBody = ({
             periode.beregningsdetaljer === undefined ||
             periode.erBeregnetAvslag ||
             periode.erDirekteAvslag ||
+            periode.erOpphør ||
             periode.resultatKode === Resultatkode.INNVILGET_VEDTAK ||
             (!erBisysVedtak && vedtakstype === Vedtakstype.ALDERSJUSTERING);
 

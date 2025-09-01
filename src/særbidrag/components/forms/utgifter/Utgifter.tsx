@@ -261,6 +261,7 @@ const Main = () => {
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{behandling.vedtakstypeVisningsnavn}</BodyShort>
+                    <KlagetPåVedtakButton />
                 </div>
                 {behandling.utgift.kategori.kategori !== Saerbidragskategori.ANNET && (
                     <div className="flex gap-x-2">
@@ -296,7 +297,6 @@ const Main = () => {
                 )}
             </FlexRow>
 
-            <KlagetPåVedtakButton />
             <FlexRow>
                 <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
                     {!erAvslagSomInneholderUtgifter && <option value="">{text.select.avslagPlaceholder}</option>}

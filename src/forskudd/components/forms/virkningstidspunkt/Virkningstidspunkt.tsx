@@ -130,8 +130,6 @@ const VirkningstidspunktRolle = ({
         [fom]
     );
 
-    console.log("fom", fom);
-
     useEffect(() => {
         if (
             initialVirkningsdato &&
@@ -226,6 +224,7 @@ const VirkningstidspunktRolle = ({
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                    <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
@@ -307,7 +306,6 @@ const VirkningstidspunktRolle = ({
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
                 </BehandlingAlert>
             )}
-            <KlagetPåVedtakButton />
         </>
     );
 };
