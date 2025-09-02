@@ -146,7 +146,7 @@ const NyOpplysningerFraFolkeregistreTabell = () => {
             borderColor="border-default"
             className="w-[708px]"
         >
-            <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
+            <Heading size="xsmall">{text.label.oppdaterOpplysninger}</Heading>
             <div className="grid gap-4">
                 {husstandsmedlemBM.map((husstandsmedlem) => (
                     <Box key={husstandsmedlem.ident} background="surface-subtle">
