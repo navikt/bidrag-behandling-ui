@@ -769,12 +769,25 @@ const VirkningstidspunktBarn = ({
             )}
 
             {er18ÅrsBidrag && !erTypeOpphør && !(lesemodus && !item.kanSkriveVurderingAvSkolegang) && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
-                    label={text.title.begrunnelseVurderingAvSkolegang}
-                    readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
-                    resize
-                />
+                <>
+                    <FormControlledCustomTextareaEditor
+                        name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegang`}
+                        label={text.title.begrunnelseVurderingAvSkolegang}
+                        readOnly={!getValues(`roller.${barnIndex}.kanSkriveVurderingAvSkolegang`)}
+                        resize
+                    />
+                    {selectedVirkningstidspunkt.begrunnelseVurderingAvSkolegangFraOpprinneligVedtak?.innhold && (
+                        <CustomTextareaEditor
+                            name={`roller.${barnIndex}.begrunnelseVurderingAvSkolegangFraOpprinneligVedtak`}
+                            label={text.label.vurderingAvSkolegangOpprinneligVedtak}
+                            value={
+                                selectedVirkningstidspunkt.begrunnelseVurderingAvSkolegangFraOpprinneligVedtak.innhold
+                            }
+                            resize
+                            readOnly
+                        />
+                    )}
+                </>
             )}
 
             <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />

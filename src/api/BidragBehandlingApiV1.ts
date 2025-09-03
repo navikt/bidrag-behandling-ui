@@ -530,6 +530,7 @@ export enum Grunnlagstype {
   ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
   RESULTAT_FRA_VEDTAK = "RESULTAT_FRA_VEDTAK",
   VEDTAK_ORKESTRERING_DETALJER = "VEDTAK_ORKESTRERING_DETALJER",
+  ETTERFOLGENDEMANUELLEVEDTAK = "ETTERFØLGENDE_MANUELLE_VEDTAK",
 }
 
 export enum Engangsbeloptype {
@@ -829,6 +830,7 @@ export interface BehandlingDtoV2 {
   kanBehandlesINyLøsning: boolean;
   kanIkkeBehandlesBegrunnelse?: string;
   erKlageEllerOmgjøring: boolean;
+  skalInnkrevingKunneUtsettes: boolean;
   /** @format date-time */
   opprettetTidspunkt: string;
   /**
@@ -1404,9 +1406,9 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  gjelderBarn?: string;
-  gjelderBarnNavn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1441,9 +1443,9 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  gjelderBarn?: string;
-  gjelderBarnNavn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1793,6 +1795,7 @@ export interface VirkningstidspunktDtoV2 {
   /** Saksbehandlers begrunnelse */
   begrunnelse: BegrunnelseDto;
   begrunnelseVurderingAvSkolegang?: BegrunnelseDto;
+  begrunnelseVurderingAvSkolegangFraOpprinneligVedtak?: BegrunnelseDto;
   harLøpendeBidrag: boolean;
   begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
   /** @format date */
@@ -1975,6 +1978,7 @@ export interface OppdaterOpphorsdatoRequestDto {
   idRolle: number;
   /** @format date */
   opphørsdato?: string;
+  simulerEndring: boolean;
 }
 
 export interface OppdatereInntektRequest {
@@ -2523,8 +2527,8 @@ export interface Skatt {
   trygdeavgift: number;
   skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2749,6 +2753,7 @@ export interface ResultatFraVedtakGrunnlag {
   opprettParagraf35c: boolean;
   /** @format date-time */
   vedtakstidspunkt?: string;
+  vedtakstype?: Vedtakstype;
 }
 
 export interface SluttberegningBarnebidrag {
@@ -2889,10 +2894,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
   type: OpplysningerType;
   rolle: RolleDto;
-  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-  gjelderBarn?: HusstandsmedlemDto;
   /** @format int64 */
   underholdskostnadId?: number;
+  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+  gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -3161,6 +3166,7 @@ export interface NotatBarnetilsynOffentligeOpplysninger {
 /** Notat begrunnelse skrevet av saksbehandler */
 export interface NotatBegrunnelseDto {
   innhold?: string;
+  innholdFraOmgjortVedtak?: string;
   /** @deprecated */
   intern?: string;
   gjelder?: NotatPersonDto;
@@ -3180,10 +3186,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  avslagVisningsnavn?: string;
-  kategoriVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
+  avslagVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3278,9 +3284,9 @@ export interface NotatInntektDto {
   gjelderBarn?: NotatPersonDto;
   historisk: boolean;
   inntektsposter: NotatInntektspostDto[];
-  visningsnavn: string;
   /** Avrundet månedsbeløp for barnetillegg */
   månedsbeløp?: number;
+  visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3457,8 +3463,8 @@ export interface NotatSkattBeregning {
   trygdeavgift: number;
   skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3630,6 +3636,9 @@ export interface NotatVirkningstidspunktDto {
    * @example "01.12.2025"
    */
   søktFraDato?: string;
+  beregnTilDato?: string;
+  beregnTil?: BeregnTil;
+  etterfølgendeVedtakVirkningstidspunkt?: string;
   /**
    * @format date
    * @example "01.12.2025"
@@ -3963,7 +3972,8 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "http://localhost:8990",
+      baseURL:
+        axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
     });
     this.secure = secure;
     this.format = format;
@@ -4077,7 +4087,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<
   SecurityDataType extends unknown,
