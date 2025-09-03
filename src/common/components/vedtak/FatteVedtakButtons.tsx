@@ -36,7 +36,7 @@ export const FatteVedtakButtons = ({
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
-    const { engangsbeløptype, stønadstype, vedtakstype } = useGetBehandlingV2();
+    const { engangsbeløptype, stønadstype, vedtakstype, skalInnkrevingKunneUtsettes } = useGetBehandlingV2();
     const erBarnebidrag = type === TypeBehandling.BIDRAG;
     const erAldersjustering = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const [innkrevingUtsattAntallDager, setInnkrevingUtsattAntallDager] = useState<number | null>(
@@ -88,27 +88,24 @@ export const FatteVedtakButtons = ({
 
     return (
         <div>
-            {erBarnebidrag &&
-                vedtakstype !== Vedtakstype.OPPHOR &&
-                vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
-                vedtakstype !== Vedtakstype.KLAGE && (
-                    <Select
-                        size="small"
-                        onChange={(e) =>
-                            setInnkrevingUtsattAntallDager(e.target.value === "" ? null : Number(e.target.value))
-                        }
-                        defaultValue={innkrevingUtsattAntallDager}
-                        label="Utsett overføring til regnskap"
-                        className="w-max pb-2"
-                    >
-                        <option value="">Ikke utsett</option>
-                        {utsettDagerListe.map((dager, index) => (
-                            <option value={dager} key={dager + "-" + index}>
-                                {dager} dager
-                            </option>
-                        ))}
-                    </Select>
-                )}
+            {skalInnkrevingKunneUtsettes && (
+                <Select
+                    size="small"
+                    onChange={(e) =>
+                        setInnkrevingUtsattAntallDager(e.target.value === "" ? null : Number(e.target.value))
+                    }
+                    defaultValue={innkrevingUtsattAntallDager}
+                    label="Utsett overføring til regnskap"
+                    className="w-max pb-2"
+                >
+                    <option value="">Ikke utsett</option>
+                    {utsettDagerListe.map((dager, index) => (
+                        <option value={dager} key={dager + "-" + index}>
+                            {dager} dager
+                        </option>
+                    ))}
+                </Select>
+            )}
             {skalBekrefteNotatOpplysninger && (
                 <Alert
                     className="pb-2 mb-2"

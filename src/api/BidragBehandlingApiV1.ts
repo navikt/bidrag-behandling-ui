@@ -2525,10 +2525,10 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
+  trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2725,8 +2725,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   vedtakstype: Vedtakstype;
   klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
   resultatFraVedtak?: ResultatFraVedtakGrunnlag;
-  resultatkodeVisningsnavn?: string;
   delvedtakstypeVisningsnavn: string;
+  resultatkodeVisningsnavn?: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -3405,8 +3405,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3461,10 +3461,10 @@ export interface NotatSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
+  trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {

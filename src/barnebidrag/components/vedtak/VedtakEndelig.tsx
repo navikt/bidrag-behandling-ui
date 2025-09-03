@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
 
 import { ResultatBidragsberegningBarnDto, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import InnkrevingIkon from "../../../assets/Innkreving";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -213,7 +214,8 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                             />
                             {resultatBarn.innkrevesFraDato && (
                                 <BodyShort size="small">
-                                    <HStack gap="2">
+                                    <HStack gap="2" className="items-center">
+                                        <InnkrevingIkon />
                                         <div>Innkreves fra: </div>
                                         <div>{DateToMMYYYYString(dateOrNull(resultatBarn.innkrevesFraDato))}</div>
                                     </HStack>
