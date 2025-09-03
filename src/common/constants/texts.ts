@@ -227,6 +227,8 @@ const tekster = {
         søknadfra: "Søknad fra",
         søktfradato: "Søkt fra dato",
         opprinneligvedtakstidspunkt: "Opprinnelig vedtakstidspunkt",
+        omgjørvedtakstidspunkt: "Omgjort vedtak vedtakstidspunkt",
+        påklagetvedtakstidspunkt: "Påklaget vedtak vedtakstidspunkt",
         taMed: "Ta med",
         tilbakeTilUtfylling: "Tilbake til utfylling",
         tilleggstønad: "Tilleggstønad",

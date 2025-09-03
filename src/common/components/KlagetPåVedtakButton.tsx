@@ -23,4 +23,23 @@ const KlagetPåVedtakButton = () => {
     );
 };
 
+export const OpprinneligVedtakButton = () => {
+    const { opprinneligVedtakId, saksnummer } = useGetBehandlingV2();
+    const enhet = useQueryParams().get("enhet");
+    const sessionState = useQueryParams().get("sessionState");
+
+    if (!opprinneligVedtakId) return null;
+    return (
+        <Link
+            className="w-max"
+            to={`/sak/${saksnummer}/vedtak/${opprinneligVedtakId}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+            target="_blank"
+            rel="noreferrer"
+            title="Lenke til opprinnelig vedtak"
+        >
+            <ExternalLinkIcon aria-hidden />
+        </Link>
+    );
+};
+
 export default KlagetPåVedtakButton;
