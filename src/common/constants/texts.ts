@@ -241,6 +241,7 @@ const tekster = {
         utgiftskategori: "Utgiftskategori",
         virkningstidspunkt: "Virkningstidspunkt",
         varighet: "Varighet",
+        vurderingAvSkolegangOpprinneligVedtak: "Vurdering av skolegang (opprinnelig vedtak)",
         beregningsperiode: "Velg beregningsperiode",
         årsak: "Årsak",
     },
