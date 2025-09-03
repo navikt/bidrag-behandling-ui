@@ -530,6 +530,7 @@ export enum Grunnlagstype {
   ALDERSJUSTERING_DETALJER = "ALDERSJUSTERING_DETALJER",
   RESULTAT_FRA_VEDTAK = "RESULTAT_FRA_VEDTAK",
   VEDTAK_ORKESTRERING_DETALJER = "VEDTAK_ORKESTRERING_DETALJER",
+  ETTERFOLGENDEMANUELLEVEDTAK = "ETTERFØLGENDE_MANUELLE_VEDTAK",
 }
 
 export enum Engangsbeloptype {
@@ -829,6 +830,7 @@ export interface BehandlingDtoV2 {
   kanBehandlesINyLøsning: boolean;
   kanIkkeBehandlesBegrunnelse?: string;
   erKlageEllerOmgjøring: boolean;
+  skalInnkrevingKunneUtsettes: boolean;
   /** @format date-time */
   opprettetTidspunkt: string;
   /**
@@ -1405,8 +1407,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
   gjelderBarn?: string;
-  gjelderBarnNavn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarnNavn?: string;
 }
 
 export interface RolleDto {
@@ -1442,8 +1444,8 @@ export interface SamvaerValideringsfeilDto {
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
   gjelderBarn?: string;
-  gjelderBarnNavn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarnNavn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -2487,10 +2489,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
-  inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2521,9 +2523,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2749,6 +2751,7 @@ export interface ResultatFraVedtakGrunnlag {
   opprettParagraf35c: boolean;
   /** @format date-time */
   vedtakstidspunkt?: string;
+  vedtakstype?: Vedtakstype;
 }
 
 export interface SluttberegningBarnebidrag {
@@ -3161,6 +3164,7 @@ export interface NotatBarnetilsynOffentligeOpplysninger {
 /** Notat begrunnelse skrevet av saksbehandler */
 export interface NotatBegrunnelseDto {
   innhold?: string;
+  innholdFraOmgjortVedtak?: string;
   /** @deprecated */
   intern?: string;
   gjelder?: NotatPersonDto;
@@ -3180,9 +3184,9 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  avslagVisningsnavn?: string;
   kategoriVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
+  avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -3264,8 +3268,8 @@ export interface NotatGebyrRolleDto {
   begrunnelse?: string;
   beløpGebyrsats: number;
   rolle: NotatPersonDto;
-  erManueltOverstyrt: boolean;
   gebyrResultatVisningsnavn: string;
+  erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3363,10 +3367,10 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
-  inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3424,8 +3428,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
   enesteVoksenIHusstandenErEgetBarn?: boolean;
   erDirekteAvslag: boolean;
   bpHarEvne: boolean;
-  beløpSomInnkreves: number;
   resultatVisningsnavn: string;
+  beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -3455,9 +3459,9 @@ export interface NotatSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3630,6 +3634,9 @@ export interface NotatVirkningstidspunktDto {
    * @example "01.12.2025"
    */
   søktFraDato?: string;
+  beregnTilDato?: string;
+  beregnTil?: BeregnTil;
+  etterfølgendeVedtakVirkningstidspunkt?: string;
   /**
    * @format date
    * @example "01.12.2025"
