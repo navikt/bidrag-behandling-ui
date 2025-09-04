@@ -98,11 +98,13 @@ const GrunnlagFraVedtakButton = () => {
 const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
     if (!resultat.ugyldigBeregning) return null;
     return (
-        <Alert variant="warning" size="small" className="mb-2">
+        <Alert variant="warning" size="small" className="mb-2 w-full">
             <Heading size="small">{resultat.ugyldigBeregning.tittel}</Heading>
             <BodyShort size="small">Kan ikke fatte vedtak</BodyShort>
-            <BodyShort size="small">{resultat.ugyldigBeregning.begrunnelse}</BodyShort>
-            <BodyShort spacing>
+            <BodyShort size="small" className="w-max">
+                {resultat.ugyldigBeregning.begrunnelse}
+            </BodyShort>
+            <BodyShort spacing className="mt-2">
                 <BodyShort size="small">Gjelder følgende vedtak:</BodyShort>
                 <HStack gap="2" className="justify-self-start">
                     <BodyShort size="small">
