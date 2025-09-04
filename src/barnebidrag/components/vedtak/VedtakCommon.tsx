@@ -4,7 +4,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Checkbox, Heading, Link, Modal, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import {
     ResultatBarnebidragsberegningPeriodeDto,
@@ -403,15 +403,54 @@ export const VedtakTableBody = ({
     manuellAldersjustering?: boolean;
 }) => {
     const { erBisysVedtak, vedtakstype } = useGetBehandlingV2();
+    const lastVedtakRef = useRef<number | undefined>(undefined);
+    const currentColorIndexRef = useRef(0);
+
+    // Predefined background colors for zebra scheme
+    const bgColors = ["bg-gray-200", "bg-gray-100"];
 
     function getRowClassName(periode: ResultatBarnebidragsberegningPeriodeDto): string {
+        let classes = "border-solid border-0";
+        const currentVedtak = periode.klageOmgjøringDetaljer?.resultatFraVedtak;
+
+        // Check if vedtaksid has changed and toggle color if so
+        if (currentVedtak !== lastVedtakRef.current && currentVedtak !== undefined) {
+            currentColorIndexRef.current = 1 - currentColorIndexRef.current; // Toggle between 0 and 1
+            lastVedtakRef.current = currentVedtak;
+        }
+
         if (periode.klageOmgjøringDetaljer?.kanOpprette35c) {
-            return "bg-gray-100";
+            classes += ` ${bgColors[currentColorIndexRef.current]}`;
         }
         if (periode.klageOmgjøringDetaljer?.delAvVedtaket === false) {
-            return "opacity-40";
+            classes += " opacity-40"; // Existing opacity
+            classes += ` ${bgColors[currentColorIndexRef.current]}`;
         }
-        return "";
+
+        return classes.trim();
+    }
+    function findPeriodWithLowestFom(
+        periods: ResultatBarnebidragsberegningPeriodeDto[]
+    ): ResultatBarnebidragsberegningPeriodeDto | undefined {
+        if (periods.length === 0) return undefined;
+
+        // Find the minimum timestamp
+        const minTimestamp = Math.min(...periods.map((p) => new Date(p.periode.fom).getTime()));
+
+        // Find the period with that timestamp
+        return periods.find((p) => new Date(p.periode.fom).getTime() === minTimestamp);
+    }
+
+    function vis35CCheckbox(periode: ResultatBarnebidragsberegningPeriodeDto) {
+        if (periode.klageOmgjøringDetaljer?.kanOpprette35c === false) return false;
+        const vedtaksid = periode.klageOmgjøringDetaljer.resultatFraVedtak;
+        const perioderMedSammeVedtak = resultatBarn.perioder.filter(
+            (p) => p.klageOmgjøringDetaljer?.resultatFraVedtak === vedtaksid
+        );
+        if (perioderMedSammeVedtak.length < 2) return true;
+        const førstePeriode = findPeriodWithLowestFom(perioderMedSammeVedtak);
+        if (førstePeriode.periode.fom === periode.periode.fom) return true;
+        return false;
     }
     function renderTable(periode: ResultatBarnebidragsberegningPeriodeDto) {
         const skjulBeregning =
@@ -482,7 +521,7 @@ export const VedtakTableBody = ({
                 >
                     {inneholder35C && (
                         <Table.DataCell textSize="small">
-                            {periode.klageOmgjøringDetaljer?.kanOpprette35c && (
+                            {vis35CCheckbox(periode) && (
                                 <OpprettParagraf35cCheckbox periode={periode} resultatBarn={resultatBarn} />
                             )}
                         </Table.DataCell>
