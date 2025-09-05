@@ -255,7 +255,7 @@ export const VedtakTableHeader = ({
                             {"Manuell aldersjustering"}
                         </Table.HeaderCell>
                     )}
-                    <Table.HeaderCell textSize="small" scope="col" className="w-[20%]">
+                    <Table.HeaderCell textSize="small" scope="col" className="w-[23%]">
                         Type
                     </Table.HeaderCell>
                     <Table.HeaderCell textSize="small" scope="col" className="w-[12%]">
