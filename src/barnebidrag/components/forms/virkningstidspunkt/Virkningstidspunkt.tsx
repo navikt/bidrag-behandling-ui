@@ -598,7 +598,6 @@ const VirkningstidspunktBarn = ({
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
-                    <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
