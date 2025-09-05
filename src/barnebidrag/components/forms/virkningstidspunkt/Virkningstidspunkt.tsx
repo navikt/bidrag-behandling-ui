@@ -612,18 +612,7 @@ const VirkningstidspunktBarn = ({
                     <Label size="small">{text.label.søktfradato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
-                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt && (
-                    <div className="flex gap-x-2">
-                        <Label size="small">
-                            {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
-                        </Label>
-                        <BodyShort size="small">
-                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt))}
-                        </BodyShort>
-                        <KlagetPåVedtakButton />
-                    </div>
-                )}
-                {behandling.erKlageEllerOmgjøring && opprinneligOgOmgjortVedtakErUlik && (
+                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.opprinneligVedtakstidspunkt && (
                     <div className="flex gap-x-2">
                         <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
                         <BodyShort size="small">
@@ -632,6 +621,21 @@ const VirkningstidspunktBarn = ({
                         <OpprinneligVedtakButton />
                     </div>
                 )}
+                {behandling.erKlageEllerOmgjøring &&
+                    selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt &&
+                    opprinneligOgOmgjortVedtakErUlik && (
+                        <div className="flex gap-x-2">
+                            <Label size="small">
+                                {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
+                            </Label>
+                            <BodyShort size="small">
+                                {DateToDDMMYYYYString(
+                                    dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt)
+                                )}
+                            </BodyShort>
+                            <KlagetPåVedtakButton />
+                        </div>
+                    )}
             </FlexRow>
 
             <FlexRow className="gap-x-8">
