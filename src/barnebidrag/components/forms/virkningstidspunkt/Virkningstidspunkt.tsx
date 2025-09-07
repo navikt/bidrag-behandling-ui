@@ -589,13 +589,15 @@ const VirkningstidspunktBarn = ({
 
     const debouncedOnSave = useDebounce(onSave);
 
+    const opprinneligOgOmgjortVedtakErUlik =
+        selectedVirkningstidspunkt.opprinneligVedtakstidspunkt !==
+        selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt;
     return (
         <>
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
-                    <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
@@ -609,28 +611,28 @@ const VirkningstidspunktBarn = ({
                     <Label size="small">{text.label.søktfradato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
-                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt && (
+                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.opprinneligVedtakstidspunkt && (
                     <div className="flex gap-x-2">
-                        <Label size="small">
-                            {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
-                        </Label>
+                        <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
                         <BodyShort size="small">
-                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt))}
+                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt))}
                         </BodyShort>
-                        <KlagetPåVedtakButton />
+                        <OpprinneligVedtakButton />
                     </div>
                 )}
                 {behandling.erKlageEllerOmgjøring &&
-                    selectedVirkningstidspunkt.opprinneligVedtakstidspunkt !==
-                        selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt && (
+                    selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt &&
+                    opprinneligOgOmgjortVedtakErUlik && (
                         <div className="flex gap-x-2">
-                            <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
+                            <Label size="small">
+                                {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
+                            </Label>
                             <BodyShort size="small">
                                 {DateToDDMMYYYYString(
-                                    dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt)
+                                    dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt)
                                 )}
                             </BodyShort>
-                            <OpprinneligVedtakButton />
+                            <KlagetPåVedtakButton />
                         </div>
                     )}
             </FlexRow>
@@ -748,10 +750,18 @@ const VirkningstidspunktBarn = ({
                     >
                         <Radio
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
-                            description={`Beregnes til og med måneden ${erKlage ? "påklaget" : "omgjort"} vedtak ble fattet`}
+                            description={`Beregnes til og med måneden opprinnelig vedtak ble fattet`}
                         >
-                            Ut måneden {erKlage ? "påklaget" : "omgjort"} vedtak ble fattet
+                            Ut måneden opprinnelig vedtak ble fattet
                         </Radio>
+                        {opprinneligOgOmgjortVedtakErUlik && (
+                            <Radio
+                                value={BeregnTil.OMGJORT_VEDTAK_VEDTAKSTIDSPUNKT}
+                                description={`Beregnes til og med måneden ${erKlage ? "påklaget" : "omgjort"} vedtak ble fattet`}
+                            >
+                                Ut måneden {erKlage ? "påklaget" : "omgjort"} vedtak ble fattet
+                            </Radio>
+                        )}
                         <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
                         <Radio
                             value={BeregnTil.ETTERFOLGENDEMANUELLVEDTAK}

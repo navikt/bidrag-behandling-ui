@@ -99,8 +99,7 @@ const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegni
     if (!resultat.ugyldigBeregning) return null;
     return (
         <Alert variant="warning" size="small" className="mb-2 w-full">
-            <Heading size="small">{resultat.ugyldigBeregning.tittel}</Heading>
-            <BodyShort size="small">Kan ikke fatte vedtak</BodyShort>
+            <Heading size="small">Kan ikke fatte vedtak</Heading>
             <BodyShort size="small" className="w-max">
                 {resultat.ugyldigBeregning.begrunnelse}
             </BodyShort>
