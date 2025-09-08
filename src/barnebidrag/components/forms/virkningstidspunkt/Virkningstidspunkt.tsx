@@ -611,28 +611,28 @@ const VirkningstidspunktBarn = ({
                     <Label size="small">{text.label.søktfradato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
-                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.opprinneligVedtakstidspunkt && (
+                {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt && (
                     <div className="flex gap-x-2">
-                        <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
+                        <Label size="small">
+                            {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
+                        </Label>
                         <BodyShort size="small">
-                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt))}
+                            {DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt))}
                         </BodyShort>
-                        <OpprinneligVedtakButton />
+                        <KlagetPåVedtakButton />
                     </div>
                 )}
                 {behandling.erKlageEllerOmgjøring &&
-                    selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt &&
+                    selectedVirkningstidspunkt.opprinneligVedtakstidspunkt &&
                     opprinneligOgOmgjortVedtakErUlik && (
                         <div className="flex gap-x-2">
-                            <Label size="small">
-                                {erKlage ? text.label.påklagetvedtakstidspunkt : text.label.omgjørvedtakstidspunkt}:
-                            </Label>
+                            <Label size="small">{text.label.opprinneligvedtakstidspunkt}:</Label>
                             <BodyShort size="small">
                                 {DateToDDMMYYYYString(
-                                    dateOrNull(selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt)
+                                    dateOrNull(selectedVirkningstidspunkt.opprinneligVedtakstidspunkt)
                                 )}
                             </BodyShort>
-                            <KlagetPåVedtakButton />
+                            <OpprinneligVedtakButton />
                         </div>
                     )}
             </FlexRow>
@@ -749,17 +749,17 @@ const VirkningstidspunktBarn = ({
                         defaultValue={initialValues.beregnTil}
                     >
                         <Radio
-                            value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
-                            description={`Beregnes til og med måneden opprinnelig vedtak ble fattet`}
+                            value={BeregnTil.OMGJORT_VEDTAK_VEDTAKSTIDSPUNKT}
+                            description={`Beregnes til og med måneden ${erKlage ? "påklaget" : "omgjort"} vedtak ble fattet`}
                         >
-                            Ut måneden opprinnelig vedtak ble fattet
+                            Ut måneden {erKlage ? "påklaget" : "omgjort"} vedtak ble fattet
                         </Radio>
                         {opprinneligOgOmgjortVedtakErUlik && (
                             <Radio
-                                value={BeregnTil.OMGJORT_VEDTAK_VEDTAKSTIDSPUNKT}
-                                description={`Beregnes til og med måneden ${erKlage ? "påklaget" : "omgjort"} vedtak ble fattet`}
+                                value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
+                                description={`Beregnes til og med måneden opprinnelig vedtak ble fattet`}
                             >
-                                Ut måneden {erKlage ? "påklaget" : "omgjort"} vedtak ble fattet
+                                Ut måneden opprinnelig vedtak ble fattet
                             </Radio>
                         )}
                         <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
