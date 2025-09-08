@@ -31,7 +31,8 @@ export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
             vedtaksLista={[
                 {
                     vedtaksid: omgjøringsvedtakFiktivVedtaksid,
-
+                    vedtakstype,
+                    virkningsDato: selectedBarn.virkningstidspunkt,
                     resultatSistePeriode: vedtakstype === Vedtakstype.KLAGE ? "Klagevedtak" : "Omgjøringsvedtak",
                 } as ManuellVedtakDto,
             ].concat(
@@ -137,14 +138,16 @@ export const VedtaksListe = ({
                                 <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
                                 <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
                                 <Table.DataCell>
-                                    <Link
-                                        variant="action"
-                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                    </Link>
+                                    {vedtak.vedtaksid !== omgjøringsvedtakFiktivVedtaksid && (
+                                        <Link
+                                            variant="action"
+                                            href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
+                                        </Link>
+                                    )}
                                 </Table.DataCell>
                             </Table.Row>
                         ))}
