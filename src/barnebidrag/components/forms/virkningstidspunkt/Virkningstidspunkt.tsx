@@ -42,7 +42,7 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { Link, useSearchParams } from "react-router-dom";
 
-import { OpprinneligVedtakButton } from "../../../../common/components/KlagetPåVedtakButton";
+import KlagetPåVedtakButton, { OpprinneligVedtakButton } from "../../../../common/components/KlagetPåVedtakButton";
 import { useQueryParams } from "../../../../common/hooks/useQueryParams";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
@@ -597,6 +597,7 @@ const VirkningstidspunktBarn = ({
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                    <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
