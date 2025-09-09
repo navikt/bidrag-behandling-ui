@@ -32,6 +32,7 @@ export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
                 {
                     vedtaksid: omgjøringsvedtakFiktivVedtaksid,
                     vedtakstype,
+                    søknadstype: vedtakstype === Vedtakstype.KLAGE ? "Klage" : "Omgjøring",
                     virkningsDato: selectedBarn.virkningstidspunkt,
                     resultatSistePeriode: vedtakstype === Vedtakstype.KLAGE ? "Klagevedtak" : "Omgjøringsvedtak",
                 } as ManuellVedtakDto,
