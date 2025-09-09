@@ -9,21 +9,40 @@ import { useBehandlingProvider } from "../../common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetBeregningBidrag, useOppdaterManuelleVedtak } from "../../common/hooks/useApiData";
 import { dateOrNull, DateToDDMMYYYYString } from "../../utils/date-utils";
 
+const omgjøringsvedtakFiktivVedtaksid = -1;
 type VedtaksListeProps = { barnIdent: string; aldersjusteringForÅr?: number; onSelectVedtak?: () => void };
 export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
     const { data: beregning } = useGetBeregningBidrag(true);
-    const { virkningstidspunktV2 } = useGetBehandlingV2();
+    const { virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
     const selectedBarn = virkningstidspunktV2.find(({ rolle }) => rolle.ident === props.barnIdent);
     const barn = beregning.resultat?.resultatBarn?.find((b) => b.barn.ident === props.barnIdent);
 
+    const grunnlagFraVedtak = barn?.barn?.grunnlagFraVedtak?.find(
+        (g) => g.aldersjusteringForÅr === props.aldersjusteringForÅr
+    );
+    const vedtaksid =
+        grunnlagFraVedtak?.grunnlagFraOmgjøringsvedtak === true
+            ? omgjøringsvedtakFiktivVedtaksid
+            : grunnlagFraVedtak?.vedtak;
     return (
         <VedtaksListe
             {...props}
-            valgVedtak={
-                barn?.barn?.grunnlagFraVedtak?.find((g) => g.aldersjusteringForÅr === props.aldersjusteringForÅr)
-                    ?.vedtak
-            }
-            vedtaksLista={selectedBarn.manuelleVedtak}
+            valgVedtak={vedtaksid ?? selectedBarn?.grunnlagFraVedtak}
+            vedtaksLista={[
+                {
+                    vedtaksid: omgjøringsvedtakFiktivVedtaksid,
+                    vedtakstype,
+                    søknadstype: vedtakstype === Vedtakstype.KLAGE ? "Klage" : "Omgjøring",
+                    virkningsDato: selectedBarn.virkningstidspunkt,
+                    resultatSistePeriode: vedtakstype === Vedtakstype.KLAGE ? "Klagevedtak" : "Omgjøringsvedtak",
+                } as ManuellVedtakDto,
+            ].concat(
+                selectedBarn.manuelleVedtak.filter((p) => {
+                    const fattetDate = new Date(p.fattetTidspunkt);
+                    const cutoffDate = new Date(`${props.aldersjusteringForÅr}-07-01`);
+                    return fattetDate < cutoffDate;
+                })
+            )}
         />
     );
 };
@@ -58,11 +77,13 @@ export const VedtaksListe = ({
 
     const onSelect = (vedtaksid: number, checked: boolean) => {
         const updatedValue = checked ? vedtaksid : null;
-        setVal(updatedValue);
+        const grunnlagFraOmgjøringsvedtak = updatedValue === omgjøringsvedtakFiktivVedtaksid;
+        setVal(grunnlagFraOmgjøringsvedtak ? omgjøringsvedtakFiktivVedtaksid : updatedValue);
         mutate({
             barnId: selectedBarn.rolle.id,
-            vedtaksid: updatedValue,
+            vedtaksid: grunnlagFraOmgjøringsvedtak ? null : updatedValue,
             aldersjusteringForÅr,
+            grunnlagFraOmgjøringsvedtak,
         });
     };
 
@@ -118,14 +139,16 @@ export const VedtaksListe = ({
                                 <Table.DataCell>{vedtak.søknadstype}</Table.DataCell>
                                 <Table.DataCell>{vedtak.resultatSistePeriode}</Table.DataCell>
                                 <Table.DataCell>
-                                    <Link
-                                        variant="action"
-                                        href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
-                                    </Link>
+                                    {vedtak.vedtaksid !== omgjøringsvedtakFiktivVedtaksid && (
+                                        <Link
+                                            variant="action"
+                                            href={`/sak/${saksnummer}/vedtak/${vedtak.vedtaksid}/?steg=vedtak`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <ExternalLinkIcon title="vedtak lenken" fontSize="1.5rem" />
+                                        </Link>
+                                    )}
                                 </Table.DataCell>
                             </Table.Row>
                         ))}
