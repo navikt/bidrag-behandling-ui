@@ -68,6 +68,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                         </ErrorSummary.Item>
                     );
                 }
+                if (value?.måVelgeVedtakHvisAvtaletypeErVedtakFraNav === true) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
+                            Innkreving: Vedtak må velges når "Vedtak fra Nav" er valgt for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
                 if (value?.harPeriodiseringsfeil) {
                     feilliste.push(
                         <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>

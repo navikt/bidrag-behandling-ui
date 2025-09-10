@@ -595,6 +595,8 @@ export interface GrunnlagFraVedtak {
   /** @format int32 */
   vedtak?: number;
   grunnlagFraOmgjøringsvedtak: boolean;
+  /** @format date-time */
+  vedtakstidspunkt?: string;
   /** Perioder i vedtaket som er valgt. Brukes når vedtakstype er innkreving og det er valgt å innkreve en vedtak fra NAV som opprinnelig var uten innkreving */
   perioder: VedtakPeriodeDto[];
 }
@@ -1319,6 +1321,7 @@ export interface ManuellVedtakDto {
   vedtakstype: Vedtakstype;
   resultatSistePeriode: string;
   manglerGrunnlag: boolean;
+  innkrevingstype: Innkrevingstype;
   søknadstype: string;
 }
 
@@ -1429,6 +1432,7 @@ export interface PrivatAvtaleValideringsfeilDto {
   manglerBegrunnelse: boolean;
   manglerAvtaledato: boolean;
   manglerAvtaletype: boolean;
+  måVelgeVedtakHvisAvtaletypeErVedtakFraNav: boolean;
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
@@ -2438,9 +2442,9 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2520,10 +2524,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
-  inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2754,8 +2758,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   vedtakstype: Vedtakstype;
   klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
   resultatFraVedtak?: ResultatFraVedtakGrunnlag;
-  delvedtakstypeVisningsnavn: string;
   resultatkodeVisningsnavn?: string;
+  delvedtakstypeVisningsnavn: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -3200,8 +3204,8 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  vedtakstypeVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
   avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3383,10 +3387,10 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
+  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
-  inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3419,8 +3423,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  sivilstandVisningsnavn?: string;
   resultatKodeVisningsnavn: string;
+  sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<

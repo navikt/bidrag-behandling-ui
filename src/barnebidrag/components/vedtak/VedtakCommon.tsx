@@ -360,6 +360,7 @@ export const VelgManuellVedtakModal = ({
                 <Modal.Body>
                     <VedtaksListeBeregning
                         barnIdent={barnIdent}
+                        omgjøring
                         aldersjusteringForÅr={aldersjusteringForÅr}
                         onSelectVedtak={() =>
                             queryClient.refetchQueries({ queryKey: QueryKeys.beregnBarnebidrag(true) })
