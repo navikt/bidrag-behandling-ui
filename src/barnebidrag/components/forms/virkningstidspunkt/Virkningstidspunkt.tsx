@@ -491,10 +491,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-          ? årsakListe18årsBidrag
-          : selectedVirkningstidspunkt.harLøpendeBidrag
-            ? harLøpendeBidragÅrsakListe
-            : årsakListe;
+            ? årsakListe18årsBidrag
+            : selectedVirkningstidspunkt.harLøpendeBidrag
+                ? harLøpendeBidragÅrsakListe
+                : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -588,9 +588,6 @@ const VirkningstidspunktBarn = ({
 
     const debouncedOnSave = useDebounce(onSave);
 
-    // const opprinneligOgOmgjortVedtakErUlik =
-    //     selectedVirkningstidspunkt.opprinneligVedtakstidspunkt !==
-    //     selectedVirkningstidspunkt.omgjortVedtakVedtakstidspunkt;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -671,12 +668,12 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
+                                        ? avslagsListeOpphør.filter((value) =>
                                             erTypeOpphør
                                                 ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
                                                 : true
                                         )
-                                      : avslagsListe
+                                        : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -723,7 +720,7 @@ const VirkningstidspunktBarn = ({
                 setPreviousValues={setPreviousValues}
             />
 
-            {behandling.erKlageEllerOmgjøring && (
+            {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.avslag == null && (
                 <>
                     <RadioGroup
                         name={`roller.${barnIndex}.beregnTil`}
@@ -794,7 +791,7 @@ const VirkningstidspunktBarn = ({
                 </>
             )}
 
-            <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} />
+            <VedtaksListeVirkningstidspunkt barnIdent={item.rolle.ident} omgjøring={false} />
         </>
     );
 };
