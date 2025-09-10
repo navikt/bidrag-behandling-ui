@@ -10,7 +10,12 @@ import { useGetBehandlingV2, useGetBeregningBidrag, useOppdaterManuelleVedtak } 
 import { dateOrNull, DateToDDMMYYYYString } from "../../utils/date-utils";
 
 const omgjøringsvedtakFiktivVedtaksid = -1;
-type VedtaksListeProps = { barnIdent: string; aldersjusteringForÅr?: number; onSelectVedtak?: () => void };
+type VedtaksListeProps = {
+    barnIdent: string;
+    aldersjusteringForÅr?: number;
+    onSelectVedtak?: () => void;
+    omgjøring: boolean;
+};
 export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
     const { data: beregning } = useGetBeregningBidrag(true);
     const { virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
@@ -24,20 +29,24 @@ export const VedtaksListeBeregning = (props: VedtaksListeProps) => {
         grunnlagFraVedtak?.grunnlagFraOmgjøringsvedtak === true
             ? omgjøringsvedtakFiktivVedtaksid
             : grunnlagFraVedtak?.vedtak;
+
+    const omgjøringsVedtak = [
+        {
+            vedtaksid: omgjøringsvedtakFiktivVedtaksid,
+            vedtakstype,
+            søknadstype: vedtakstype === Vedtakstype.KLAGE ? "Klage" : "Omgjøring",
+            virkningsDato: selectedBarn.virkningstidspunkt,
+            resultatSistePeriode: vedtakstype === Vedtakstype.KLAGE ? "Klagevedtak" : "Omgjøringsvedtak",
+        } as ManuellVedtakDto,
+    ];
+    const omgjøringsvedtak = props.omgjøring ? omgjøringsVedtak : [];
     return (
         <VedtaksListe
             {...props}
             valgVedtak={vedtaksid ?? selectedBarn?.grunnlagFraVedtak}
-            vedtaksLista={[
-                {
-                    vedtaksid: omgjøringsvedtakFiktivVedtaksid,
-                    vedtakstype,
-                    søknadstype: vedtakstype === Vedtakstype.KLAGE ? "Klage" : "Omgjøring",
-                    virkningsDato: selectedBarn.virkningstidspunkt,
-                    resultatSistePeriode: vedtakstype === Vedtakstype.KLAGE ? "Klagevedtak" : "Omgjøringsvedtak",
-                } as ManuellVedtakDto,
-            ].concat(
+            vedtaksLista={omgjøringsvedtak.concat(
                 selectedBarn.manuelleVedtak.filter((p) => {
+                    if (!props.omgjøring) return true;
                     const fattetDate = new Date(p.fattetTidspunkt);
                     const cutoffDate = new Date(`${props.aldersjusteringForÅr}-07-01`);
                     return fattetDate < cutoffDate;

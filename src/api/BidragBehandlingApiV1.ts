@@ -595,6 +595,8 @@ export interface GrunnlagFraVedtak {
   /** @format int32 */
   vedtak?: number;
   grunnlagFraOmgjøringsvedtak: boolean;
+  /** @format date-time */
+  vedtakstidspunkt?: string;
   /** Perioder i vedtaket som er valgt. Brukes når vedtakstype er innkreving og det er valgt å innkreve en vedtak fra NAV som opprinnelig var uten innkreving */
   perioder: VedtakPeriodeDto[];
 }
@@ -1319,6 +1321,7 @@ export interface ManuellVedtakDto {
   vedtakstype: Vedtakstype;
   resultatSistePeriode: string;
   manglerGrunnlag: boolean;
+  innkrevingstype: Innkrevingstype;
   søknadstype: string;
 }
 
@@ -1429,6 +1432,7 @@ export interface PrivatAvtaleValideringsfeilDto {
   manglerBegrunnelse: boolean;
   manglerAvtaledato: boolean;
   manglerAvtaletype: boolean;
+  måVelgeVedtakHvisAvtaletypeErVedtakFraNav: boolean;
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
@@ -1843,11 +1847,23 @@ export interface VirkningstidspunktDtoV2 {
   kanSkriveVurderingAvSkolegang: boolean;
   etterfølgendeVedtak?: EtterfolgendeVedtakDto;
   manuelleVedtak: ManuellVedtakDto[];
+  valideringsfeil?: VirkningstidspunktFeilDto;
   /**
    * Bruk begrunnelse
    * @deprecated
    */
   notat: BegrunnelseDto;
+}
+
+export interface VirkningstidspunktFeilDto {
+  manglerVirkningstidspunkt: boolean;
+  manglerOpphørsdato: RolleDto[];
+  kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak: RolleDto[];
+  manglerÅrsakEllerAvslag: boolean;
+  måVelgeVedtakForBeregning: RolleDto[];
+  manglerBegrunnelse: boolean;
+  manglerVurderingAvSkolegang: boolean;
+  virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
 }
 
 export interface OppdatereUtgift {
@@ -2520,10 +2536,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
-  inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
+  inntektBPMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2929,16 +2945,6 @@ export interface MaBekrefteNyeOpplysninger {
   underholdskostnadId?: number;
 }
 
-export interface VirkningstidspunktFeilDto {
-  manglerVirkningstidspunkt: boolean;
-  manglerOpphørsdato: RolleDto[];
-  manglerÅrsakEllerAvslag: boolean;
-  måVelgeVedtakForBeregning: RolleDto[];
-  manglerBegrunnelse: boolean;
-  manglerVurderingAvSkolegang: boolean;
-  virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
-}
-
 export interface ArbeidOgInntektLenkeRequest {
   /** @format int64 */
   behandlingId: number;
@@ -3200,10 +3206,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  vedtakstypeVisningsnavn?: string;
-  kategoriVisningsnavn?: string;
-  avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
+  avslagVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3383,10 +3389,10 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
-  inntektBPMånedlig?: number;
-  inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  inntektBMMånedlig?: number;
+  inntektBPMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<

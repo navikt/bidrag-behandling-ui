@@ -68,6 +68,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                         </ErrorSummary.Item>
                     );
                 }
+                if (value?.måVelgeVedtakHvisAvtaletypeErVedtakFraNav === true) {
+                    feilliste.push(
+                        <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
+                            Innkreving: Vedtak må velges når "Vedtak fra Nav" er valgt for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                }
                 if (value?.harPeriodiseringsfeil) {
                     feilliste.push(
                         <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.privat_avtale)}>
@@ -85,6 +92,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
+            feilInnhold.virkningstidspunkt?.kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak.forEach((rolle) => {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Kan ikke sette opphørsdato etter etterfølgende vedtak for barn {rolle.navn}
+                    </ErrorSummary.Item>
+                );
+            });
             if (feilInnhold.virkningstidspunkt?.manglerVurderingAvSkolegang === true) {
                 feilliste.push(
                     <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>

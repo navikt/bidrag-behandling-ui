@@ -153,9 +153,11 @@ const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsbe
     } = useGetBehandlingV2();
 
     const erAvslag = avslag !== null && avslag !== undefined;
-    const avvistAldersjustering = resultatBarn.perioder.every(
-        (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
-    );
+    const avvistAldersjustering =
+        resultatBarn.perioder.length > 0 &&
+        resultatBarn.perioder.every(
+            (p) => p.aldersjusteringDetaljer != null && p.aldersjusteringDetaljer?.aldersjustert === false
+        );
     if (isFetching && !isLoading) {
         return (
             <VStack gap="2" className="w-full">

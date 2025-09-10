@@ -199,7 +199,7 @@ function BeregningTabellBarn({ resultatBarn }: { resultatBarn: ResultatBidragsbe
                         <VStack>
                             <ResultatTabell
                                 key={i + `Delvedtak ${hentVisningsnavn(vedtakstype)}`}
-                                erAvslag={false}
+                                erAvslag={delvedtak.perioder.every((p) => p.erDirekteAvslag)}
                                 avvistAldersjustering={avvistAldersjustering}
                                 beregnet={
                                     delvedtak.beregnet ||
