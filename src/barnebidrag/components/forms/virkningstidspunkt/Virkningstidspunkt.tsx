@@ -35,7 +35,7 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, HStack, Label, Radio, RadioGroup, Tabs, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Label, Radio, RadioGroup, Tabs, VStack } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
@@ -250,16 +250,22 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
     const { getValues, reset, setValue } = useFormContext();
     const [opphørsvarighet, setOpphørsvarighet] = useState(getValues(`roller.${barnIndex}.opphørsvarighet`));
     const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
+    const valideringsfeilForBarn = selectedBarn.valideringsfeil?.kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak?.find(
+        (p) => p.ident === item.rolle.ident
+    );
     const tom = useMemo(() => {
+        if (selectedBarn.etterfølgendeVedtak != null && selectedBarn.beregnTil !== BeregnTil.INNEVAeRENDEMANED) {
+            return dateOrNull(selectedBarn.etterfølgendeVedtak.virkningstidspunkt);
+        }
         if (behandling.stønadstype === Stonadstype.BIDRAG)
             return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
         return addMonths(new Date(), 50 * 12);
-    }, []);
+    }, [selectedBarn]);
 
     const updateOpphørsdato = () => {
         const values = getValues(`roller.${barnIndex}`);
         oppdaterOpphørsdato.mutation.mutate(
-            { idRolle: selectedBarn.rolle.id, opphørsdato: values.opphørsdato },
+            { idRolle: selectedBarn.rolle.id, opphørsdato: values.opphørsdato, simulerEndring: false },
             {
                 onSuccess: (response) => {
                     oppdaterOpphørsdato.queryClientUpdater((currentData) => {
@@ -326,6 +332,16 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                             DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.opphørsdato)),
                             DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.vedtaksdato))
                         )}
+                    </BodyShort>
+                </BehandlingAlert>
+            )}
+            {valideringsfeilForBarn && !lesemodus && (
+                <BehandlingAlert variant="warning" className="!w-[520px]">
+                    <Heading spacing size="xsmall" level="3">
+                        Ugyldig opphørsdato
+                    </Heading>
+                    <BodyShort size="small">
+                        Kan ikke sette opphørsdato etter virkningstidspunkt til etterfølgende vedtak
                     </BodyShort>
                 </BehandlingAlert>
             )}

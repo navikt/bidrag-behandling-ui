@@ -92,6 +92,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
+            feilInnhold.virkningstidspunkt?.kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak.forEach((rolle) => {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Kan ikke sette opphørsdato etter etterfølgende vedtak for barn {rolle.navn}
+                    </ErrorSummary.Item>
+                );
+            });
             if (feilInnhold.virkningstidspunkt?.manglerVurderingAvSkolegang === true) {
                 feilliste.push(
                     <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
