@@ -272,7 +272,13 @@ const VirkningstidspunktRolle = ({
                         </optgroup>
                     )}
                     {!lesemodus && (
-                        <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
+                        <optgroup
+                            label={
+                                erTypeOpphør || selectedVirkningstidspunkt.harLøpendeForskudd
+                                    ? text.label.opphør
+                                    : text.label.avslag
+                            }
+                        >
                             {avslagsOpphørsliste.map((value) => (
                                 <option key={value} value={value}>
                                     {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}

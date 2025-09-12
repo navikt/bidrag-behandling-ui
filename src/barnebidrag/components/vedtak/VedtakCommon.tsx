@@ -219,7 +219,7 @@ export const VedtakTableHeader = ({
                 </Table.Row>
             );
 
-        if (avslag)
+        if (avslag && !orkestrertVedtak) {
             return (
                 <Table.Row>
                     <Table.HeaderCell textSize="small" scope="col">
@@ -233,7 +233,7 @@ export const VedtakTableHeader = ({
                     </Table.HeaderCell>
                 </Table.Row>
             );
-
+        }
         if (orkestrertVedtak) {
             const inneholder35C = resultatBarn?.perioder?.some((p) => p?.klageOmgjøringDetaljer?.kanOpprette35c);
             return (
@@ -497,7 +497,7 @@ export const VedtakTableBody = ({
             );
         }
 
-        if (avslag) {
+        if (avslag && !orkestrertVedtak) {
             return (
                 <Table.Row>
                     <Table.DataCell textSize="small">

@@ -290,6 +290,7 @@ export enum Resultatkode {
   MAKS_25_PROSENT_AV_INNTEKT = "MAKS_25_PROSENT_AV_INNTEKT",
   MANGLER_BIDRAGSEVNE = "MANGLER_BIDRAGSEVNE",
   KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
+  INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
   INDEKSREGULERING = "INDEKSREGULERING",
 }
 
@@ -1829,6 +1830,7 @@ export interface VirkningstidspunktDtoV2 {
   begrunnelseVurderingAvSkolegang?: BegrunnelseDto;
   begrunnelseVurderingAvSkolegangFraOpprinneligVedtak?: BegrunnelseDto;
   harLøpendeBidrag: boolean;
+  harLøpendeForskudd: boolean;
   begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
   /** @format date */
   opphørsdato?: string;
@@ -2454,9 +2456,11 @@ export interface KanBehandlesINyLosningRequest {
   søktFomDato?: string;
   /** @format date */
   mottattdato?: string;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
+  /** Rolle beskrivelse som er brukte til å opprette nye roller */
+  bidragsmottaker?: SjekkRolleDto;
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2537,9 +2541,9 @@ export interface ResultatBeregningInntekterDto {
   inntektBarn?: number;
   barnEndeligInntekt?: number;
   inntektBarnMånedlig?: number;
-  inntektBMMånedlig?: number;
-  inntektBPMånedlig?: number;
   totalEndeligInntekt: number;
+  inntektBPMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -3206,10 +3210,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
-  avslagVisningsnavn?: string;
-  kategoriVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
+  avslagVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3390,9 +3394,9 @@ export interface NotatResultatBeregningInntekterDto {
   inntektBarn?: number;
   barnEndeligInntekt?: number;
   inntektBarnMånedlig?: number;
-  inntektBMMånedlig?: number;
-  inntektBPMånedlig?: number;
   totalEndeligInntekt: number;
+  inntektBPMånedlig?: number;
+  inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<
