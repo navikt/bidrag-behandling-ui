@@ -736,7 +736,7 @@ const VirkningstidspunktBarn = ({
                 setPreviousValues={setPreviousValues}
             />
 
-            {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.avslag == null && (
+            {behandling.erKlageEllerOmgjøring && (
                 <>
                     <RadioGroup
                         name={`roller.${barnIndex}.beregnTil`}
