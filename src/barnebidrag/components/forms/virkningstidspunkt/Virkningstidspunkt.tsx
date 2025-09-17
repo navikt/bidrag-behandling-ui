@@ -744,21 +744,27 @@ const VirkningstidspunktBarn = ({
                         size="small"
                         onChange={updateBeregnTilDato}
                         readOnly={lesemodus}
+                        className="w-[550px]"
                         defaultValue={initialValues.beregnTil}
                     >
                         <Radio
                             value={BeregnTil.OPPRINNELIG_VEDTAKSTIDSPUNKT}
-                            description={`Beregnes til og med måneden opprinnelig vedtak ble fattet`}
+                            description={`Beregn og periodiser til og med måneden opprinnelig vedtak ble fattet. Etterfølgende vedtak vil løpe etter beregningsperioden.`}
                         >
                             Ut måneden opprinnelig vedtak ble fattet
                         </Radio>
-                        <Radio value={BeregnTil.INNEVAeRENDEMANED}>Ut nåværende måned</Radio>
+                        <Radio
+                            value={BeregnTil.INNEVAeRENDEMANED}
+                            description="Beregn og periodiser ut nåværende måned. Dette vil overskrive perioder fra etterfølgende vedtak"
+                        >
+                            Ut nåværende måned
+                        </Radio>
                         <Radio
                             value={BeregnTil.ETTERFOLGENDEMANUELLVEDTAK}
                             readOnly={selectedVirkningstidspunkt.etterfølgendeVedtak === undefined}
                             description={
                                 selectedVirkningstidspunkt.etterfølgendeVedtak
-                                    ? `Beregnes fram til etterfølgende vedtak med virkningstidspunkt ${DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt))}`
+                                    ? `Beregn og periodiser fram til etterfølgende vedtak med virkningstidspunkt ${DateToDDMMYYYYString(dateOrNull(selectedVirkningstidspunkt.etterfølgendeVedtak?.virkningstidspunkt))}. Etterfølgende vedtak vil løpe etter beregningsperioden.`
                                     : ""
                             }
                         >
