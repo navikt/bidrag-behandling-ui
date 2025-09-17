@@ -17,15 +17,14 @@ import {
     pageMeta,
     ReactIntegration,
 } from "@grafana/faro-react";
-import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
 import { BidragCommonsProvider, BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import useStartTracing from "@navikt/bidrag-ui-common/esm/react_components/hooks/useStartTracing";
-import { Button, Loader } from "@navikt/ds-react";
+import { Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
+import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
 import {
     BrowserRouter,
     createRoutesFromChildren,
@@ -158,8 +157,6 @@ export default function App() {
                             </div>
                         }
                     >
-                        <HideSensitiveInfoButton />
-
                         <BrowserRouter>
                             <FaroRoutes>
                                 <Route path="/sak/:saksnummer/behandling/:behandlingId">
@@ -227,48 +224,6 @@ export default function App() {
     );
 }
 
-function HideSensitiveInfoButton() {
-    const { isAdminEnabled, isDeveloper } = useFeatureToogle();
-    const [isHiding, setIsHiding] = useState(isDeveloper);
-    useEffect(() => {
-        const eventListener = (e) => {
-            if (e.ctrlKey && e.key === "ø") {
-                document.body.classList.toggle("blur-sensitive-info");
-                window.localStorage.setItem(
-                    "blur-sensitive-info",
-                    document.body.classList.contains("blur-sensitive-info").toString()
-                );
-            }
-        };
-        document.addEventListener("keydown", eventListener);
-        return () => document.removeEventListener("keydown", eventListener);
-    }, []);
-    useEffect(() => {
-        const isEnabled = isDeveloper || window.localStorage.getItem("blur-sensitive-info") === "true";
-        if (isEnabled) {
-            document.body.classList.add("blur-sensitive-info");
-            setIsHiding(true);
-        }
-        if (!isAdminEnabled) {
-            document.body.classList.remove("blur-sensitive-info");
-            setIsHiding(false);
-        }
-    }, [isDeveloper, isAdminEnabled]);
-    if (!isAdminEnabled) return null;
-    return (
-        <div className="fixed left-2 bottom-2 z-50">
-            <Button
-                size="small"
-                variant="tertiary-neutral"
-                icon={isHiding ? <EyeIcon /> : <EyeObfuscatedIcon />}
-                onClick={() => {
-                    document.body.classList.toggle("blur-sensitive-info");
-                    setIsHiding(document.body.classList.contains("blur-sensitive-info"));
-                }}
-            ></Button>
-        </div>
-    );
-}
 function ForskuddBrukerveiledningPageWrapper() {
     useEffect(scrollToHash, []);
     return (
