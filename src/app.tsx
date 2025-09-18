@@ -34,9 +34,11 @@ import {
     useLocation,
     useNavigationType,
     useParams,
+    useSearchParams,
 } from "react-router-dom";
 
 import { BarnebidragProviderWrapper } from "./barnebidrag/context/BarnebidragProviderWrapper";
+import BrukerveiledningBarnebidragKlage from "./barnebidrag/docs/BrukerveiledningBarnebidragKlage.mdx";
 import BrukerveiledningBarnebidragV1 from "./barnebidrag/docs/BrukerveiledningBarnebidragV1.mdx";
 import { BarnebidragPage } from "./barnebidrag/pages/BarnebidragPage";
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -203,6 +205,7 @@ export default function App() {
                                     path="/bidrag/brukerveiledning"
                                     element={<BidragBrukerveiledningPageWrapper />}
                                 />
+
                                 <Route path="/forskudd/:behandlingId">
                                     <Route
                                         index
@@ -234,9 +237,22 @@ function ForskuddBrukerveiledningPageWrapper() {
         </PageWrapper>
     );
 }
+
 function BidragBrukerveiledningPageWrapper() {
     useEffect(scrollToHash, []);
+    const [searchParams] = useSearchParams();
 
+    // Example criteria: Check if 'criteria' query param is 'true'
+    const forKlage = searchParams.get("klage") === "true";
+    if (forKlage) {
+        return (
+            <PageWrapper name="Bidrag brukerveiledning">
+                <BidragContainer className="container p-6 max-w-[60rem]">
+                    <BrukerveiledningBarnebidragKlage />
+                </BidragContainer>
+            </PageWrapper>
+        );
+    }
     return (
         <PageWrapper name="Bidrag brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">

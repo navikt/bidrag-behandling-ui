@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
 import elementIds from "../../common/constants/elementIds";
 import { useBehandlingProvider } from "../../common/context/BehandlingContext";
+import { useGetBehandlingV2 } from "../../common/hooks/useApiData";
 import environment from "../../environment";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
@@ -20,6 +21,7 @@ export default function EksterneLenkerKnapper() {
 function BrukerveiledningKnapp() {
     const nudgeEnabledName = "brukerveiledningShowNudge";
     const { activeStep } = useBehandlingProvider();
+    const { erKlageEllerOmgjøring } = useGetBehandlingV2();
     const [nudge, setNudge] = useState(LocalStorage.get(nudgeEnabledName) !== "false");
 
     useEffect(() => {
@@ -47,10 +49,17 @@ function BrukerveiledningKnapp() {
                 return elementIds.brukerveildning.tittel_vedtak;
             case BarnebidragStepper.SAMVÆR:
                 return elementIds.brukerveildning.tittel_samvær;
+            case BarnebidragStepper.VEDTAK_ENDELIG:
+                return elementIds.brukerveildning.tittel_vedtak;
+            case BarnebidragStepper.KLAGEVEDTAK:
+                return elementIds.brukerveildning.tittel_klagevedtak;
             default:
                 return "";
         }
     }
+    const url = erKlageEllerOmgjøring
+        ? environment.url.bidragBrukerveiledningKlage
+        : environment.url.bidragBrukerveiledning;
     return (
         <div>
             <Button
@@ -63,7 +72,7 @@ function BrukerveiledningKnapp() {
                 icon={<ExternalLinkIcon />}
                 onClick={() => {
                     faro.api.pushEvent("click.button.brukerveiledning", { type: TypeBehandling.BIDRAG });
-                    window.open(environment.url.bidragBrukerveiledning + "#" + renderHref(), "_blank");
+                    window.open(url + "#" + renderHref(), "_blank");
                 }}
             >
                 Brukerveiledning
