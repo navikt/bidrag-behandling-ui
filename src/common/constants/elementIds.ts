@@ -12,6 +12,7 @@ export default {
         tittel_underholdskostnad: "underholdskostnad",
         tittel_privat_avtale: "privat-avtale",
         tittel_inntekt: "inntekt-generelt",
+        tittel_klagevedtak: "klagevedtak",
         tittel_vedtak: "fatte-vedtak",
         tittel_samvær: "samvær",
         tittel_gebyr: "gebyr",

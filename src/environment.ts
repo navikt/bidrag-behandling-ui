@@ -19,6 +19,7 @@ const url = {
     modia: process.env.MODIA_URL,
     forskuddBrukerveiledning: "/forskudd/brukerveiledning",
     bidragBrukerveiledning: "/bidrag/brukerveiledning",
+    bidragBrukerveiledningKlage: "/bidrag/brukerveiledning?klage=true",
     særbidragBrukerveiledning: "/sarbidrag/brukerveiledning",
 };
 

@@ -65,9 +65,9 @@ export const BarnebidragPage = () => {
                         <NavigationLoaderWrapper>
                             <FormWrapper />
                         </NavigationLoaderWrapper>
+                        <EksterneLenkerKnapper />
                     </div>
                 </div>
-                <EksterneLenkerKnapper />
             </Provider>
         </PageWrapper>
     );
