@@ -168,6 +168,13 @@ const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsbe
             </VStack>
         );
     }
+    if (resultatBarn.erAvvisning) {
+        return (
+            <Alert variant="info">
+                Vedtak er avvisning og har derfor ingen perioder. Vedtaket vil ikke føre til noe endringer i regnskapet.
+            </Alert>
+        );
+    }
     return (
         <Table size="small">
             <VedtakTableHeader

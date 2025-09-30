@@ -123,9 +123,10 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.GEBYR,
             visible:
-                !behandling.erKlageEllerOmgjøring &&
-                behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
-                !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
+                (behandling.lesemodus?.erAvvist && behandling.gebyr) ||
+                (!behandling.erKlageEllerOmgjøring &&
+                    behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
+                    !(behandling.erVedtakUtenBeregning && behandling.lesemodus)),
             interactive: !!behandling.gebyr?.gebyrRoller.length,
         },
         {

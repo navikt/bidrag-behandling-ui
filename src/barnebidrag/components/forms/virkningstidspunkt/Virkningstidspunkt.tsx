@@ -79,15 +79,15 @@ const harLøpendeBidragÅrsakListe = [
 ];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListe18ÅrOpphør = [
+const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avvisningslisteListe18ÅrOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.AVSLUTTET_SKOLEGANG,
-    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.IKKE_OMSORG_FOR_BARNET_BP,
 ];
-const avslagsListeOpphør = [
+const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
+export const avvisningsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.IKKE_OMSORG_FOR_BARNET,
-    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.IKKE_OMSORG_FOR_BARNET_BP,
 ];
 
 const avslaglisteAlle = Array.from(
@@ -150,9 +150,14 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
     const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
         (value) => value === values.årsakAvslag
     );
-    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør].find(
-        (value) => value === values.årsakAvslag
-    );
+    const avslag = [
+        ...avslagsListe,
+        ...avslagsListe18År,
+        ...avslagsListe18ÅrOpphør,
+        ...avslagsListeOpphør,
+        ...avvisningsListeOpphør,
+        ...avvisningslisteListe18ÅrOpphør,
+    ].find((value) => value === values.årsakAvslag);
 
     let payload: OppdatereVirkningstidspunkt = {
         rolleId,
@@ -684,11 +689,7 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
-                                            erTypeOpphør
-                                                ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
-                                                : true
-                                        )
+                                      ? avslagsListeOpphør
                                       : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
@@ -703,6 +704,17 @@ const VirkningstidspunktBarn = ({
                                             </option>
                                         ))}
                                     </>
+                                )}
+                            </optgroup>
+                        )}
+                        {!lesemodus && (
+                            <optgroup label={text.label.avvisning}>
+                                {(er18ÅrsBidrag ? avvisningslisteListe18ÅrOpphør : avvisningsListeOpphør).map(
+                                    (value) => (
+                                        <option key={value} value={value}>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    )
                                 )}
                             </optgroup>
                         )}
