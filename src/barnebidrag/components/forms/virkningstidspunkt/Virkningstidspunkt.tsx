@@ -720,18 +720,20 @@ const VirkningstidspunktBarn = ({
                         )}
                     </FormControlledSelectField>
                 )}
-                <HStack gap={"2"}>
-                    <FormControlledMonthPicker
-                        name={`roller.${barnIndex}.virkningstidspunkt`}
-                        label={text.label.virkningstidspunkt}
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        defaultValue={initialValues.virkningstidspunkt}
-                        fromDate={fom}
-                        toDate={tom}
-                        readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
-                        required
-                    />
-                </HStack>
+                {!avvisningsListeOpphør.includes(selectedVirkningstidspunkt.avslag) && (
+                    <HStack gap={"2"}>
+                        <FormControlledMonthPicker
+                            name={`roller.${barnIndex}.virkningstidspunkt`}
+                            label={text.label.virkningstidspunkt}
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultValue={initialValues.virkningstidspunkt}
+                            fromDate={fom}
+                            toDate={tom}
+                            readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
+                            required
+                        />
+                    </HStack>
+                )}
             </FlexRow>
 
             {showChangedVirkningsDatoAlert && (
