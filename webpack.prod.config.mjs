@@ -27,6 +27,7 @@ export default merge(webpackCommon, {
             UNLEASH_FRONTEND_TOKEN: "",
             UNLEASH_API_URL: "",
             MODIA_URL: "",
+            VIS_MELDING_VED_NETTVERKSFEIL: "",
             ENVIRONMENT: "",
         }),
     ],
