@@ -4,6 +4,7 @@ const system = {
     isDevelopment: process.env.NODE_ENV === "development",
     isProduction: process.env.NODE_ENV === "production",
     environment: process.env.ENVIRONMENT,
+    visMeldingVedNettverksfeil: process.env.VIS_MELDING_VED_NETTVERKSFEIL === "true",
 };
 
 const url = {
