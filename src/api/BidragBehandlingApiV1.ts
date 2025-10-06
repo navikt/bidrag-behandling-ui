@@ -461,8 +461,6 @@ export enum Grunnlagstype {
   NOTAT = "NOTAT",
   PRIVAT_AVTALE_GRUNNLAG = "PRIVAT_AVTALE_GRUNNLAG",
   PRIVAT_AVTALE_PERIODE_GRUNNLAG = "PRIVAT_AVTALE_PERIODE_GRUNNLAG",
-  INNKREVING_GRUNNLAG = "INNKREVING_GRUNNLAG",
-  INNKREVING_PERIODE_GRUNNLAG = "INNKREVING_PERIODE_GRUNNLAG",
   SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
   UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
   UTGIFTMAKSGODKJENTBELOP = "UTGIFT_MAKS_GODKJENT_BELØP",
@@ -839,6 +837,7 @@ export interface BehandlingDtoV2 {
   type: TypeBehandling;
   lesemodus?: LesemodusVedtak;
   erBisysVedtak: boolean;
+  forholdsmessigFordeling?: ForholdmessigFordelingDetaljerDto;
   erVedtakUtenBeregning: boolean;
   /** @format int32 */
   grunnlagFraVedtaksid?: number;
@@ -1058,6 +1057,30 @@ export interface FaktiskTilsynsutgiftDto {
   kostpenger?: number;
   kommentar?: string;
   total: number;
+}
+
+export interface ForholdmessigFordelingDetaljerDto {
+  barn: ForholdsmessigFordelingBarnDto[];
+}
+
+export interface ForholdsmessigFordelingBarnDto {
+  ident: string;
+  bidragsmottaker: RolleDto;
+  navn: string;
+  /** @format date */
+  fødselsdato?: string;
+  saksnr: string;
+  sammeSakSomBehandling: boolean;
+  getåpenBehandling?: ForholdsmessigFordelingApenBehandlingDto;
+}
+
+export interface ForholdsmessigFordelingApenBehandlingDto {
+  /** @format date */
+  søktFraDato: string;
+  /** @format date */
+  mottattDato: string;
+  stønadstype: Stonadstype;
+  behandlerEnhet: string;
 }
 
 export interface GebyrDto {
@@ -1453,6 +1476,7 @@ export interface RolleDto {
   /** @format date */
   fødselsdato?: string;
   harInnvilgetTilleggsstønad?: boolean;
+  delAvOpprinneligBehandling?: boolean;
 }
 
 export interface SamvaerDto {
@@ -2473,6 +2497,12 @@ export interface SjekkRolleDto {
   erUkjent?: boolean;
 }
 
+export interface SjekkForholdmessigFordelingResponse {
+  kanOppretteForholdsmessigFordeling: boolean;
+  måOppretteForholdsmessigFordeling: boolean;
+  barn: ForholdsmessigFordelingBarnDto[];
+}
+
 export interface FatteVedtakRequestDto {
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
@@ -2776,8 +2806,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   vedtakstype: Vedtakstype;
   klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
   resultatFraVedtak?: ResultatFraVedtakGrunnlag;
-  resultatkodeVisningsnavn?: string;
   delvedtakstypeVisningsnavn: string;
+  resultatkodeVisningsnavn?: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -3696,8 +3726,8 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -4719,6 +4749,65 @@ export class Api<
         path: `/api/v2/behandling/kanBehandles/${behandlingsid}`,
         method: "POST",
         secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags forholdsmessig-fordeling-controller
+     * @name OpprettForholdsmessigFordeling
+     * @request POST:/api/v2/behandling/forholdsmessigfordeling/{behandlingsid}
+     * @secure
+     */
+    opprettForholdsmessigFordeling: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/v2/behandling/forholdsmessigfordeling/${behandlingsid}`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags forholdsmessig-fordeling-controller
+     * @name KanOppretteForholdsmessigFordeling
+     * @request POST:/api/v2/behandling/forholdsmessigfordeling/sjekk/{behandlingsid}
+     * @secure
+     */
+    kanOppretteForholdsmessigFordeling: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<SjekkForholdmessigFordelingResponse, any>({
+        path: `/api/v2/behandling/forholdsmessigfordeling/sjekk/${behandlingsid}`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags forholdsmessig-fordeling-controller
+     * @name SkalLeggeTilBarnFraAndreSoknaderEllerBehandlinger
+     * @request POST:/api/v2/behandling/forholdsmessigfordeling/nyeopplysninger/{behandlingsid}
+     * @secure
+     */
+    skalLeggeTilBarnFraAndreSoknaderEllerBehandlinger: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<boolean, any>({
+        path: `/api/v2/behandling/forholdsmessigfordeling/nyeopplysninger/${behandlingsid}`,
+        method: "POST",
+        secure: true,
+        format: "json",
         ...params,
       }),
 

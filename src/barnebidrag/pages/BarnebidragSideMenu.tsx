@@ -15,6 +15,7 @@ import { useSearchParams } from "react-router-dom";
 import { Rolletype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
+import OpprettForholdsmessigFordelingPrompt from "../forholdsmessigfordeling/OpprettForholdsmessigFordeling";
 
 const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
@@ -742,20 +743,28 @@ export const BarnebidragSideMenu = () => {
     }, [searchParams, location]);
 
     return (
-        <SideMenu>
-            {sideMenu
-                .filter((menu) => menu.visible)
-                .map((menuButton, index) => {
-                    const Component = menuButtonMap[menuButton.step];
-                    return (
-                        <Component
-                            key={index + menuButton.step}
-                            activeButton={activeButton}
-                            step={index + 1}
-                            interactive={menuButton.interactive}
-                        />
-                    );
-                })}
-        </SideMenu>
+        <div className="flex flex-col">
+            <SideMenu
+                otherChildren={
+                    <div className="mt-4">
+                        <OpprettForholdsmessigFordelingPrompt />
+                    </div>
+                }
+            >
+                {sideMenu
+                    .filter((menu) => menu.visible)
+                    .map((menuButton, index) => {
+                        const Component = menuButtonMap[menuButton.step];
+                        return (
+                            <Component
+                                key={index + menuButton.step}
+                                activeButton={activeButton}
+                                step={index + 1}
+                                interactive={menuButton.interactive}
+                            />
+                        );
+                    })}
+            </SideMenu>
+        </div>
     );
 };

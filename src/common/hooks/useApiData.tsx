@@ -35,6 +35,7 @@ import {
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
+    SjekkForholdmessigFordelingResponse,
     SletteSamvaersperiodeElementDto,
     SletteUnderholdselement,
     StonadTilBarnetilsynAktiveGrunnlagDto,
@@ -99,6 +100,7 @@ export const QueryKeys = {
         behandlingId,
         vedtakId,
     ],
+    sjekkFF: (behandlingId: string) => ["behandlingV2", "FF", QueryKeys.behandlingVersion, behandlingId],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person", ident],
@@ -240,7 +242,22 @@ export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
     return useBehandlingV2(behandlingId, vedtakId);
 };
-
+export const useGetForholdsmessigFordelingDetaljer = (): SjekkForholdmessigFordelingResponse => {
+    const { behandlingId } = useBehandlingProvider();
+    const { data: response } = useSuspenseQuery({
+        queryKey: QueryKeys.sjekkFF(behandlingId),
+        queryFn: async () => {
+            try {
+                return (await BEHANDLING_API_V1.api.kanOppretteForholdsmessigFordeling(Number(behandlingId))).data;
+            } catch (e) {
+                console.log(e);
+                return { kanOppretteForholdsmessigFordeling: false } as SjekkForholdmessigFordelingResponse;
+            }
+        },
+        staleTime: Infinity,
+    });
+    return response;
+};
 export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
