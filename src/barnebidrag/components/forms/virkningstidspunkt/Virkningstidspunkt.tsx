@@ -516,10 +516,10 @@ const VirkningstidspunktBarn = ({
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
-            ? årsakListe18årsBidrag
-            : selectedVirkningstidspunkt.harLøpendeBidrag
-                ? harLøpendeBidragÅrsakListe
-                : årsakListe;
+          ? årsakListe18årsBidrag
+          : selectedVirkningstidspunkt.harLøpendeBidrag
+            ? harLøpendeBidragÅrsakListe
+            : årsakListe;
 
     const onSave = () => {
         const values = getValues(`roller.${barnIndex}`);
@@ -693,8 +693,8 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                        ? avslagsListeOpphør
-                                        : avslagsListe
+                                      ? avslagsListeOpphør
+                                      : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
                                         {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
