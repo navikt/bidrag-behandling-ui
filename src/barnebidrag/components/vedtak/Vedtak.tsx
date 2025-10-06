@@ -171,7 +171,8 @@ const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsbe
     if (resultatBarn.erAvvisning) {
         return (
             <Alert variant="info">
-                Vedtak er avvisning og har derfor ingen perioder. Vedtaket vil ikke føre til noe endringer i regnskapet.
+                Vedtaket er avslag av behandlingen og har derfor ingen perioder. Vedtaket vil ikke føre til noe
+                endringer i regnskapet.
             </Alert>
         );
     }

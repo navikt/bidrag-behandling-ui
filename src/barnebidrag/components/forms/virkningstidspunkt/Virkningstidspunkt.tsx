@@ -3,6 +3,7 @@ import {
     EksisterendeOpphorsvedtakDto,
     OppdatereVirkningstidspunkt,
     Resultatkode,
+    SoktAvType,
     Stonadstype,
     TypeArsakstype,
     Vedtakstype,
@@ -82,13 +83,15 @@ const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode
 const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avvisningslisteListe18ÅrOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.IKKE_OMSORG_FOR_BARNET_BP,
+    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
 ];
 const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 export const avvisningsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.IKKE_OMSORG_FOR_BARNET_BP,
+    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
 ];
+
+export const avvisningsListe = [Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT];
 
 const avslaglisteAlle = Array.from(
     new Set([...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør])
@@ -505,6 +508,7 @@ const VirkningstidspunktBarn = ({
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opphørsdato]);
 
+    const erSøktAVIkkeBM = behandling.søktAv !== SoktAvType.BIDRAGSMOTTAKER;
     const erTypeOpphør =
         behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || selectedVirkningstidspunkt.harLøpendeBidrag;
@@ -709,7 +713,7 @@ const VirkningstidspunktBarn = ({
                         )}
                         {!lesemodus && (
                             <optgroup label={text.label.avvisning}>
-                                {(er18ÅrsBidrag ? avvisningslisteListe18ÅrOpphør : avvisningsListeOpphør).map(
+                                {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map(
                                     (value) => (
                                         <option key={value} value={value}>
                                             {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
