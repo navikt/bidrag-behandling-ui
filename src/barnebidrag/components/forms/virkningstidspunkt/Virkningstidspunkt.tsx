@@ -3,6 +3,7 @@ import {
     EksisterendeOpphorsvedtakDto,
     OppdatereVirkningstidspunkt,
     Resultatkode,
+    SoktAvType,
     Stonadstype,
     TypeArsakstype,
     Vedtakstype,
@@ -80,15 +81,25 @@ const harLøpendeBidragÅrsakListe = [
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18ÅrOpphør = [
-    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
     Resultatkode.AVSLUTTET_SKOLEGANG,
     Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDOD,
+];
+const avvisningslisteListe18ÅrOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
 ];
 const avslagsListeOpphør = [
-    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
     Resultatkode.IKKE_OMSORG_FOR_BARNET,
     Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDOD,
 ];
+export const avvisningsListeOpphør = [
+    Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
+];
+
+export const avvisningsListe = [Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT];
 
 const avslaglisteAlle = Array.from(
     new Set([...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør])
@@ -150,9 +161,14 @@ const createPayload = (values: VirkningstidspunktFormValuesPerBarn, rolleId?: nu
     const årsak = [...årsakListe, ...årsakListe18årsBidrag, ...harLøpendeBidragÅrsakListe].find(
         (value) => value === values.årsakAvslag
     );
-    const avslag = [...avslagsListe, ...avslagsListe18År, ...avslagsListe18ÅrOpphør, ...avslagsListeOpphør].find(
-        (value) => value === values.årsakAvslag
-    );
+    const avslag = [
+        ...avslagsListe,
+        ...avslagsListe18År,
+        ...avslagsListe18ÅrOpphør,
+        ...avslagsListeOpphør,
+        ...avvisningsListeOpphør,
+        ...avvisningslisteListe18ÅrOpphør,
+    ].find((value) => value === values.årsakAvslag);
 
     let payload: OppdatereVirkningstidspunkt = {
         rolleId,
@@ -500,6 +516,7 @@ const VirkningstidspunktBarn = ({
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opphørsdato]);
 
+    const erSøktAVIkkeBM = behandling.søktAv !== SoktAvType.BIDRAGSMOTTAKER;
     const erTypeOpphør =
         behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || selectedVirkningstidspunkt.harLøpendeBidrag;
@@ -684,11 +701,7 @@ const VirkningstidspunktBarn = ({
                                 {(lesemodus
                                     ? avslaglisteAlle
                                     : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør.filter((value) =>
-                                            erTypeOpphør
-                                                ? value !== Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT
-                                                : true
-                                        )
+                                      ? avslagsListeOpphør
                                       : avslagsListe
                                 ).map((value) => (
                                     <option key={value} value={value}>
@@ -706,20 +719,33 @@ const VirkningstidspunktBarn = ({
                                 )}
                             </optgroup>
                         )}
+                        {!lesemodus && (
+                            <optgroup label={text.label.avvisning}>
+                                {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map(
+                                    (value) => (
+                                        <option key={value} value={value}>
+                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        </option>
+                                    )
+                                )}
+                            </optgroup>
+                        )}
                     </FormControlledSelectField>
                 )}
-                <HStack gap={"2"}>
-                    <FormControlledMonthPicker
-                        name={`roller.${barnIndex}.virkningstidspunkt`}
-                        label={text.label.virkningstidspunkt}
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        defaultValue={initialValues.virkningstidspunkt}
-                        fromDate={fom}
-                        toDate={tom}
-                        readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
-                        required
-                    />
-                </HStack>
+                {!avvisningsListeOpphør.includes(selectedVirkningstidspunkt.avslag) && (
+                    <HStack gap={"2"}>
+                        <FormControlledMonthPicker
+                            name={`roller.${barnIndex}.virkningstidspunkt`}
+                            label={text.label.virkningstidspunkt}
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultValue={initialValues.virkningstidspunkt}
+                            fromDate={fom}
+                            toDate={tom}
+                            readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
+                            required
+                        />
+                    </HStack>
+                )}
             </FlexRow>
 
             {showChangedVirkningsDatoAlert && (

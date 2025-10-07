@@ -168,6 +168,14 @@ const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsbe
             </VStack>
         );
     }
+    if (resultatBarn.erAvvisning) {
+        return (
+            <Alert variant="info">
+                Vedtaket er avslag av behandlingen og har derfor ingen perioder. Vedtaket vil ikke føre til noe
+                endringer i regnskapet.
+            </Alert>
+        );
+    }
     return (
         <Table size="small">
             <VedtakTableHeader
