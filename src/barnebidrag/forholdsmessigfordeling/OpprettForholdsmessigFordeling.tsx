@@ -32,7 +32,7 @@ export default function OpprettForholdsmessigFordelingPrompt() {
         <>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-label="">
                 <Modal.Header>Opprett forholdsmessig fordeling</Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="min-w-[500px]">
                     <VStack gap="2">
                         <BarnListe barn={detaljer.barn} />
                     </VStack>

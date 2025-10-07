@@ -22,7 +22,7 @@ export default function BarnListe({ barn }: BarnListeProps) {
                             </div>
                         ))
                     ) : (
-                        <BodyShort size="small">Ingen barn fra samme sak</BodyShort>
+                        <BodyShort size="small">Ingen flere barn fra samme sak</BodyShort>
                     )}
                 </VStack>
             </div>
@@ -36,7 +36,7 @@ export default function BarnListe({ barn }: BarnListeProps) {
                             </div>
                         ))
                     ) : (
-                        <BodyShort size="small">Ingen barn fra andre saker</BodyShort>
+                        <BodyShort size="small">Ingen flere barn fra andre saker</BodyShort>
                     )}
                 </VStack>
             </div>
