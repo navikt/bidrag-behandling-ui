@@ -80,15 +80,23 @@ const harLøpendeBidragÅrsakListe = [
 ];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18ÅrOpphør = [
+    Resultatkode.AVSLUTTET_SKOLEGANG,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDOD,
+];
 const avvisningslisteListe18ÅrOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
 ];
-const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListeOpphør = [
+    Resultatkode.IKKE_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDOD,
+];
 export const avvisningsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
 ];
 
 export const avvisningsListe = [Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT];

@@ -72,7 +72,7 @@ const avslagsListe = [
     Resultatkode.UTENLANDSK_YTELSE,
 ];
 
-const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR];
+const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR, Resultatkode.BARNETERDOD];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
