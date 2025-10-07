@@ -246,10 +246,13 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale, stønadstype, vedtakstype } = useGetBehandlingV2();
+    const { privatAvtale, stønadstype, vedtakstype, virkningstidspunktV2 } = useGetBehandlingV2();
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
+    const manuelleVedtak = virkningstidspunktV2.find(
+        (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
+    ).manuelleVedtak;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
@@ -373,11 +376,15 @@ const PrivatAvtalePerioder = ({
                         label={"Avtaletype"}
                         className="w-max max-h-[10px]"
                     >
-                        {Object.keys(PrivatAvtaleType).map((value) => (
-                            <option key={value} value={value}>
-                                {hentVisningsnavn(value)}
-                            </option>
-                        ))}
+                        {Object.keys(PrivatAvtaleType)
+                            .filter((value) =>
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak.length : true
+                            )
+                            .map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavn(value)}
+                                </option>
+                            ))}
                     </FormControlledSelectField>
                 </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
