@@ -97,6 +97,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.UNDERHOLDSKOSTNAD,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 !(
                     behandling.erVedtakUtenBeregning &&
                     behandling.lesemodus &&
@@ -116,6 +117,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.INNTEKT,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
             interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
@@ -123,6 +125,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.GEBYR,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 !behandling.erKlageEllerOmgjøring &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
@@ -131,6 +134,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.BOFORHOLD,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
             interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
@@ -138,6 +142,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.SAMVÆR,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
             interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,

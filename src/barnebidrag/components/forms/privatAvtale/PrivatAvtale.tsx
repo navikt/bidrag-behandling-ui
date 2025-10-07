@@ -38,6 +38,7 @@ import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale"
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
+import { VedtaksListeBeregning } from "../../Vedtakliste";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
@@ -252,6 +253,7 @@ const PrivatAvtalePerioder = ({
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
+    const isVedtakFraNav = item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
@@ -362,7 +364,7 @@ const PrivatAvtalePerioder = ({
                         defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
                         fromDate={fom}
                         toDate={tom}
-                        readonly={lesemodus}
+                        readonly={lesemodus || isVedtakFraNav}
                         required
                     />
                     <FormControlledSelectField
@@ -379,13 +381,16 @@ const PrivatAvtalePerioder = ({
                 </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
-            <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            {!isVedtakFraNav && (
+                <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            )}
+            {isVedtakFraNav && <VedtaksListeBeregning barnIdent={item.gjelderBarn.ident} omgjøring={false} />}
             <FlexRow>
                 <FormControlledSwitch
                     name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}
                     legend={text.label.skalIndeksreguleres}
                     onChange={onToggle}
-                    readOnly={!item.privatAvtale.perioder.length}
+                    readOnly={!item.privatAvtale.perioder.length || isVedtakFraNav}
                 />
             </FlexRow>
             {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (
