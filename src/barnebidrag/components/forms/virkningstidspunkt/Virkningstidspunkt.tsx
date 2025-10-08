@@ -83,7 +83,7 @@ const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode
 const avslagsListe18ÅrOpphør = [
     Resultatkode.AVSLUTTET_SKOLEGANG,
     Resultatkode.BIDRAGSPLIKTIGERDOD,
-    Resultatkode.BARNETERDOD,
+    Resultatkode.BARNETERDODT,
 ];
 const avvisningslisteListe18ÅrOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
@@ -92,7 +92,7 @@ const avvisningslisteListe18ÅrOpphør = [
 const avslagsListeOpphør = [
     Resultatkode.IKKE_OMSORG_FOR_BARNET,
     Resultatkode.BIDRAGSPLIKTIGERDOD,
-    Resultatkode.BARNETERDOD,
+    Resultatkode.BARNETERDODT,
 ];
 export const avvisningsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
