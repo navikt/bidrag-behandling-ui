@@ -717,10 +717,6 @@ const VirkningstidspunktBarn = ({
                                         ))}
                                     </>
                                 )}
-                            </optgroup>
-                        )}
-                        {!lesemodus && (
-                            <optgroup label={text.label.avvisning}>
                                 {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map(
                                     (value) => (
                                         <option key={value} value={value}>
