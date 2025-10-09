@@ -125,6 +125,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         {
             step: BarnebidragStepper.GEBYR,
             visible:
+                (behandling.lesemodus?.erAvvist && behandling.gebyr) ||
                 behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 ((behandling.lesemodus?.erAvvist && !!behandling.gebyr) ||
                     (!behandling.erKlageEllerOmgjøring &&
