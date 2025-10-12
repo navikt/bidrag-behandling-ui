@@ -38,6 +38,7 @@ import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale"
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
+import { VedtaksListeBeregning } from "../../Vedtakliste";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
@@ -245,13 +246,18 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale, stønadstype } = useGetBehandlingV2();
+    const { privatAvtale, stønadstype, vedtakstype, virkningstidspunktV2 } = useGetBehandlingV2();
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
+    const manuelleVedtak = virkningstidspunktV2.find(
+        (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
+    ).manuelleVedtak;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
+    const isInnkrevingOgVedtakFraNav =
+        vedtakstype === Vedtakstype.INNKREVING && item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
@@ -362,7 +368,7 @@ const PrivatAvtalePerioder = ({
                         defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
                         fromDate={fom}
                         toDate={tom}
-                        readonly={lesemodus}
+                        readonly={lesemodus || isInnkrevingOgVedtakFraNav}
                         required
                     />
                     <FormControlledSelectField
@@ -370,22 +376,31 @@ const PrivatAvtalePerioder = ({
                         label={"Avtaletype"}
                         className="w-max max-h-[10px]"
                     >
-                        {Object.keys(PrivatAvtaleType).map((value) => (
-                            <option key={value} value={value}>
-                                {hentVisningsnavn(value)}
-                            </option>
-                        ))}
+                        {Object.keys(PrivatAvtaleType)
+                            .filter((value) =>
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak.length : true
+                            )
+                            .map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavn(value)}
+                                </option>
+                            ))}
                     </FormControlledSelectField>
                 </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
-            <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            {!isInnkrevingOgVedtakFraNav && (
+                <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            )}
+            {isInnkrevingOgVedtakFraNav && (
+                <VedtaksListeBeregning barnIdent={item.gjelderBarn.ident} omgjøring={false} />
+            )}
             <FlexRow>
                 <FormControlledSwitch
                     name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}
                     legend={text.label.skalIndeksreguleres}
                     onChange={onToggle}
-                    readOnly={!item.privatAvtale.perioder.length}
+                    readOnly={!item.privatAvtale.perioder.length || isInnkrevingOgVedtakFraNav}
                 />
             </FlexRow>
             {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (

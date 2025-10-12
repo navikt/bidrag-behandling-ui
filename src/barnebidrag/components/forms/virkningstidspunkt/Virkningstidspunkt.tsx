@@ -80,15 +80,23 @@ const harLøpendeBidragÅrsakListe = [
 ];
 const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 const avslagsListe18År = [Resultatkode.IKKE_DOKUMENTERT_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
-const avslagsListe18ÅrOpphør = [Resultatkode.AVSLUTTET_SKOLEGANG, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListe18ÅrOpphør = [
+    Resultatkode.AVSLUTTET_SKOLEGANG,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDODT,
+];
 const avvisningslisteListe18ÅrOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
 ];
-const avslagsListeOpphør = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
+const avslagsListeOpphør = [
+    Resultatkode.IKKE_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
+    Resultatkode.BARNETERDODT,
+];
 export const avvisningsListeOpphør = [
     Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT,
-    Resultatkode.BM_HAR_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSMOTTAKER_HAR_OMSORG_FOR_BARNET,
 ];
 
 export const avvisningsListe = [Resultatkode.IKKESTERKNOKGRUNNOGBIDRAGETHAROPPHORT];
@@ -613,6 +621,77 @@ const VirkningstidspunktBarn = ({
 
     const debouncedOnSave = useDebounce(onSave);
 
+    function renderAvslagsgrunner() {
+        if (!lesemodus && er18ÅrsBidrag) {
+            return (
+                <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                    {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
+                        <option key={value} value={value}>
+                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                        </option>
+                    ))}
+                </optgroup>
+            );
+        }
+        const avslagslisteIkkeLesemodus = erTypeOpphørOrLøpendeBidrag ? avslagsListeOpphør : avslagsListe;
+        const avslagsliste = lesemodus ? avslaglisteAlle : avslagslisteIkkeLesemodus;
+        if (erTypeOpphørOrLøpendeBidrag) {
+            return (
+                <>
+                    <optgroup label={text.label.opphør}>
+                        {avslagsliste.map((value) => (
+                            <option key={value} value={value}>
+                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            </option>
+                        ))}
+                        {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
+                            <>
+                                {avslagsListeDeprekert.map((value) => (
+                                    <option key={value} value={value} disabled>
+                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                    </option>
+                                ))}
+                            </>
+                        )}
+                    </optgroup>
+                    <optgroup label={text.label.avslag}>
+                        {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map((value) => (
+                            <option key={value} value={value}>
+                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            </option>
+                        ))}
+                    </optgroup>
+                </>
+            );
+        }
+
+        return (
+            <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
+                {(lesemodus ? avslaglisteAlle : erTypeOpphørOrLøpendeBidrag ? avslagsListeOpphør : avslagsListe).map(
+                    (value) => (
+                        <option key={value} value={value}>
+                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                        </option>
+                    )
+                )}
+                {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
+                    <>
+                        {avslagsListeDeprekert.map((value) => (
+                            <option key={value} value={value} disabled>
+                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            </option>
+                        ))}
+                    </>
+                )}
+                {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map((value) => (
+                    <option key={value} value={value}>
+                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                    </option>
+                ))}
+            </optgroup>
+        );
+    }
+
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -678,50 +757,7 @@ const VirkningstidspunktBarn = ({
                             </optgroup>
                         )}
 
-                        {!lesemodus && er18ÅrsBidrag ? (
-                            <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
-                                {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map(
-                                    (value) => (
-                                        <option key={value} value={value}>
-                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                        </option>
-                                    )
-                                )}
-                            </optgroup>
-                        ) : (
-                            <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
-                                {(lesemodus
-                                    ? avslaglisteAlle
-                                    : erTypeOpphørOrLøpendeBidrag
-                                      ? avslagsListeOpphør
-                                      : avslagsListe
-                                ).map((value) => (
-                                    <option key={value} value={value}>
-                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                    </option>
-                                ))}
-                                {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
-                                    <>
-                                        {avslagsListeDeprekert.map((value) => (
-                                            <option key={value} value={value} disabled>
-                                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                            </option>
-                                        ))}
-                                    </>
-                                )}
-                            </optgroup>
-                        )}
-                        {!lesemodus && (
-                            <optgroup label={text.label.avvisning}>
-                                {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map(
-                                    (value) => (
-                                        <option key={value} value={value}>
-                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
-                                        </option>
-                                    )
-                                )}
-                            </optgroup>
-                        )}
+                        {renderAvslagsgrunner()}
                     </FormControlledSelectField>
                 )}
                 {!avvisningsListeOpphør.includes(selectedVirkningstidspunkt.avslag) && (
