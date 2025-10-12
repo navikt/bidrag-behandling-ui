@@ -204,7 +204,7 @@ const tekster = {
         nåværendeArbeidsforhold: "Nåværende arbeidsforhold",
         omfang: "Heltid/Deltid",
         opphør: "Opphør",
-        avvisning: "Avslag behandling",
+        avvisning: "Avslag på behandling",
         opphørsdato: "Opphørsdato",
         beregnTilDato: "Beregn til dato",
         opplysninger: "Opplysninger",
