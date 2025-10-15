@@ -49,7 +49,7 @@ export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: s
         const firstMonthAfterEighteenBirthday = getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
         return isBeforeDate(firstMonthAfterEighteenBirthday, fomMin) ? fomMin : firstMonthAfterEighteenBirthday;
     }
-    const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    const birthMonth = firstDayOfMonth(new Date(fødselsdato));
     return isBeforeDate(birthMonth, fomMin) ? fomMin : birthMonth;
 };
 
