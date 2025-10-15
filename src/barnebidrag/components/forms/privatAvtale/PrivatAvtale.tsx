@@ -28,7 +28,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
-import { addMonths, firstDayOfMonth, isBeforeDate } from "@utils/date-utils";
+import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -51,6 +51,12 @@ export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: s
     }
     const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
     return isBeforeDate(birthMonth, fomMin) ? fomMin : birthMonth;
+};
+
+export const getTomForPrivatAvtale = (fødselsdato: string) => {
+    const tomMax = new Date();
+    const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    return isAfterDate(birthMonth, tomMax) ? birthMonth : tomMax;
 };
 
 export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
@@ -262,7 +268,10 @@ const PrivatAvtalePerioder = ({
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
     }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
-    const tom = useMemo(() => new Date(), []);
+    const tom = useMemo(
+        () => getTomForPrivatAvtale(selectedPrivatAvtale.gjelderBarn.fødselsdato),
+        [selectedPrivatAvtale.gjelderBarn.fødselsdato]
+    );
 
     useEffect(() => {
         const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);
