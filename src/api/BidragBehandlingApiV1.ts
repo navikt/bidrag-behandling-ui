@@ -310,6 +310,7 @@ export enum OpplysningerType {
   BOFORHOLD = "BOFORHOLD",
   BOFORHOLDBMSOKNADSBARN = "BOFORHOLD_BM_SØKNADSBARN",
   BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
+  BARN_TIL_BP_UTEN_BIDRAGSAK = "BARN_TIL_BP_UTEN_BIDRAGSAK",
   KONTANTSTOTTE = "KONTANTSTØTTE",
   SIVILSTAND = "SIVILSTAND",
   UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
@@ -592,6 +593,7 @@ export enum Behandlingstype {
   OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
   PARAGRAF_35_C = "PARAGRAF_35_C",
   PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
+  MANEDLIGPALOP = "MÅNEDLIG_PÅLOP",
 }
 
 export enum Behandlingstema {
@@ -624,9 +626,9 @@ export enum Behandlingstema {
 export enum Behandlingstatus {
   DOMTAVSLUTTET = "DØMT_AVSLUTTET",
   ERKJENT_AVSLUTTET = "ERKJENT_AVSLUTTET",
-  ENDELIG_VEDTAK_FATTET = "ENDELIG_VEDTAK_FATTET",
   AVVIST = "AVVIST",
   MIDLERTIDLIG_VEDTAK = "MIDLERTIDLIG_VEDTAK",
+  VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK = "VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK",
   UNNTAS_KLAGE = "UNNTAS_KLAGE",
   G4 = "G4",
   SENDT_UTLANDET_LUKKET = "SENDT_UTLANDET_LUKKET",
@@ -967,6 +969,8 @@ export interface BehandlingDtoV2 {
   behandlerenhet: string;
   /** @uniqueItems true */
   roller: RolleDto[];
+  /** @uniqueItems true */
+  bpsBarnUtenBidraggsak: RolleDto[];
   virkningstidspunkt: VirkningstidspunktDto;
   virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
   virkningstidspunktV3: VirkningstidspunktDtoV3;
@@ -1473,9 +1477,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
   /** @format date */
-  til?: string;
-  /** @format date */
   fom: string;
+  /** @format date */
+  til?: string;
 }
 
 export interface Permisjon {
@@ -2703,9 +2707,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattAlminneligInntektMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3358,9 +3362,9 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattAlminneligInntektMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3432,8 +3436,8 @@ export interface NotatBehandlingDetaljerDto {
   kategoriVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
-  avslagVisningsnavn?: string;
   erAvvisning: boolean;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3593,8 +3597,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3791,7 +3795,8 @@ export interface NotatVedtakDetaljerDto {
   )[];
 }
 
-export interface NotatVirkningstidspunktDto {
+export interface NotatVirkningstidspunktBarnDto {
+  rolle: DokumentmalPersonDto;
   søknadstype?: string;
   vedtakstype?: Vedtakstype;
   søktAv?: SoktAvType;
@@ -3806,6 +3811,7 @@ export interface NotatVirkningstidspunktDto {
    */
   søktFraDato?: string;
   beregnTilDato?: string;
+  opphørsdato?: string;
   beregnTil?: BeregnTil;
   etterfølgendeVedtakVirkningstidspunkt?: string;
   /**
@@ -3826,6 +3832,11 @@ export interface NotatVirkningstidspunktDto {
   notat: NotatBegrunnelseDto;
   avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+}
+
+export interface NotatVirkningstidspunktDto {
+  erLikForAlle: boolean;
+  barn: NotatVirkningstidspunktBarnDto[];
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3877,7 +3888,8 @@ export interface VedtakNotatDto {
   saksnummer: string;
   behandling: NotatBehandlingDetaljerDto;
   saksbehandlerNavn?: string;
-  virkningstidspunkt: NotatVirkningstidspunktDto;
+  virkningstidspunkt: NotatVirkningstidspunktBarnDto;
+  virkningstidspunktV2: NotatVirkningstidspunktDto;
   utgift?: NotatSaerbidragUtgifterDto;
   boforhold: NotatBoforholdDto;
   samvær: NotatSamvaerDto[];

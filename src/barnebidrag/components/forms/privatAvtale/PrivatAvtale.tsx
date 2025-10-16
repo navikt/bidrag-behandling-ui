@@ -18,7 +18,6 @@ import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
@@ -26,8 +25,8 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { TrashIcon } from "@navikt/aksel-icons";
-import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
+import { ObjectUtils, PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
+import { Alert, Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
@@ -118,47 +117,70 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
         return barnIdent ?? controlledFields[0].gjelderBarn.ident;
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
+    const barnUtenBidragsak = controlledFields.some((f) => f.bpsBarnUtenBidraggsak);
 
     if (controlledFields.length > 1) {
         return (
-            <Tabs
-                defaultValue={defaultTab}
-                value={selectedTab}
-                onChange={onNavigateToTab}
-                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
-            >
-                <Tabs.List>
-                    {controlledFields.map(({ gjelderBarn }) => (
-                        <Tabs.Tab
-                            key={gjelderBarn.ident}
-                            value={gjelderBarn.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${gjelderBarn.ident}`}
-                        />
-                    ))}
-                </Tabs.List>
-                {controlledFields.map((item, index) => {
-                    return (
-                        <Tabs.Panel
-                            key={item.gjelderBarn.ident}
-                            value={item.gjelderBarn.ident}
-                            className="grid gap-y-4"
-                        >
-                            <PrivatAvtaleBarn
-                                key={item.id}
-                                item={item}
-                                barnIndex={index}
-                                initialValues={initialValues}
+            <>
+                {barnUtenBidragsak && (
+                    <Alert variant="info" size="small">
+                        Bidragspliktig har barn uten bidragssak. De er listet under med grå bakgrunn. Hvis BP har privat
+                        avtale for de barna kan fylle ut beløpene for å se om det slår ut til forholdsmessig fordeling
+                    </Alert>
+                )}
+                <Tabs
+                    defaultValue={defaultTab}
+                    value={selectedTab}
+                    onChange={onNavigateToTab}
+                    className={`lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full`}
+                >
+                    <Tabs.List>
+                        {controlledFields.map(({ gjelderBarn, bpsBarnUtenBidraggsak }) => (
+                            <Tabs.Tab
+                                key={gjelderBarn.ident}
+                                value={gjelderBarn.ident}
+                                className={bpsBarnUtenBidraggsak ? "bg-gray-50" : ""}
+                                label={
+                                    bpsBarnUtenBidraggsak ? (
+                                        <PersonNavnIdent ident={gjelderBarn.ident} variant="compact" />
+                                    ) : (
+                                        <PersonNavnIdent
+                                            skjulNavn
+                                            rolle={RolleTypeFullName.BARN}
+                                            ident={gjelderBarn.ident}
+                                            variant="compact"
+                                        />
+                                    )
+                                }
                             />
-                        </Tabs.Panel>
-                    );
-                })}
-            </Tabs>
+                        ))}
+                    </Tabs.List>
+                    {controlledFields.map((item, index) => {
+                        return (
+                            <Tabs.Panel
+                                key={item.gjelderBarn.ident}
+                                value={item.gjelderBarn.ident}
+                                className="grid gap-y-4"
+                            >
+                                <PrivatAvtaleBarn
+                                    multiple
+                                    key={item.id}
+                                    item={item}
+                                    barnIndex={index}
+                                    initialValues={initialValues}
+                                />
+                            </Tabs.Panel>
+                        );
+                    })}
+                </Tabs>
+            </>
         );
     }
 
     return (
         <>
             <PrivatAvtaleBarn
+                multiple={false}
                 key={controlledFields[0].id}
                 item={controlledFields[0]}
                 barnIndex={0}
@@ -169,10 +191,12 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
 };
 
 const PrivatAvtaleBarn = ({
+    multiple,
     item,
     barnIndex,
     initialValues,
 }: {
+    multiple: boolean;
     item: PrivatAvtaleFormValue;
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
@@ -211,18 +235,22 @@ const PrivatAvtaleBarn = ({
     return (
         <>
             <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
-                <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
-                    <div>
-                        <RolleTag rolleType={Rolletype.BA} />
+                {!multiple && (
+                    <div
+                        className={`grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]`}
+                    >
+                        <div>
+                            <RolleTag rolleType={Rolletype.BA} />
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <PersonNavnIdent
+                                navn={item.gjelderBarn.navn}
+                                ident={item.gjelderBarn.ident}
+                                fødselsdato={item.gjelderBarn.fødselsdato}
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <PersonNavnIdent
-                            navn={item.gjelderBarn.navn}
-                            ident={item.gjelderBarn.ident}
-                            fødselsdato={item.gjelderBarn.fødselsdato}
-                        />
-                    </div>
-                </div>
+                )}
                 {!item.privatAvtale && (
                     <Button
                         type="button"
@@ -258,7 +286,7 @@ const PrivatAvtalePerioder = ({
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
     const manuelleVedtak = virkningstidspunktV2.find(
         (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
-    ).manuelleVedtak;
+    )?.manuelleVedtak;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
@@ -457,11 +485,11 @@ const Side = () => {
 };
 
 const PrivatAvtaleForm = () => {
-    const { privatAvtale, roller: behandlingRoller } = useGetBehandlingV2();
+    const { privatAvtale, roller: behandlingRoller, bpsBarnUtenBidraggsak } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const baRoller = behandlingRoller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialValues(privatAvtale, baRoller),
+        () => createInitialValues(privatAvtale, baRoller, bpsBarnUtenBidraggsak),
         [JSON.stringify(privatAvtale), JSON.stringify(baRoller)]
     );
 

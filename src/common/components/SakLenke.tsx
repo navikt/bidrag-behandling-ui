@@ -5,7 +5,7 @@ import environment from "../../environment";
 
 export default function SakLenke({ saksnummer }: { saksnummer: string }) {
     return (
-        <Link variant="action" href={`${environment.url.bisys}/Sak.do?saksnr=${saksnummer}`} target="_blank">
+        <Link variant="action" href={`${environment.url.bisys}Sak.do?saksnr=${saksnummer}`} target="_blank">
             {saksnummer} <ExternalLinkIcon aria-hidden />
         </Link>
     );

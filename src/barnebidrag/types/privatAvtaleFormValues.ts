@@ -4,6 +4,7 @@ export type PrivatAvtaleFormValue = {
         navn?: string;
         fødselsdato?: string;
     };
+    bpsBarnUtenBidraggsak: boolean;
     privatAvtale: PrivatAvtaleFormValuesPerBarn | null;
 };
 export type PrivatAvtaleFormValues = {
