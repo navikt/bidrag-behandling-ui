@@ -592,6 +592,7 @@ export enum Behandlingstype {
   OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
   PARAGRAF_35_C = "PARAGRAF_35_C",
   PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
+  MANEDLIGPALOP = "MÅNEDLIG_PÅLOP",
 }
 
 export enum Behandlingstema {
@@ -624,9 +625,9 @@ export enum Behandlingstema {
 export enum Behandlingstatus {
   DOMTAVSLUTTET = "DØMT_AVSLUTTET",
   ERKJENT_AVSLUTTET = "ERKJENT_AVSLUTTET",
-  ENDELIG_VEDTAK_FATTET = "ENDELIG_VEDTAK_FATTET",
   AVVIST = "AVVIST",
   MIDLERTIDLIG_VEDTAK = "MIDLERTIDLIG_VEDTAK",
+  VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK = "VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK",
   UNNTAS_KLAGE = "UNNTAS_KLAGE",
   G4 = "G4",
   SENDT_UTLANDET_LUKKET = "SENDT_UTLANDET_LUKKET",
@@ -1797,9 +1798,9 @@ export interface UnderholdskostnadValideringsfeil {
   manglerPerioderForTilsynsordning: boolean;
   /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
   manglerBegrunnelse: boolean;
-  gjelderBarn: UnderholdBarnDto;
   /** @format int64 */
   id: number;
+  gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -2430,11 +2431,7 @@ export interface OpprettBehandlingRequest {
    * @maxLength 4
    */
   behandlerenhet: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   * @uniqueItems true
-   */
+  /** @uniqueItems true */
   roller: OpprettRolleDto[];
   stønadstype: Stonadstype;
   engangsbeløpstype: Engangsbeloptype;
@@ -2553,6 +2550,7 @@ export interface SjekkRolleDto {
 }
 
 export interface FatteVedtakRequestDto {
+  skalIndeksreguleres: boolean;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2655,9 +2653,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3310,9 +3308,9 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3381,10 +3379,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  kategoriVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
-  vedtakstypeVisningsnavn?: string;
   erAvvisning: boolean;
+  avslagVisningsnavnUtenPrefiks?: string;
+  kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
   avslagVisningsnavn?: string;
 }
 
@@ -3545,8 +3543,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  sivilstandVisningsnavn?: string;
   resultatKodeVisningsnavn: string;
+  sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3743,7 +3741,8 @@ export interface NotatVedtakDetaljerDto {
   )[];
 }
 
-export interface NotatVirkningstidspunktDto {
+export interface NotatVirkningstidspunktBarnDto {
+  rolle: DokumentmalPersonDto;
   søknadstype?: string;
   vedtakstype?: Vedtakstype;
   søktAv?: SoktAvType;
@@ -3758,6 +3757,7 @@ export interface NotatVirkningstidspunktDto {
    */
   søktFraDato?: string;
   beregnTilDato?: string;
+  opphørsdato?: string;
   beregnTil?: BeregnTil;
   etterfølgendeVedtakVirkningstidspunkt?: string;
   /**
@@ -3776,8 +3776,13 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
+}
+
+export interface NotatVirkningstidspunktDto {
+  erLikForAlle: boolean;
+  barn: NotatVirkningstidspunktBarnDto[];
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3829,7 +3834,8 @@ export interface VedtakNotatDto {
   saksnummer: string;
   behandling: NotatBehandlingDetaljerDto;
   saksbehandlerNavn?: string;
-  virkningstidspunkt: NotatVirkningstidspunktDto;
+  virkningstidspunkt: NotatVirkningstidspunktBarnDto;
+  virkningstidspunktV2: NotatVirkningstidspunktDto;
   utgift?: NotatSaerbidragUtgifterDto;
   boforhold: NotatBoforholdDto;
   samvær: NotatSamvaerDto[];

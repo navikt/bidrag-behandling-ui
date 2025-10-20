@@ -20,7 +20,7 @@ import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { dateOrNull, DateToMMYYYYString } from "../../../utils/date-utils";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
-import { VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
+import { NestIndeksår, VedtakProvider, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
 
 const VedtakEndelig = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
@@ -40,7 +40,7 @@ const VedtakEndelig = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8  w-[1150px]">
+        <VedtakProvider className="grid gap-y-8  w-[1150px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -67,7 +67,7 @@ const VedtakEndelig = () => {
                 />
             )}
             <AdminButtons />
-        </div>
+        </VedtakProvider>
     );
 };
 
@@ -135,18 +135,7 @@ const VedtakResultat = () => {
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                         <VedtakResultatBarn barn={r.barn} />
                         <VedtakUgyldigBeregning resultat={r} />
-                        {r.indeksår && (
-                            <ResultatDescription
-                                data={[
-                                    {
-                                        label: "Neste indeksår",
-                                        textRight: false,
-                                        labelBold: true,
-                                        value: r.indeksår,
-                                    },
-                                ].filter((d) => d)}
-                            />
-                        )}
+                        <NestIndeksår nesteIndeksår={r.indeksår} />
                         {r.barn.innbetaltBeløp && (
                             <ResultatDescription
                                 data={[

@@ -34,6 +34,7 @@ export const FatteVedtakButtons = ({
     disabled?: boolean;
     opprettesForsendelse?: boolean;
 }) => {
+    const { skalIndeksreguleres } = useVedtakProvider();
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
     const { engangsbeløptype, stønadstype, vedtakstype, skalInnkrevingKunneUtsettes } = useGetBehandlingV2();
@@ -57,6 +58,7 @@ export const FatteVedtakButtons = ({
                 return await BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), {
                     innkrevingUtsattAntallDager,
                     enhet,
+                    skalIndeksreguleres,
                 });
             } catch (error) {
                 if (error instanceof AxiosError && error.response.status === 400) {
@@ -237,4 +239,7 @@ export default function Confetti() {
             }}
         />
     );
+}
+function useVedtakProvider(): { skalIndeksreguleres: any; setSkalIndeksreguleres: any } {
+    throw new Error("Function not implemented.");
 }
