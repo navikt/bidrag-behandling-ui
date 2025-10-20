@@ -1,24 +1,28 @@
-import { BodyShort, Heading, VStack } from "@navikt/ds-react";
+import { BodyShort, Heading, HStack, Label, VStack } from "@navikt/ds-react";
 
 import { ForholdsmessigFordelingBarnDto } from "../../api/BidragBehandlingApiV1";
-import BarnDetaljer from "./BarnDetaljer";
+import BarnDetaljerFF, { BarnDetaljerOpprettFF } from "./BarnDetaljer";
 
 interface BarnListeProps {
+    skalBehandlesAvEnhet?: string;
     barn: ForholdsmessigFordelingBarnDto[];
 }
-
-export default function BarnListe({ barn }: BarnListeProps) {
+export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProps) {
     const barnFraSammeSak = barn.filter((b) => b.sammeSakSomBehandling);
     const barnFraAndreSaker = barn.filter((b) => !b.sammeSakSomBehandling);
     return (
         <VStack gap="2">
+            <HStack gap={"2"}>
+                <Label size="small">Skal behandles av enhet: </Label>
+                <BodyShort size="small">{skalBehandlesAvEnhet}</BodyShort>
+            </HStack>
             <div>
                 <Heading size="xsmall">Barn fra samme sak:</Heading>
                 <VStack gap="2">
                     {barnFraSammeSak.length > 0 ? (
                         barnFraSammeSak.map((b) => (
                             <div key={b.ident}>
-                                <BarnDetaljer barn={b} />
+                                <BarnDetaljerOpprettFF barn={b} />
                             </div>
                         ))
                     ) : (
@@ -32,7 +36,7 @@ export default function BarnListe({ barn }: BarnListeProps) {
                     {barnFraAndreSaker.length > 0 ? (
                         barnFraAndreSaker.map((b) => (
                             <div key={b.ident}>
-                                <BarnDetaljer barn={b} />
+                                <BarnDetaljerOpprettFF barn={b} />
                             </div>
                         ))
                     ) : (
@@ -40,6 +44,20 @@ export default function BarnListe({ barn }: BarnListeProps) {
                     )}
                 </VStack>
             </div>
+        </VStack>
+    );
+}
+
+export function BarnListe({ barn }: BarnListeProps) {
+    return (
+        <VStack gap="2">
+            <VStack gap="2">
+                {barn.map((b) => (
+                    <div key={b.ident}>
+                        <BarnDetaljerFF barn={b} />
+                    </div>
+                ))}
+            </VStack>
         </VStack>
     );
 }

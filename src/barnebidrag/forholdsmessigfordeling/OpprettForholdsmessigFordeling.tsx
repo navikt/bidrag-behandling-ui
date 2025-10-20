@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BEHANDLING_API_V1 } from "../../common/constants/api";
 import { useBehandlingProvider } from "../../common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetForholdsmessigFordelingDetaljer } from "../../common/hooks/useApiData";
-import BarnListe from "./BarnListe";
+import { BarnListeOpprettFF } from "./BarnListe";
 
 export default function OpprettForholdsmessigFordelingPrompt() {
     const { forholdsmessigFordeling, id } = useGetBehandlingV2();
@@ -23,18 +23,21 @@ export default function OpprettForholdsmessigFordelingPrompt() {
             client.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         },
     });
-    if (forholdsmessigFordeling || detaljer.kanOppretteForholdsmessigFordeling === false) return null;
+    if (detaljer.kanOppretteForholdsmessigFordeling === false) return null;
 
+    const harOpprettetFF = forholdsmessigFordeling !== undefined;
     function opprettForholsmessigFordeling() {
         opprettFFFn.mutate();
     }
     return (
         <>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-label="">
-                <Modal.Header>Opprett forholdsmessig fordeling</Modal.Header>
+                <Modal.Header>
+                    {harOpprettetFF ? "Oppdater forholdsmessig fordeling" : "Opprett forholdsmessig fordeling"}
+                </Modal.Header>
                 <Modal.Body className="min-w-[500px]">
                     <VStack gap="2">
-                        <BarnListe barn={detaljer.barn} />
+                        <BarnListeOpprettFF barn={detaljer.barn} skalBehandlesAvEnhet={detaljer.skalBehandlesAvEnhet} />
                     </VStack>
                 </Modal.Body>
                 <Modal.Footer>
@@ -44,14 +47,16 @@ export default function OpprettForholdsmessigFordelingPrompt() {
                         onClick={() => opprettForholsmessigFordeling()}
                         loading={opprettFFFn.isPending}
                     >
-                        Opprett
+                        {harOpprettetFF ? "Oppdater" : "Opprett"}
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <Alert size="small" variant="info">
+            <Alert size="small" variant={harOpprettetFF ? "warning" : "info"}>
                 <VStack gap="space-12">
-                    Bidragspliktig har andre barn/saker med løpende bidrag. Det kan hende bidraget må forholdsmessig
-                    fordeles
+                    {harOpprettetFF
+                        ? "Behandling har andre barn/saker som ikke er del av behandlingen. Se detaljer for hvilken barn/saker det gjelder"
+                        : "Bidragspliktig har andre barn/saker med løpende bidrag. Det kan hende bidraget må forholdsmessig fordeles"}
+
                     <HStack gap="space-16">
                         <Button size="small" variant="secondary-neutral" onClick={() => setModalOpen(true)}>
                             Vis detaljer

@@ -242,6 +242,7 @@ export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
     return useBehandlingV2(behandlingId, vedtakId);
 };
+
 export const useGetForholdsmessigFordelingDetaljer = (): SjekkForholdmessigFordelingResponse => {
     const { behandlingId } = useBehandlingProvider();
     const { data: response } = useSuspenseQuery({
@@ -270,11 +271,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                         })
                     ).data;
                 }
-                return (
-                    await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
-                        inkluderHistoriskeInntekter: true,
-                    })
-                ).data;
+                return (await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId))).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status === 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(

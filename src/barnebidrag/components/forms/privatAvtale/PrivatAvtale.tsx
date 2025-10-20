@@ -28,10 +28,11 @@ import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { Alert, Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import OpprettSakModal from "../../../../common/sak/OpprettSakModal";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
@@ -201,9 +202,10 @@ const PrivatAvtaleBarn = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { lesemodus, setSaveErrorState, enhet } = useBehandlingProvider();
     const createPrivatAvtale = useOnCreatePrivatAvtale();
     const { setValue } = useFormContext<PrivatAvtaleFormValues>();
+    const [modalOpen, setModalOpen] = useState(false);
 
     const onCreatePrivatAvtale = () => {
         const payload: BarnDto = {
@@ -267,6 +269,23 @@ const PrivatAvtaleBarn = ({
                     <PrivatAvtalePerioder item={item} barnIndex={barnIndex} initialValues={initialValues} />
                 )}
             </Box>
+            {item.bpsBarnUtenBidraggsak && (
+                <div className="w-[100px]">
+                    <Button variant="secondary" size="xsmall" onClick={() => setModalOpen(true)}>
+                        Opprett sak
+                    </Button>
+                    <OpprettSakModal
+                        isOpen={modalOpen}
+                        ident={item.gjelderBarn.ident}
+                        navn={item.gjelderBarn.navn}
+                        eierfogd={enhet}
+                        onSubmit={() => {
+                            setModalOpen(false);
+                        }}
+                        onClose={() => setModalOpen(false)}
+                    />
+                </div>
+            )}
         </>
     );
 };
@@ -415,7 +434,7 @@ const PrivatAvtalePerioder = ({
                     >
                         {Object.keys(PrivatAvtaleType)
                             .filter((value) =>
-                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak.length : true
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak?.length : true
                             )
                             .map((value) => (
                                 <option key={value} value={value}>
@@ -449,7 +468,7 @@ const PrivatAvtalePerioder = ({
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { erBisysVedtak, privatAvtale, vedtakstype } = useGetBehandlingV2();
+    const { erBisysVedtak, privatAvtale, vedtakstype, bpsBarnUtenBidraggsak } = useGetBehandlingV2();
     const { onStepChange, getNextStep } = useBehandlingProvider();
     const { getValues } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
@@ -460,6 +479,8 @@ const Side = () => {
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
+    const barnUtenBidragsak = bpsBarnUtenBidraggsak.some((f) => f.ident === selectedBarnIdent);
+    if (barnUtenBidragsak) return;
 
     return (
         <>

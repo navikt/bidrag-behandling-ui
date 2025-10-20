@@ -9,12 +9,14 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
+import { VStack } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { Rolletype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
+import ForholdsmessigFordelingInfo from "../forholdsmessigfordeling/ForholdsmessigFordelingInfo";
 import OpprettForholdsmessigFordelingPrompt from "../forholdsmessigfordeling/OpprettForholdsmessigFordeling";
 
 const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
@@ -747,9 +749,10 @@ export const BarnebidragSideMenu = () => {
         <div className="flex flex-col">
             <SideMenu
                 otherChildren={
-                    <div className="mt-4">
+                    <VStack className="mt-4" gap="3">
                         <OpprettForholdsmessigFordelingPrompt />
-                    </div>
+                        <ForholdsmessigFordelingInfo />
+                    </VStack>
                 }
             >
                 {sideMenu

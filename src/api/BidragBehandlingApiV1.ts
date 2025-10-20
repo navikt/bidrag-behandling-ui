@@ -970,10 +970,9 @@ export interface BehandlingDtoV2 {
   /** @uniqueItems true */
   roller: RolleDto[];
   /** @uniqueItems true */
-  bpsBarnUtenBidraggsak: RolleDto[];
-  virkningstidspunkt: VirkningstidspunktDto;
+  bpsBarnUtenBidraggsak: BpsBarnUtenBidragsakDto[];
   virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
-  virkningstidspunktV3: VirkningstidspunktDtoV3;
+  virkningstidspunkt: VirkningstidspunktDtoV3;
   inntekter: InntekterDtoV2;
   boforhold: BoforholdDtoV2;
   gebyr?: GebyrDto;
@@ -1089,6 +1088,14 @@ export interface BostatusperiodeGrunnlagDto {
   bostatus: Bostatuskode;
 }
 
+export interface BpsBarnUtenBidragsakDto {
+  ident?: string;
+  navn?: string;
+  /** @format date */
+  fødselsdato?: string;
+  enhet?: string;
+}
+
 export type Datoperiode = UtilRequiredKeys<PeriodeLocalDate, "fom">;
 
 export interface DatoperiodeDto {
@@ -1151,23 +1158,27 @@ export interface ForholdmessigFordelingDetaljerDto {
 
 export interface ForholdsmessigFordelingBarnDto {
   ident: string;
-  bidragsmottaker: RolleDto;
+  bidragsmottaker?: RolleDto;
   navn: string;
   /** @format date */
   fødselsdato?: string;
   saksnr: string;
   enhet: string;
+  erRevurdering: boolean;
+  harLøpendeBidrag: boolean;
   sammeSakSomBehandling: boolean;
   åpenBehandling?: ForholdsmessigFordelingApenBehandlingDto;
 }
 
 export interface ForholdsmessigFordelingApenBehandlingDto {
   /** @format date */
-  søktFraDato: string;
+  søktFraDato?: string;
   /** @format date */
-  mottattDato: string;
+  mottattDato?: string;
   stønadstype: Stonadstype;
   behandlerEnhet: string;
+  /** @format int64 */
+  behandlingId?: number;
 }
 
 export interface GebyrDto {
@@ -1438,20 +1449,6 @@ export interface ManuellVedtakDto {
   søknadstype: string;
 }
 
-export interface OpphorsdetaljerDto {
-  /** @format date */
-  opphørsdato?: string;
-  opphørRoller: OpphorsdetaljerRolleDto[];
-}
-
-export interface OpphorsdetaljerRolleDto {
-  rolle: RolleDto;
-  /** @format date */
-  opphørsdato?: string;
-  /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
-  eksisterendeOpphør?: EksisterendeOpphorsvedtakDto;
-}
-
 export interface OverlappendeBostatusperiode {
   periode: Datoperiode;
   /** @uniqueItems true */
@@ -1477,9 +1474,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
   /** @format date */
-  fom: string;
-  /** @format date */
   til?: string;
+  /** @format date */
+  fom: string;
 }
 
 export interface Permisjon {
@@ -1564,6 +1561,7 @@ export interface RolleDto {
   fødselsdato?: string;
   harInnvilgetTilleggsstønad?: boolean;
   delAvOpprinneligBehandling?: boolean;
+  erRevurdering?: boolean;
 }
 
 export interface SamvaerBarnDto {
@@ -1943,31 +1941,6 @@ export interface VirkningstidspunktBarnDtoV2 {
   etterfølgendeVedtak?: EtterfolgendeVedtakDto;
   manuelleVedtak: ManuellVedtakDto[];
   valideringsfeil?: VirkningstidspunktFeilDto;
-  /**
-   * Bruk begrunnelse
-   * @deprecated
-   */
-  notat: BegrunnelseDto;
-}
-
-export interface VirkningstidspunktDto {
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  virkningstidspunkt?: string;
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  opprinneligVirkningstidspunkt?: string;
-  årsak?: TypeArsakstype;
-  avslag?: Resultatkode;
-  /** Saksbehandlers begrunnelse */
-  begrunnelse: BegrunnelseDto;
-  harLøpendeBidrag: boolean;
-  begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
-  opphør?: OpphorsdetaljerDto;
   /**
    * Bruk begrunnelse
    * @deprecated
@@ -2476,11 +2449,7 @@ export interface OpprettBehandlingRequest {
    * @maxLength 4
    */
   behandlerenhet: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   * @uniqueItems true
-   */
+  /** @uniqueItems true */
   roller: OpprettRolleDto[];
   stønadstype: Stonadstype;
   engangsbeløpstype: Engangsbeloptype;
@@ -2599,12 +2568,14 @@ export interface SjekkRolleDto {
 }
 
 export interface SjekkForholdmessigFordelingResponse {
+  skalBehandlesAvEnhet: string;
   kanOppretteForholdsmessigFordeling: boolean;
   måOppretteForholdsmessigFordeling: boolean;
   barn: ForholdsmessigFordelingBarnDto[];
 }
 
 export interface FatteVedtakRequestDto {
+  skalIndeksreguleres: boolean;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2709,8 +2680,8 @@ export interface Skatt {
   trygdeavgift: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2907,8 +2878,8 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
   vedtakstype: Vedtakstype;
   klageOmgjøringDetaljer?: KlageOmgjoringDetaljer;
   resultatFraVedtak?: ResultatFraVedtakGrunnlag;
-  resultatkodeVisningsnavn?: string;
   delvedtakstypeVisningsnavn: string;
+  resultatkodeVisningsnavn?: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -3077,10 +3048,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
   type: OpplysningerType;
   rolle: RolleDto;
-  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-  gjelderBarn?: HusstandsmedlemDto;
   /** @format int64 */
   underholdskostnadId?: number;
+  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+  gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface ArbeidOgInntektLenkeRequest {
@@ -3364,8 +3335,8 @@ export interface DokumentmalSkattBeregning {
   trygdeavgift: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface DokumentmalUnderholdEgneBarnIHusstand {
@@ -3434,10 +3405,10 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   kategoriVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
   erAvvisning: boolean;
   avslagVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3597,8 +3568,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  sivilstandVisningsnavn?: string;
   resultatKodeVisningsnavn: string;
+  sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
