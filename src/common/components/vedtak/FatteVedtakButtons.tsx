@@ -9,6 +9,7 @@ import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
 import { FatteVedtakFeil, TypeBehandling, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import { useVedtakProvider } from "../../../barnebidrag/components/vedtak/VedtakCommon";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
@@ -239,7 +240,4 @@ export default function Confetti() {
             }}
         />
     );
-}
-function useVedtakProvider(): { skalIndeksreguleres: any; setSkalIndeksreguleres: any } {
-    throw new Error("Function not implemented.");
 }

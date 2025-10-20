@@ -28,7 +28,7 @@ type VedtakContextProps = {
     setSkalIndeksreguleres: (value: boolean) => void;
 };
 export const VedtakContext = createContext<VedtakContextProps | null>(null);
-function useVedtakProvider() {
+export function useVedtakProvider() {
     const context = useContext(VedtakContext);
     if (!context) {
         throw new Error("useVedtakProvider must be used within a VedtakProvider");

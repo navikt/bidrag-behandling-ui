@@ -15,6 +15,7 @@ import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect } from "react";
 
+import { VedtakProvider } from "../../../../barnebidrag/components/vedtak/VedtakCommon";
 import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";
 import environment from "../../../../environment";
 import { STEPS } from "../../../constants/steps";
@@ -37,7 +38,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8 w-[1100px]">
+        <VedtakProvider className="grid gap-y-8 w-[1100px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -56,7 +57,7 @@ const Vedtak = () => {
 
             {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons isBeregningError={isBeregningError} />}
             <AdminButtons />
-        </div>
+        </VedtakProvider>
     );
 };
 
