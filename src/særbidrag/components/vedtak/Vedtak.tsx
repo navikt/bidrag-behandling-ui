@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
+import { VedtakProvider } from "../../../barnebidrag/components/vedtak/VedtakCommon";
 import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
 import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
@@ -31,7 +32,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-4 m-auto w-[830px]">
+        <VedtakProvider className="grid gap-y-4 m-auto w-[830px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <Heading level="2" size="medium">
                 {text.title.vedtak}
@@ -42,7 +43,7 @@ const Vedtak = () => {
                 <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!kanBehandlesINyLøsning} />
             )}
             <AdminButtons />
-        </div>
+        </VedtakProvider>
     );
 };
 
