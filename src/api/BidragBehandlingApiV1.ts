@@ -1836,9 +1836,9 @@ export interface UnderholdskostnadValideringsfeil {
   manglerPerioderForTilsynsordning: boolean;
   /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
   manglerBegrunnelse: boolean;
-  gjelderBarn: UnderholdBarnDto;
   /** @format int64 */
   id: number;
+  gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -2680,6 +2680,7 @@ export interface Skatt {
   trygdeavgift: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
@@ -3335,6 +3336,7 @@ export interface DokumentmalSkattBeregning {
   trygdeavgift: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
@@ -3405,8 +3407,8 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   kategoriVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
-  erAvvisning: boolean;
   avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3801,8 +3803,13 @@ export interface NotatVirkningstidspunktBarnDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
+}
+
+export interface NotatVirkningstidspunktDto {
+  erLikForAlle: boolean;
+  barn: NotatVirkningstidspunktBarnDto[];
 }
 
 export interface NotatVirkningstidspunktDto {
