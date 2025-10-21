@@ -576,6 +576,7 @@ export enum Behandlingstype {
   EGET_TILTAK = "EGET_TILTAK",
   SOKNAD = "SØKNAD",
   INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+  FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
   ALDERSJUSTERING = "ALDERSJUSTERING",
   INDEKSREGULERING = "INDEKSREGULERING",
   KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
@@ -964,8 +965,8 @@ export interface BehandlingDtoV2 {
   behandlerenhet: string;
   /** @uniqueItems true */
   roller: RolleDto[];
-  virkningstidspunkt: VirkningstidspunktDto;
-  virkningstidspunktV2: VirkningstidspunktDtoV2[];
+  virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
+  virkningstidspunkt: VirkningstidspunktDtoV3;
   inntekter: InntekterDtoV2;
   boforhold: BoforholdDtoV2;
   gebyr?: GebyrDto;
@@ -976,7 +977,8 @@ export interface BehandlingDtoV2 {
   /** Utgiftsgrunnlag for særbidrag. Vil alltid være null for forskudd og bidrag */
   utgift?: SaerbidragUtgifterDto;
   /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
-  samvær?: SamvaerDto[];
+  samvær?: SamvaerBarnDto[];
+  samværV2?: SamvaerDtoV2;
   privatAvtale?: PrivatAvtaleDto[];
   /** @uniqueItems true */
   underholdskostnader: UnderholdDto[];
@@ -1404,20 +1406,6 @@ export interface ManuellVedtakDto {
   søknadstype: string;
 }
 
-export interface OpphorsdetaljerDto {
-  /** @format date */
-  opphørsdato?: string;
-  opphørRoller: OpphorsdetaljerRolleDto[];
-}
-
-export interface OpphorsdetaljerRolleDto {
-  rolle: RolleDto;
-  /** @format date */
-  opphørsdato?: string;
-  /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
-  eksisterendeOpphør?: EksisterendeOpphorsvedtakDto;
-}
-
 export interface OverlappendeBostatusperiode {
   periode: Datoperiode;
   /** @uniqueItems true */
@@ -1531,7 +1519,7 @@ export interface RolleDto {
   harInnvilgetTilleggsstønad?: boolean;
 }
 
-export interface SamvaerDto {
+export interface SamvaerBarnDto {
   /** @format int64 */
   id: number;
   gjelderBarn: string;
@@ -1539,6 +1527,11 @@ export interface SamvaerDto {
   begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
   valideringsfeil?: SamvaerValideringsfeilDto;
   perioder: SamvaersperiodeDto[];
+}
+
+export interface SamvaerDtoV2 {
+  erSammeForAlle: boolean;
+  barn: SamvaerBarnDto[];
 }
 
 export interface SamvaerValideringsfeilDto {
@@ -1798,9 +1791,9 @@ export interface UnderholdskostnadValideringsfeil {
   manglerPerioderForTilsynsordning: boolean;
   /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
   manglerBegrunnelse: boolean;
+  gjelderBarn: UnderholdBarnDto;
   /** @format int64 */
   id: number;
-  gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -1860,32 +1853,7 @@ export interface UtgiftspostDto {
   utgiftstypeVisningsnavn: string;
 }
 
-export interface VirkningstidspunktDto {
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  virkningstidspunkt?: string;
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  opprinneligVirkningstidspunkt?: string;
-  årsak?: TypeArsakstype;
-  avslag?: Resultatkode;
-  /** Saksbehandlers begrunnelse */
-  begrunnelse: BegrunnelseDto;
-  harLøpendeBidrag: boolean;
-  begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
-  opphør?: OpphorsdetaljerDto;
-  /**
-   * Bruk begrunnelse
-   * @deprecated
-   */
-  notat: BegrunnelseDto;
-}
-
-export interface VirkningstidspunktDtoV2 {
+export interface VirkningstidspunktBarnDtoV2 {
   rolle: RolleDto;
   /**
    * @format date
@@ -1933,6 +1901,12 @@ export interface VirkningstidspunktDtoV2 {
    * @deprecated
    */
   notat: BegrunnelseDto;
+}
+
+export interface VirkningstidspunktDtoV3 {
+  erLikForAlle: boolean;
+  tidligsteVirkningstidspunkt: string;
+  barn: VirkningstidspunktBarnDtoV2[];
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2050,7 +2024,7 @@ export interface OppdatereBegrunnelseRequest {
 }
 
 export interface OppdaterSamvaerDto {
-  gjelderBarn: string;
+  gjelderBarn?: string;
   periode?: OppdaterSamvaersperiodeDto;
   /** Oppdatere saksbehandlers begrunnelse */
   oppdatereBegrunnelse?: OppdatereBegrunnelse;
@@ -2066,7 +2040,7 @@ export interface OppdaterSamvaersperiodeDto {
 
 export interface OppdaterSamvaerResponsDto {
   /** Samvær som ble oppdatert */
-  oppdatertSamvær?: SamvaerDto;
+  oppdatertSamvær?: SamvaerBarnDto;
 }
 
 export interface OppdaterePrivatAvtalePeriodeDto {
@@ -2099,7 +2073,7 @@ export interface OppdaterePrivatAvtaleResponsDto {
 
 export interface OppdaterOpphorsdatoRequestDto {
   /** @format int64 */
-  idRolle: number;
+  idRolle?: number;
   /** @format date */
   opphørsdato?: string;
   simulerEndring: boolean;
@@ -2356,7 +2330,7 @@ export interface OppdatereBoforholdResponse {
 
 export interface OppdaterBeregnTilDatoRequestDto {
   /** @format int64 */
-  idRolle: number;
+  idRolle?: number;
   beregnTil?: BeregnTil;
 }
 
@@ -2519,10 +2493,6 @@ export interface KanBehandlesINyLosningRequest {
    * @maxLength 7
    */
   saksnummer: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   */
   roller: SjekkRolleDto[];
   stønadstype: Stonadstype;
   vedtakstype: Vedtakstype;
@@ -2550,7 +2520,7 @@ export interface SjekkRolleDto {
 }
 
 export interface FatteVedtakRequestDto {
-  skalIndeksreguleres: boolean;
+  skalIndeksreguleres: Record<string, boolean>;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2654,8 +2624,8 @@ export interface Skatt {
   trinnskatt: number;
   trygdeavgift: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3309,8 +3279,8 @@ export interface DokumentmalSkattBeregning {
   trinnskatt: number;
   trygdeavgift: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3379,11 +3349,11 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  erAvvisning: boolean;
   avslagVisningsnavnUtenPrefiks?: string;
   kategoriVisningsnavn?: string;
   vedtakstypeVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  erAvvisning: boolean;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3776,8 +3746,8 @@ export interface NotatVirkningstidspunktBarnDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVirkningstidspunktDto {
@@ -4591,6 +4561,26 @@ export class Api<
       }),
 
     /**
+     * @description Bruk samme virkning for alle barna
+     *
+     * @tags virkningstidspunkt-controller
+     * @name BrukSammeVirkningstidspunktForAlleBarna
+     * @request POST:/api/v2/behandling/{behandlingsid}/virkningstidspunkt/merge
+     * @secure
+     */
+    brukSammeVirkningstidspunktForAlleBarna: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<BehandlingDtoV2, any>({
+        path: `/api/v2/behandling/${behandlingsid}/virkningstidspunkt/merge`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Oppretter underholdselement med faktiske utgifter for BMs andre barn. Legges manuelt inn av saksbehandler.
      *
      * @tags underhold-controller
@@ -4609,6 +4599,26 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Bruk samme samvær for alle barna
+     *
+     * @tags samv-ær-controller
+     * @name BrukSammeSamvaerForAlleBarna
+     * @request POST:/api/v2/behandling/{behandlingsid}/samvar/merge
+     * @secure
+     */
+    brukSammeSamvaerForAlleBarna: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<BehandlingDtoV2, any>({
+        path: `/api/v2/behandling/${behandlingsid}/samvar/merge`,
+        method: "POST",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -5104,17 +5114,10 @@ export class Api<
      * @request GET:/api/v2/behandling/{behandlingsid}
      * @secure
      */
-    henteBehandlingV2: (
-      behandlingsid: number,
-      query?: {
-        inkluderHistoriskeInntekter?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    henteBehandlingV2: (behandlingsid: number, params: RequestParams = {}) =>
       this.request<BehandlingDtoV2, BehandlingDtoV2>({
         path: `/api/v2/behandling/${behandlingsid}`,
         method: "GET",
-        query: query,
         secure: true,
         format: "json",
         ...params,

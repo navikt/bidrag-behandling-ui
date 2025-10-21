@@ -59,7 +59,7 @@ export const FatteVedtakButtons = ({
                 return await BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), {
                     innkrevingUtsattAntallDager,
                     enhet,
-                    skalIndeksreguleres,
+                    skalIndeksreguleres: skalIndeksreguleres as unknown as Record<string, boolean>,
                 });
             } catch (error) {
                 if (error instanceof AxiosError && error.response.status === 400) {
