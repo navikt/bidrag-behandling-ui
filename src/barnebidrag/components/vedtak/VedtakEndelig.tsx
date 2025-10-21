@@ -20,7 +20,7 @@ import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { dateOrNull, DateToMMYYYYString } from "../../../utils/date-utils";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
-import { NestIndeksår, VedtakProvider, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
+import { NesteIndeksår, VedtakProvider, VedtakResultatBarn, VedtakTableBody, VedtakTableHeader } from "./VedtakCommon";
 
 const VedtakEndelig = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
@@ -135,7 +135,7 @@ const VedtakResultat = () => {
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                         <VedtakResultatBarn barn={r.barn} />
                         <VedtakUgyldigBeregning resultat={r} />
-                        <NestIndeksår nesteIndeksår={r.indeksår} />
+                        <NesteIndeksår nesteIndeksår={r.indeksår} barnId={r.barn.ident} />
                         {r.barn.innbetaltBeløp && (
                             <ResultatDescription
                                 data={[

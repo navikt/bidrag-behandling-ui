@@ -17,7 +17,7 @@ import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import {
     GrunnlagFraVedtakButton,
-    NestIndeksår,
+    NesteIndeksår,
     VedtakProvider,
     VedtakResultatBarn,
     VedtakTableBody,
@@ -120,7 +120,7 @@ const VedtakResultat = () => {
                     <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                         <VedtakResultatBarn barn={r.barn} />
                         <VedtakUgyldigBeregning resultat={r} />
-                        <NestIndeksår nesteIndeksår={r.indeksår} />
+                        <NesteIndeksår nesteIndeksår={r.indeksår} barnId={r.barn.ident} />
                         {r.barn.innbetaltBeløp && (
                             <ResultatDescription
                                 data={[
