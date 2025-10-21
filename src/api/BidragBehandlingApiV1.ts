@@ -970,10 +970,8 @@ export interface BehandlingDtoV2 {
   behandlerenhet: string;
   /** @uniqueItems true */
   roller: RolleDto[];
-  /** @uniqueItems true */
-  bpsBarnUtenBidraggsak: BpsBarnUtenBidragsakDto[];
-  virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
-  virkningstidspunkt: VirkningstidspunktDtoV3;
+  virkningstidspunkt: VirkningstidspunktDto;
+  virkningstidspunktV2: VirkningstidspunktDtoV2[];
   inntekter: InntekterDtoV2;
   boforhold: BoforholdDtoV2;
   gebyr?: GebyrDto;
@@ -1949,6 +1947,12 @@ export interface VirkningstidspunktBarnDtoV2 {
   notat: BegrunnelseDto;
 }
 
+export interface VirkningstidspunktDtoV3 {
+  erLikForAlle: boolean;
+  tidligsteVirkningstidspunkt: string;
+  barn: VirkningstidspunktBarnDtoV2[];
+}
+
 export interface VirkningstidspunktFeilDto {
   manglerVirkningstidspunkt: boolean;
   manglerOpphørsdato: RolleDto[];
@@ -2567,7 +2571,7 @@ export interface SjekkForholdmessigFordelingResponse {
 }
 
 export interface FatteVedtakRequestDto {
-  skalIndeksreguleres: boolean;
+  skalIndeksreguleres: Record<string, boolean>;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2670,9 +2674,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
@@ -3326,9 +3330,9 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
@@ -3398,13 +3402,14 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
+  erAvvisning: boolean;
+  avslagVisningsnavnUtenPrefiks?: string;
   kategoriVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
   erAvvisning: boolean;
   avslagVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3798,12 +3803,6 @@ export interface NotatVirkningstidspunktBarnDto {
    */
   notat: NotatBegrunnelseDto;
   avslagVisningsnavn?: string;
-  årsakVisningsnavn?: string;
-}
-
-export interface NotatVirkningstidspunktDto {
-  erLikForAlle: boolean;
-  barn: NotatVirkningstidspunktBarnDto[];
 }
 
 export interface NotatVirkningstidspunktDto {
