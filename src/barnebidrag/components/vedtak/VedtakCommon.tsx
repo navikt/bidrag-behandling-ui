@@ -4,7 +4,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Checkbox, Heading, HStack, Link, Modal, Switch, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import {
     ResultatBarnebidragsberegningPeriodeDto,
@@ -24,8 +24,8 @@ import { VedtaksListeBeregning } from "../Vedtakliste";
 import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
 
 type VedtakContextProps = {
-    skalIndeksreguleres: boolean;
-    setSkalIndeksreguleres: (value: boolean) => void;
+    skalIndeksreguleres: Map<string, boolean>;
+    setSkalIndeksreguleres: (barnId: string, value: boolean) => void;
 };
 export const VedtakContext = createContext<VedtakContextProps | null>(null);
 export function useVedtakProvider() {
@@ -36,24 +36,26 @@ export function useVedtakProvider() {
     return context;
 }
 
-export const NestIndeksår = ({ nesteIndeksår }) => {
+export const NesteIndeksår = ({ nesteIndeksår, barnId }: { nesteIndeksår?: number; barnId: string }) => {
     const { skalIndeksreguleres, setSkalIndeksreguleres } = useVedtakProvider();
     const { vedtakstype, lesemodus } = useGetBehandlingV2();
     const erInnkreving = vedtakstype === Vedtakstype.INNKREVING;
-    if (!nesteIndeksår) return null;
+    useEffect(() => {
+        setSkalIndeksreguleres(barnId, nesteIndeksår !== undefined);
+    }, []);
     return (
         <HStack gap="2" className="items-center">
             {erInnkreving && (
                 <Switch
-                    defaultChecked={skalIndeksreguleres}
+                    defaultChecked={skalIndeksreguleres[barnId]}
                     readOnly={!!lesemodus}
                     size="small"
-                    onChange={(e) => setSkalIndeksreguleres(e.target.checked)}
+                    onChange={(e) => setSkalIndeksreguleres(barnId, e.target.checked)}
                 >
                     Skal indeksreguleres
                 </Switch>
             )}
-            {skalIndeksreguleres && (
+            {skalIndeksreguleres[barnId] && (
                 <ResultatDescription
                     data={[
                         {
@@ -69,9 +71,19 @@ export const NestIndeksår = ({ nesteIndeksår }) => {
     );
 };
 export const VedtakProvider = ({ children, className }: { children: React.ReactNode; className?: string }) => {
-    const [skalIndeksreguleres, setSkalIndeksreguleres] = useState(true);
+    const [skalIndeksreguleres, setSkalIndeksreguleres] = useState<Map<string, boolean>>(new Map());
     return (
-        <VedtakContext value={{ skalIndeksreguleres, setSkalIndeksreguleres }}>
+        <VedtakContext
+            value={{
+                skalIndeksreguleres,
+                setSkalIndeksreguleres: (barnId: string, value: boolean) =>
+                    setSkalIndeksreguleres((prev) => {
+                        const newMap = new Map(prev);
+                        newMap.set(barnId, value);
+                        return newMap;
+                    }),
+            }}
+        >
             <div className={className}>{children}</div>
         </VedtakContext>
     );
