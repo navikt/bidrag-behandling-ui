@@ -40,10 +40,10 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
                         <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
                     </BodyShort>
                 </Box>
-                <Box>
+                {/* <Box>
                     <Label size="small">Har løpende bidrag?</Label>
                     <BodyShort>{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
-                </Box>
+                </Box> */}
                 <Box>
                     <Label size="small">Har åpen behandling?</Label>
                     <BodyShort>
@@ -88,10 +88,10 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
                         <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
                     </BodyShort>
                 </Box>
-                <Box>
+                {/* <Box>
                     <Label size="small">Har løpende bidrag?</Label>
                     <BodyShort>{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
-                </Box>
+                </Box> */}
                 <Box>
                     <Label size="small">Er del av hovedbehandling?</Label>
                     <BodyShort>{barn.sammeSakSomBehandling ? "Ja" : "Nei"}</BodyShort>

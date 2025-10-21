@@ -377,7 +377,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             }
             return fomDato;
         }
-        return behandling.virkningstidspunkt?.virkningstidspunkt;
+        return behandling.virkningstidspunktV2[0].virkningstidspunkt;
     };
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {
@@ -496,9 +496,8 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${
-                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                            } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                                } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

@@ -577,6 +577,7 @@ export enum Behandlingstype {
   EGET_TILTAK = "EGET_TILTAK",
   SOKNAD = "SØKNAD",
   INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+  FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
   ALDERSJUSTERING = "ALDERSJUSTERING",
   INDEKSREGULERING = "INDEKSREGULERING",
   KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
@@ -1836,9 +1837,9 @@ export interface UnderholdskostnadValideringsfeil {
   manglerPerioderForTilsynsordning: boolean;
   /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
   manglerBegrunnelse: boolean;
+  gjelderBarn: UnderholdBarnDto;
   /** @format int64 */
   id: number;
-  gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -1946,11 +1947,6 @@ export interface VirkningstidspunktBarnDtoV2 {
    * @deprecated
    */
   notat: BegrunnelseDto;
-}
-
-export interface VirkningstidspunktDtoV3 {
-  erLikForAlle: boolean;
-  barn: VirkningstidspunktBarnDtoV2[];
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2537,10 +2533,6 @@ export interface KanBehandlesINyLosningRequest {
    * @maxLength 7
    */
   saksnummer: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   */
   roller: SjekkRolleDto[];
   stønadstype: Stonadstype;
   vedtakstype: Vedtakstype;
@@ -3409,6 +3401,8 @@ export interface NotatBehandlingDetaljerDto {
   kategoriVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
+  erAvvisning: boolean;
   avslagVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
 }
@@ -3803,8 +3797,8 @@ export interface NotatVirkningstidspunktBarnDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVirkningstidspunktDto {

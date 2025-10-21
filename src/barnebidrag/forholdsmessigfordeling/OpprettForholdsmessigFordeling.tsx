@@ -35,7 +35,7 @@ export default function OpprettForholdsmessigFordelingPrompt() {
                 <Modal.Header>
                     {harOpprettetFF ? "Oppdater forholdsmessig fordeling" : "Opprett forholdsmessig fordeling"}
                 </Modal.Header>
-                <Modal.Body className="min-w-[500px]">
+                <Modal.Body className="min-w-[600px]">
                     <VStack gap="2">
                         <BarnListeOpprettFF barn={detaljer.barn} skalBehandlesAvEnhet={detaljer.skalBehandlesAvEnhet} />
                     </VStack>

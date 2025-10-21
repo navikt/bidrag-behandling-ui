@@ -274,16 +274,18 @@ const PrivatAvtaleBarn = ({
                     <Button variant="secondary" size="xsmall" onClick={() => setModalOpen(true)}>
                         Opprett sak
                     </Button>
-                    <OpprettSakModal
-                        isOpen={modalOpen}
-                        ident={item.gjelderBarn.ident}
-                        navn={item.gjelderBarn.navn}
-                        eierfogd={enhet}
-                        onSubmit={() => {
-                            setModalOpen(false);
-                        }}
-                        onClose={() => setModalOpen(false)}
-                    />
+                    {modalOpen && (
+                        <OpprettSakModal
+                            isOpen={modalOpen}
+                            ident={item.gjelderBarn.ident}
+                            navn={item.gjelderBarn.navn}
+                            eierfogd={enhet}
+                            onSubmit={() => {
+                                setModalOpen(false);
+                            }}
+                            onClose={() => setModalOpen(false)}
+                        />
+                    )}
                 </div>
             )}
         </>
