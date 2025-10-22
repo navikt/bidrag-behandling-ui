@@ -4,11 +4,16 @@ export type PrivatAvtaleFormValue = {
         navn?: string;
         fødselsdato?: string;
     };
-    bpsBarnUtenBidraggsak: boolean;
+    harLøpendeBidrag: boolean;
+    saksnummer?: string;
+    enhet?: string;
+    lagtTilManuelt?: boolean;
     privatAvtale: PrivatAvtaleFormValuesPerBarn | null;
 };
 export type PrivatAvtaleFormValues = {
     roller: PrivatAvtaleFormValue[];
+    andreBarn: PrivatAvtaleFormValue[];
+    andreBarnBegrunnelse?: string;
 };
 export type PrivatAvtalePeriode = {
     id?: number;

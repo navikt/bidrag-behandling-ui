@@ -106,6 +106,14 @@ export const QueryKeys = {
     person: (ident: string) => ["person", ident],
     manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
 };
+export const useRefetchFFInfo = () => {
+    const { id } = useGetBehandlingV2();
+    const client = useQueryClient();
+    return () => {
+        client.refetchQueries({ queryKey: QueryKeys.behandlingV2(id.toString()) });
+        client.refetchQueries({ queryKey: QueryKeys.sjekkFF(id.toString()) });
+    };
+};
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.arbeidsforhold;

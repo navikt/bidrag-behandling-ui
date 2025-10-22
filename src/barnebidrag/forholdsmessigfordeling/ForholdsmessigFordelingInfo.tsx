@@ -15,7 +15,7 @@ export default function ForholdsmessigFordelingInfo() {
         <>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-label="">
                 <Modal.Header>Forholdsmessig fordeling detaljer</Modal.Header>
-                <Modal.Body className="min-w-[600px]">
+                <Modal.Body className="min-w-[700px]">
                     <VStack gap="2">
                         <BarnListe barn={forholdsmessigFordeling.barn} />
                     </VStack>

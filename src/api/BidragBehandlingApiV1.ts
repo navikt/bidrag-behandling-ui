@@ -1087,12 +1087,13 @@ export interface BostatusperiodeGrunnlagDto {
   bostatus: Bostatuskode;
 }
 
-export interface BpsBarnUtenBidragsakDto {
+export interface BpsBarnUtenLopendeBidragDto {
   ident?: string;
   navn?: string;
   /** @format date */
   fødselsdato?: string;
   enhet?: string;
+  saksnummer?: string;
 }
 
 export type Datoperiode = UtilRequiredKeys<PeriodeLocalDate, "fom">;
@@ -1519,6 +1520,7 @@ export interface PrivatAvtaleDto {
   avtaleType?: PrivatAvtaleType;
   skalIndeksreguleres: boolean;
   begrunnelse?: string;
+  erSøknadsbarn: boolean;
   begrunnelseFraOpprinneligVedtak?: string;
   valideringsfeil?: PrivatAvtaleValideringsfeilDto;
   perioder: PrivatAvtalePeriodeDto[];
@@ -2550,9 +2552,9 @@ export interface KanBehandlesINyLosningRequest {
   mottattdato?: string;
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragsmottaker?: SjekkRolleDto;
+  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -3407,7 +3409,6 @@ export interface NotatBehandlingDetaljerDto {
   kategoriVisningsnavn?: string;
   avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   erAvvisning: boolean;
   avslagVisningsnavn?: string;
 }
@@ -3569,8 +3570,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<

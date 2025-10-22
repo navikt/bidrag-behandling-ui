@@ -51,8 +51,9 @@ export const MenuButton = ({
         <>
             <Button
                 variant="tertiary"
-                className={`grid-item w-full grid justify-stretch rounded-none py-3 px-5 ${active ? "bg-[var(--a-blue-50)]" : ""
-                    }`}
+                className={`grid-item w-full grid justify-stretch rounded-none py-3 px-5 ${
+                    active ? "bg-[var(--a-blue-50)]" : ""
+                }`}
                 onClick={onClick}
                 disabled={!interactive}
                 size={size ?? "medium"}
@@ -97,8 +98,9 @@ export const SideMenu = ({ children, otherChildren }) => {
 
     return (
         <div
-            className={`top-0 z-10 h-screen sticky border-solid border-0 border-r-2 border-r-blue-400 max-w-[412px] ${menuOpen ? openMenuCss : closedMenuCss
-                }`}
+            className={`top-0 z-10 h-screen sticky border-solid border-0 border-r-2 border-r-blue-400 max-w-[412px] ${
+                menuOpen ? openMenuCss : closedMenuCss
+            }`}
         >
             {menuOpen && (
                 <VStack gap="0" className="grid overflow-hidden border border-solid border-[var(--a-border-divider)]">
@@ -106,8 +108,9 @@ export const SideMenu = ({ children, otherChildren }) => {
                 </VStack>
             )}
             <Button
-                className={`absolute right-[-1rem] top-[40%] p-0 rounded-full bg-white z-10 duration-500 ${!menuOpen ? "rotate-180" : "rotate-0"
-                    }`}
+                className={`absolute right-[-1rem] top-[40%] p-0 rounded-full bg-white z-10 duration-500 ${
+                    !menuOpen ? "rotate-180" : "rotate-0"
+                }`}
                 variant="tertiary"
                 icon={<ChevronLeftCircleIcon title="sidebar-button" fontSize="2rem" />}
                 type="button"
