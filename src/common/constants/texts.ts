@@ -209,7 +209,7 @@ const tekster = {
         beregnTilDato: "Beregn til dato",
         opplysninger: "Opplysninger",
         oppdaterOpplysninger: "Oppdater opplysninger",
-        opprettePrivatAvtale: "Opprette privat avtale",
+        opprettePrivatAvtale: "Opprett privat avtale",
         periode: "Periode",
         privatAvtale: "Privat avtale",
         resultat: "Resultat",

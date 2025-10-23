@@ -84,11 +84,13 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     const { control } = useFormContext<PrivatAvtaleFormValues>();
     const { onNavigateToTab } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
+
     const roller = useFieldArray({
         control,
         name: "roller",
     });
     const watchFieldArray = useWatch({ control, name: "roller" });
+    const andreBarn = useWatch({ control, name: "andreBarn" });
     const controlledFields = roller.fields.map((field, index) => ({
         ...field,
         ...watchFieldArray?.[index],
@@ -101,15 +103,15 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
         return barnIdent ?? controlledFields[0].gjelderBarn.ident;
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
-    const barnUtenBidragsak = controlledFields.some((f) => !f.harLøpendeBidrag);
 
-    if (controlledFields.length > 0) {
+    if (controlledFields.length > 1 || andreBarn.length > 0) {
         return (
             <>
-                {barnUtenBidragsak && (
+                {andreBarn.length > 0 && (
                     <Alert variant="info" size="small">
-                        Bidragspliktig har barn uten løpende bidrag. De er listet under "Andre barn". Hvis BP har privat
-                        avtale for de barna kan fylle ut beløpene for å se om det slår ut til forholdsmessig fordeling
+                        Bidragspliktig har barn uten bidragsak/løpende bidrag. De er listet under "Andre barn". Hvis BP
+                        har privat avtale for andre barn kan du fylle ut bidragsbeløpene for å se om det slår ut til
+                        forholdsmessig fordeling.
                     </Alert>
                 )}
                 <Tabs

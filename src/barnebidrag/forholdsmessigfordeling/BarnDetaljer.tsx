@@ -4,6 +4,7 @@ import { BodyShort, Box, HGrid, Label } from "@navikt/ds-react";
 import { ForholdsmessigFordelingBarnDto } from "../../api/BidragBehandlingApiV1";
 import BehandlingLenke from "../../common/components/BehandlingLenke";
 import SakLenke from "../../common/components/SakLenke";
+import { dateOrNull, DateToMMYYYYString } from "../../utils/date-utils";
 
 interface BarnDetaljerProps {
     barn: ForholdsmessigFordelingBarnDto;
@@ -19,7 +20,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
             borderRadius="medium"
             className="shadow-sm"
         >
-            <HGrid gap="space-1" columns={{ xs: 1, sm: 2, md: 2 }} className="border-t border-border-subtle">
+            <HGrid gap="space-6" columns={{ xs: 1, sm: 2, md: 2 }} className="border-t border-border-subtle">
                 <Box>
                     <Label size="small" className="mb-1">
                         Barn
@@ -51,6 +52,9 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
                         {barn.åpenBehandling?.behandlingId && (
                             <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />
                         )}
+                        {barn.åpenBehandling?.behandlingId && (
+                            <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />
+                        )}
                     </BodyShort>
                 </Box>
             </HGrid>
@@ -58,6 +62,16 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
     );
 }
 export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
+    function renderType() {
+        if (barn.erRevurdering) {
+            return (
+                <BodyShort size="small">
+                    Revurdering fra {DateToMMYYYYString(dateOrNull(barn.åpenBehandling?.søktFraDato))}
+                </BodyShort>
+            );
+        }
+        return <BodyShort size="small">Del av hovedbehandling</BodyShort>;
+    }
     return (
         <Box
             background="surface-subtle"
@@ -67,7 +81,7 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
             borderRadius="medium"
             className="shadow-sm"
         >
-            <HGrid gap="space-1" columns={{ xs: 1, sm: 2, md: 2 }} className="border-t border-border-subtle">
+            <HGrid gap="space-6" columns={{ xs: 1, sm: 2, md: 2 }} className="border-t border-border-subtle">
                 <Box>
                     <Label size="small" className="mb-1">
                         Barn
@@ -88,13 +102,13 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
                         <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
                     </BodyShort>
                 </Box>
-                {/* <Box>
-                    <Label size="small">Har løpende bidrag?</Label>
-                    <BodyShort>{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
-                </Box> */}
                 <Box>
-                    <Label size="small">Er del av hovedbehandling?</Label>
-                    <BodyShort>{barn.sammeSakSomBehandling ? "Ja" : "Nei"}</BodyShort>
+                    <Label size="small">Har løpende bidrag?</Label>
+                    <BodyShort size="small">{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
+                </Box>
+                <Box>
+                    <Label size="small">Type</Label>
+                    <BodyShort size="small">{renderType()}</BodyShort>
                 </Box>
             </HGrid>
         </Box>

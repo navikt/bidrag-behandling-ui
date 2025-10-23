@@ -1449,6 +1449,20 @@ export interface ManuellVedtakDto {
   søknadstype: string;
 }
 
+export interface OpphorsdetaljerDto {
+  /** @format date */
+  opphørsdato?: string;
+  opphørRoller: OpphorsdetaljerRolleDto[];
+}
+
+export interface OpphorsdetaljerRolleDto {
+  rolle: RolleDto;
+  /** @format date */
+  opphørsdato?: string;
+  /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
+  eksisterendeOpphør?: EksisterendeOpphorsvedtakDto;
+}
+
 export interface OverlappendeBostatusperiode {
   periode: Datoperiode;
   /** @uniqueItems true */
@@ -1949,9 +1963,35 @@ export interface VirkningstidspunktBarnDtoV2 {
   notat: BegrunnelseDto;
 }
 
+export interface VirkningstidspunktDto {
+  /**
+   * @format date
+   * @example "01.12.2025"
+   */
+  virkningstidspunkt?: string;
+  /**
+   * @format date
+   * @example "01.12.2025"
+   */
+  opprinneligVirkningstidspunkt?: string;
+  årsak?: TypeArsakstype;
+  avslag?: Resultatkode;
+  /** Saksbehandlers begrunnelse */
+  begrunnelse: BegrunnelseDto;
+  harLøpendeBidrag: boolean;
+  begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
+  opphør?: OpphorsdetaljerDto;
+  /**
+   * Bruk begrunnelse
+   * @deprecated
+   */
+  notat: BegrunnelseDto;
+}
+
 export interface VirkningstidspunktDtoV3 {
   erLikForAlle: boolean;
-  tidligsteVirkningstidspunkt: string;
+  erAvslagForAlle: boolean;
+  eldsteVirkningstidspunkt: string;
   barn: VirkningstidspunktBarnDtoV2[];
 }
 
@@ -2552,9 +2592,9 @@ export interface KanBehandlesINyLosningRequest {
   mottattdato?: string;
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragsmottaker?: SjekkRolleDto;
-  søknadsbarn: SjekkRolleDto[];
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragspliktig?: SjekkRolleDto;
+  søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -3410,6 +3450,7 @@ export interface NotatBehandlingDetaljerDto {
   avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
   erAvvisning: boolean;
+  avslagVisningsnavnUtenPrefiks?: string;
   avslagVisningsnavn?: string;
 }
 
@@ -3570,8 +3611,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  sivilstandVisningsnavn?: string;
   resultatKodeVisningsnavn: string;
+  sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<

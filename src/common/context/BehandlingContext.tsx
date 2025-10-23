@@ -171,7 +171,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [nextTab, setNextTab] = useState<string>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
     const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
-        dateOrNull(behandling.virkningstidspunkt.barn[0].virkningstidspunkt),
+        dateOrNull(behandling.virkningstidspunktV3.barn[0].virkningstidspunkt),
         firstDayOfMonth(new Date())
     );
 
