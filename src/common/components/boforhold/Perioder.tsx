@@ -151,7 +151,7 @@ const Status = ({
 export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
-        virkningstidspunkt: { opphør },
+        virkningstidspunktV3: virkningstidspunkt,
         feilOppståttVedSisteGrunnlagsinnhenting,
     } = useGetBehandlingV2();
     const {
@@ -187,6 +187,8 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             innhentingsFeil.rolle.ident === barn.ident &&
             innhentingsFeil.grunnlagsdatatype === OpplysningerType.BOFORHOLD
     );
+    const selectedVirkningstidspunkt = virkningstidspunkt.barn.find((v) => v.rolle.ident === barn.ident);
+    const opphørsdato = selectedVirkningstidspunkt?.opphørsdato;
 
     useEffect(() => {
         setPageErrorsOrUnsavedState((state) => ({
@@ -534,11 +536,11 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
                         {valideringsfeilForBarn.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
                         {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
-                        {valideringsfeilForBarn.ugyldigSluttperiode && (
+                        {valideringsfeilForBarn.ugyldigSluttperiode && opphørsdato && (
                             <p>
                                 {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
                                     "{}",
-                                    DateToDDMMYYYYString(dateOrNull(opphør.opphørsdato))
+                                    DateToDDMMYYYYString(dateOrNull(opphørsdato))
                                 )}
                             </p>
                         )}

@@ -69,13 +69,17 @@ const booleanValueOfEndeligIlagtGebyr = {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const {
-        virkningstidspunkt: { avslag },
-    } = useGetBehandlingV2();
+    const { virkningstidspunktV3: virkningstidspunkt } = useGetBehandlingV2();
 
     return (
         <ActionButtons
-            onNext={() => onStepChange(avslag ? STEPS[BarnebidragStepper.VEDTAK] : STEPS[BarnebidragStepper.BOFORHOLD])}
+            onNext={() =>
+                onStepChange(
+                    virkningstidspunkt.erAvslagForAlle
+                        ? STEPS[BarnebidragStepper.VEDTAK]
+                        : STEPS[BarnebidragStepper.BOFORHOLD]
+                )
+            }
         />
     );
 };
@@ -84,7 +88,7 @@ const Main = () => {
     const { setSaveErrorState } = useBehandlingProvider();
     const {
         gebyr: { gebyrRoller },
-        virkningstidspunkt: { avslag },
+        virkningstidspunktV3: virkningstidspunkt,
     } = useGetBehandlingV2();
     const { control, getValues, setValue } = useFormContext<GebyrFormValues>();
     const barnFieldArray = useFieldArray({
@@ -152,6 +156,7 @@ const Main = () => {
         <>
             {controlledFields.map((item, index) => {
                 const onSaveFn = onSave(`gebyrRoller.${index}`);
+                const avslag = virkningstidspunkt.erAvslagForAlle;
                 return (
                     <Fragment key={item?.rolle?.id}>
                         <Box

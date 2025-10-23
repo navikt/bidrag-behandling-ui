@@ -19,7 +19,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 export const ForskuddPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
-        virkningstidspunkt,
+        virkningstidspunktV3: virkningstidspunkt,
         erVedtakFattet,
         kanBehandlesINyLøsning,
         vedtakstype,
@@ -27,7 +27,7 @@ export const ForskuddPage = () => {
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
+    const interactive = !virkningstidspunkt.barn[0].avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
     const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter

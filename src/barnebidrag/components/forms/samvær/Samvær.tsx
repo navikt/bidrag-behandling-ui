@@ -1,7 +1,7 @@
 import {
     OppdaterSamvaerDto,
     Rolletype,
-    SamvaerDto,
+    SamvaerBarnDto,
     Samvaersklasse,
     SletteSamvaersperiodeElementDto,
     Vedtakstype,
@@ -10,6 +10,7 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
@@ -31,8 +32,8 @@ import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "@common/hooks/useS
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { SamværBarnformvalues, SamværPeriodeFormvalues } from "@common/types/samværFormValues";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { deductDays, PersonNavn } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Table, Tabs } from "@navikt/ds-react";
+import { dateToDDMMYYYYString, deductDays, PersonNavn } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, Switch, Table, Tabs } from "@navikt/ds-react";
 import {
     addDays,
     addMonthsIgnoreDay,
@@ -48,15 +49,19 @@ import { useSearchParams } from "react-router-dom";
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
+import { useOnMergeSamvær } from "../../../hooks/useOnMergeSamvær";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
 import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
 import { Samværsperiode } from "./Samværsperiode";
 
 const SamværForm = () => {
-    const { samvær, roller } = useGetBehandlingV2();
+    const { samværV2: samvær, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
-    const initialValues = useMemo(() => createInitialValues(samvær), [samvær, virkningsOrSoktFraDato, barnMedISaken]);
+    const initialValues = useMemo(
+        () => createInitialValues(samvær.barn),
+        [samvær.barn, virkningsOrSoktFraDato, barnMedISaken]
+    );
 
     const ref = useRef(null);
     const useFormMethods = useForm({
@@ -65,7 +70,7 @@ const SamværForm = () => {
     });
 
     useEffect(() => {
-        const checkForBegrunnelseValidationError = (samvær: SamvaerDto) => {
+        const checkForBegrunnelseValidationError = (samvær: SamvaerBarnDto) => {
             if (samvær?.valideringsfeil?.manglerBegrunnelse) {
                 useFormMethods.setError(`${samvær.gjelderBarn}.begrunnelse`, {
                     type: "notValid",
@@ -74,7 +79,7 @@ const SamværForm = () => {
             }
         };
 
-        samvær.forEach(checkForBegrunnelseValidationError);
+        samvær.barn.forEach(checkForBegrunnelseValidationError);
     }, []);
 
     return (
@@ -88,14 +93,14 @@ const SamværForm = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { erBisysVedtak, samvær, roller, vedtakstype } = useGetBehandlingV2();
+    const { erBisysVedtak, samværV2: samvær, roller, vedtakstype } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState, getNextStep } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
     const selectedRolleId = searchParams.get(urlSearchParams.tab);
     const selectedRolleIdNumber = selectedRolleId !== null ? Number(selectedRolleId) : undefined;
     const rolle = roller.find((rolle) => rolle.id === selectedRolleIdNumber);
-    const oppdaterSamvær = rolle ? samvær.find((s) => s.gjelderBarn === rolle.ident) : samvær?.[0];
+    const oppdaterSamvær = rolle ? samvær.barn.find((s) => s.gjelderBarn === rolle.ident) : samvær?.barn[0];
     const [previousValues, setPreviousValues] = useState<string>(
         getValues(`${oppdaterSamvær.gjelderBarn}.begrunnelse`)
     );
@@ -113,7 +118,7 @@ const Side = () => {
             {
                 onSuccess: (response) => {
                     saveSamværFn.queryClientUpdater((currentData) => {
-                        const updatedSamvær = currentData.samvær.map((s) => {
+                        const updatedSamvær = currentData.samværV2.barn.map((s) => {
                             if (s.id === Number(oppdaterSamvær.id)) {
                                 return response.oppdatertSamvær;
                             }
@@ -121,7 +126,7 @@ const Side = () => {
                         });
                         return {
                             ...currentData,
-                            samvær: updatedSamvær,
+                            samværV2: { ...currentData.samværV2, barn: updatedSamvær },
                         };
                     });
                     setPreviousValues(response.oppdatertSamvær.begrunnelse.innhold);
@@ -176,9 +181,13 @@ const Side = () => {
 };
 
 const Main = () => {
-    const { roller: behandlingRoller } = useGetBehandlingV2();
-    const { onNavigateToTab } = useBehandlingProvider();
+    const { roller: behandlingRoller, samværV2: samvær } = useGetBehandlingV2();
+    const { reset } = useFormContext<SamværBarnformvalues>();
+    const { onNavigateToTab, setSaveErrorState } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
+    const mergeSamværMutation = useOnMergeSamvær();
+    const [vurderSeparat, setVurderSeparat] = useState<boolean>(!samvær.erSammeForAlle);
+    const ref = useRef<HTMLDialogElement>(null);
 
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)
@@ -192,38 +201,93 @@ const Main = () => {
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
-    if (roller.length > 1) {
-        return (
-            <Tabs
-                defaultValue={defaultTab}
-                value={selectedTab}
-                onChange={onNavigateToTab}
-                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
-            >
-                <Tabs.List>
-                    {roller.map((rolle) => (
-                        <Tabs.Tab
-                            key={rolle.ident}
-                            value={rolle.id.toString()}
-                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${rolle.ident}`}
-                        />
-                    ))}
-                </Tabs.List>
-                {roller.map((rolle) => {
-                    return (
-                        <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
-                            <SamværBarn gjelderBarn={rolle.ident} />
-                        </Tabs.Panel>
-                    );
-                })}
-            </Tabs>
-        );
-    }
-    const rolle = roller[0];
+    const onChangeVurderSeparat = () => {
+        mergeSamværMutation.mutation.mutate(undefined, {
+            onSuccess: (response) => {
+                setVurderSeparat(false);
+                mergeSamværMutation.queryClientUpdater((_) => response);
+                reset(createInitialValues(response.samværV2.barn));
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onChangeVurderSeparat(),
+                    rollbackFn: () => {},
+                });
+            },
+            onSettled: () => {
+                ref?.current?.close();
+            },
+        });
+    };
+
     return (
-        <>
-            <SamværBarn gjelderBarn={rolle.ident} />
-        </>
+        <div>
+            <ConfirmationModal
+                ref={ref}
+                closeable
+                description={text.varsel.ønskerDuÅSlåSammenVerdierDescription}
+                heading={<Heading size="small">{text.varsel.ønskerDuÅSlåSammenVerdier}</Heading>}
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            onClick={onChangeVurderSeparat}
+                            size="small"
+                            loading={mergeSamværMutation.mutation.isPending}
+                        >
+                            {text.label.ja}
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={() => ref.current?.close()}>
+                            {text.label.avbryt}
+                        </Button>
+                    </>
+                }
+            />
+            {roller.length > 1 && (
+                <Switch
+                    value="erLikForAlle"
+                    checked={vurderSeparat}
+                    onChange={(e) => {
+                        if (e.target.checked) {
+                            setVurderSeparat(e.target.checked);
+                        }
+                        if (!e.target.checked) {
+                            ref.current?.showModal();
+                        }
+                    }}
+                    size="small"
+                >
+                    {text.label.vurderSeparatPerBarn}
+                </Switch>
+            )}
+            {vurderSeparat && roller.length > 1 && (
+                <Tabs
+                    defaultValue={defaultTab}
+                    value={selectedTab}
+                    onChange={onNavigateToTab}
+                    className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
+                >
+                    <Tabs.List>
+                        {roller.map((rolle) => (
+                            <Tabs.Tab
+                                key={rolle.ident}
+                                value={rolle.id.toString()}
+                                label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${rolle.ident}`}
+                            />
+                        ))}
+                    </Tabs.List>
+                    {roller.map((rolle) => {
+                        return (
+                            <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
+                                <SamværBarn gjelderBarn={rolle.ident} />
+                            </Tabs.Panel>
+                        );
+                    })}
+                </Tabs>
+            )}
+            {(roller.length === 1 || !vurderSeparat) && <SamværBarn gjelderBarn={roller[0].ident} />}
+        </div>
     );
 };
 export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
@@ -239,6 +303,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
     const behandling = useGetBehandlingV2();
     const saveSamværFn = useOnSaveSamvær();
     const deleteSamværFn = useOnDeleteSamværsperiode();
+    const virkningsdato = useVirkningsdato();
     const { control, getValues, clearErrors, setError, getFieldState, setValue } =
         useFormContext<SamværBarnformvalues>();
     const perioder = useFieldArray({
@@ -246,7 +311,8 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
         name: `${gjelderBarn}.perioder`,
     });
     const watchFieldArray = useWatch({ control, name: `${gjelderBarn}.perioder` });
-    const samvær = behandling.samvær.find((s) => s.gjelderBarn === gjelderBarn);
+    const samvær = behandling.samværV2.barn.find((s) => s.gjelderBarn === gjelderBarn);
+    const virkningstidspunkt = behandling.virkningstidspunktV3.barn.find((v) => v.rolle.ident === gjelderBarn);
     const samværId = samvær.id;
     const controlledFields = perioder.fields.map((field, index) => ({
         ...field,
@@ -295,12 +361,15 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 saveSamværFn.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,
-                        samvær: currentData.samvær.map((s) => {
-                            if (s.id === samværId) {
-                                return response.oppdatertSamvær;
-                            }
-                            return s;
-                        }),
+                        samværV2: {
+                            ...currentData.samværV2,
+                            barn: currentData.samværV2.barn.map((s) => {
+                                if (s.id === samværId) {
+                                    return response.oppdatertSamvær;
+                                }
+                                return s;
+                            }),
+                        },
                     };
                 });
             },
@@ -326,12 +395,15 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 saveSamværFn.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,
-                        samvær: currentData.samvær.map((s) => {
-                            if (s.gjelderBarn === gjelderBarn) {
-                                return response.oppdatertSamvær;
-                            }
-                            return s;
-                        }),
+                        samværV2: {
+                            ...currentData.samværV2,
+                            barn: currentData.samværV2.barn.map((s) => {
+                                if (s.gjelderBarn === gjelderBarn) {
+                                    return response.oppdatertSamvær;
+                                }
+                                return s;
+                            }),
+                        },
                     };
                 });
             },
@@ -369,15 +441,12 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 ? toISODateString(addDays(new Date(previousPeriode.tom), 1))
                 : toISODateString(addMonthsIgnoreDay(new Date(previousPeriode.fom), 1));
 
-            if (
-                new Date(fomDato) > getStartOfNextMonth() ||
-                new Date(fomDato) < new Date(behandling.virkningstidspunkt?.virkningstidspunkt)
-            ) {
+            if (new Date(fomDato) > getStartOfNextMonth() || new Date(fomDato) < new Date(virkningsdato)) {
                 return null;
             }
             return fomDato;
         }
-        return behandling.virkningstidspunkt?.virkningstidspunkt;
+        return dateToDDMMYYYYString(virkningsdato);
     };
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {
@@ -481,12 +550,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                                 <BodyShort size="small">
                                     {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
                                         "{}",
-                                        DateToDDMMYYYYString(
-                                            deductDays(
-                                                dateOrNull(behandling.virkningstidspunkt?.opphør?.opphørsdato),
-                                                1
-                                            )
-                                        )
+                                        DateToDDMMYYYYString(deductDays(dateOrNull(virkningstidspunkt?.opphørsdato), 1))
                                     )}
                                 </BodyShort>
                             )}

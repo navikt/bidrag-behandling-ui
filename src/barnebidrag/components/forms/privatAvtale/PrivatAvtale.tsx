@@ -29,7 +29,7 @@ import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isBeforeDate } from "@utils/date-utils";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { Fragment, useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -425,7 +425,7 @@ const Side = () => {
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     return (
-        <>
+        <Fragment key={selectedBarnIdent}>
             {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
@@ -443,7 +443,7 @@ const Side = () => {
                 />
             )}
             <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.PRIVAT_AVTALE))} />
-        </>
+        </Fragment>
     );
 };
 

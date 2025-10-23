@@ -16,10 +16,11 @@ import { andreVoksneIHusstandenBoforholdOptions } from "@common/helpers/boforhol
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useFomTomDato } from "@common/hooks/useFomTomDato";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Alert, Box, Button, Heading, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, formatDateToYearMonth, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
@@ -174,6 +175,7 @@ export const AndreVoksneIHusstanden = () => {
     const behandling = useGetBehandlingV2();
     const [showResetButton, setShowResetButton] = useState(false);
     const saveBoforhold = useOnSaveBoforhold();
+    const virkningsdato = useVirkningsdato();
     const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
     const perioder = useFieldArray({
@@ -302,7 +304,7 @@ export const AndreVoksneIHusstanden = () => {
         } else {
             const perioderValues = getValues(`andreVoksneIHusstanden`);
             perioder.append({
-                datoFom: behandling.virkningstidspunkt?.virkningstidspunkt,
+                datoFom: dateToDDMMYYYYString(virkningsdato),
                 datoTom: null,
                 bostatus: Bostatuskode.BOR_MED_ANDRE_VOKSNE,
                 kilde: Kilde.MANUELL,

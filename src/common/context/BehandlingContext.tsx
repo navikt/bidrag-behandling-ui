@@ -167,7 +167,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [nextTab, setNextTab] = useState<string>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
     const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
-        dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
+        dateOrNull(behandling.virkningstidspunktV3.eldsteVirkningstidspunkt),
         firstDayOfMonth(new Date())
     );
 
@@ -219,7 +219,6 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             .toSpliced(0, currentStepIndex + 1)
             .find((step) => step.visible && step.interactive);
 
-        console.log(firstNextInteractiveButton, sideMenu, currentStepIndex, currentStep);
         return stepsIndex[firstNextInteractiveButton.step];
     };
 
@@ -246,8 +245,8 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             activeStep,
             behandlingId,
             vedtakId,
-            erVirkningstidspunktNåværendeMånedEllerFramITid,
             beregnetGebyrErEndret,
+            erVirkningstidspunktNåværendeMånedEllerFramITid,
             type: behandling.type,
             lesemodus:
                 vedtaksperre ||
@@ -292,6 +291,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             behandling.vedtakstype,
             behandling.erVedtakUtenBeregning,
             behandling.kanBehandlesINyLøsning,
+            behandling.virkningstidspunktV3.eldsteVirkningstidspunkt,
             navigatingToNextPage,
             navigatingToNextTab,
             mutationStatus,

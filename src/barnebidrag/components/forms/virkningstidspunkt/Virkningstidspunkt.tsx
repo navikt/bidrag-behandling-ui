@@ -7,7 +7,7 @@ import {
     Stonadstype,
     TypeArsakstype,
     Vedtakstype,
-    VirkningstidspunktDtoV2,
+    VirkningstidspunktBarnDtoV2,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -17,6 +17,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -36,7 +37,19 @@ import {
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, HStack, Label, Radio, RadioGroup, Tabs, VStack } from "@navikt/ds-react";
+import {
+    BodyShort,
+    Box,
+    Button,
+    Heading,
+    HStack,
+    Label,
+    Radio,
+    RadioGroup,
+    Switch,
+    Tabs,
+    VStack,
+} from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, deductMonths } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
@@ -47,6 +60,7 @@ import KlagetPåVedtakButton, { OpprinneligVedtakButton } from "../../../../comm
 import { useQueryParams } from "../../../../common/hooks/useQueryParams";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultVirkningstidspunktTab } from "../../../hooks/useGetActiveAndDefaultVirkningstidspunktTab";
+import { useOnMergeVirkningtidspunkt } from "../../../hooks/useOnMergeVirkningtidspunkt";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
@@ -121,7 +135,7 @@ const getDefaultOpphørsvarighet = (opphørsdato: string, eksisterendeOpphør: s
 };
 
 const createInitialValues = (
-    response: VirkningstidspunktDtoV2[],
+    response: VirkningstidspunktBarnDtoV2[],
     stønadstype: Stonadstype,
     vedtakstype: Vedtakstype
 ): VirkningstidspunktFormValues => {
@@ -260,28 +274,38 @@ const Beregningsperiode = ({ barnIndex }: { barnIndex: number }) => {
 
 const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
-    const selectedBarn = behandling.virkningstidspunktV2.find(({ rolle }) => rolle.ident === item.rolle.ident);
+    const selectedBarnsVirkningstidspunkt = behandling.virkningstidspunktV3.barn.find(
+        ({ rolle }) => rolle.ident === item.rolle.ident
+    );
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
     const { getValues, reset, setValue } = useFormContext();
     const [opphørsvarighet, setOpphørsvarighet] = useState(getValues(`roller.${barnIndex}.opphørsvarighet`));
     const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
-    const valideringsfeilForBarn = selectedBarn.valideringsfeil?.kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak?.find(
-        (p) => p.ident === item.rolle.ident
-    );
+    const valideringsfeilForBarn =
+        selectedBarnsVirkningstidspunkt.valideringsfeil?.kanIkkeSetteOpphørsdatoEtterEtterfølgendeVedtak?.find(
+            (p) => p.ident === item.rolle.ident
+        );
     const tom = useMemo(() => {
-        if (selectedBarn.etterfølgendeVedtak != null && selectedBarn.beregnTil !== BeregnTil.INNEVAeRENDEMANED) {
-            return dateOrNull(selectedBarn.etterfølgendeVedtak.virkningstidspunkt);
+        if (
+            selectedBarnsVirkningstidspunkt.etterfølgendeVedtak != null &&
+            selectedBarnsVirkningstidspunkt.beregnTil !== BeregnTil.INNEVAeRENDEMANED
+        ) {
+            return dateOrNull(selectedBarnsVirkningstidspunkt.etterfølgendeVedtak.virkningstidspunkt);
         }
         if (behandling.stønadstype === Stonadstype.BIDRAG)
             return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
         return addMonths(new Date(), 50 * 12);
-    }, [selectedBarn]);
+    }, [selectedBarnsVirkningstidspunkt]);
 
     const updateOpphørsdato = () => {
         const values = getValues(`roller.${barnIndex}`);
         oppdaterOpphørsdato.mutation.mutate(
-            { idRolle: selectedBarn.rolle.id, opphørsdato: values.opphørsdato, simulerEndring: false },
+            {
+                idRolle: selectedBarnsVirkningstidspunkt.rolle.id,
+                opphørsdato: values.opphørsdato,
+                simulerEndring: false,
+            },
             {
                 onSuccess: (response) => {
                     oppdaterOpphørsdato.queryClientUpdater((currentData) => {
@@ -291,17 +315,21 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                         };
                     });
                     const updatedValues = createInitialValues(
-                        response.virkningstidspunktV2,
+                        response.virkningstidspunktV3.barn,
                         response.stønadstype,
                         response.vedtakstype
                     );
                     const updatedBarn = Object.values(updatedValues.roller).find(
-                        ({ rolle }) => rolle.ident === selectedBarn.rolle.ident
+                        ({ rolle }) => rolle.ident === selectedBarnsVirkningstidspunkt.rolle.ident
                     );
                     setValue(`roller.${barnIndex}.beregnTilDato`, updatedBarn.beregnTilDato);
 
                     setPreviousValues(
-                        createInitialValues(response.virkningstidspunktV2, response.stønadstype, response.vedtakstype)
+                        createInitialValues(
+                            response.virkningstidspunktV3.barn,
+                            response.stønadstype,
+                            response.vedtakstype
+                        )
                     );
                 },
                 onError: () => {
@@ -337,16 +365,20 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
         }
     };
 
-    if (behandling.virkningstidspunkt.avslag != null) return null;
+    if (selectedBarnsVirkningstidspunkt.avslag != null) return null;
     return (
         <>
-            {!lesemodus && selectedBarn.eksisterendeOpphør?.opphørsdato && (
+            {!lesemodus && selectedBarnsVirkningstidspunkt.eksisterendeOpphør?.opphørsdato && (
                 <BehandlingAlert variant="info" className="!w-[520px]">
                     <BodyShort>
                         {removePlaceholder(
                             text.alert.bidragOpphørt,
-                            DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.opphørsdato)),
-                            DateToDDMMYYYYString(dateOrNull(selectedBarn.eksisterendeOpphør?.vedtaksdato))
+                            DateToDDMMYYYYString(
+                                dateOrNull(selectedBarnsVirkningstidspunkt.eksisterendeOpphør?.opphørsdato)
+                            ),
+                            DateToDDMMYYYYString(
+                                dateOrNull(selectedBarnsVirkningstidspunkt.eksisterendeOpphør?.vedtaksdato)
+                            )
                         )}
                     </BodyShort>
                 </BehandlingAlert>
@@ -369,9 +401,9 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                     onSelect={(value) => onSelectVarighet(value)}
                 >
                     {getOpphørOptions(
-                        selectedBarn.eksisterendeOpphør,
+                        selectedBarnsVirkningstidspunkt.eksisterendeOpphør,
                         behandling.stønadstype,
-                        selectedBarn.rolle.fødselsdato
+                        selectedBarnsVirkningstidspunkt.rolle.fødselsdato
                     ).map((value) => (
                         <option key={value} value={value}>
                             {value}
@@ -398,12 +430,12 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
 
 const Side = () => {
     const { onStepChange, getNextStep } = useBehandlingProvider();
-    const { erBisysVedtak, virkningstidspunktV2, vedtakstype } = useGetBehandlingV2();
+    const { erBisysVedtak, virkningstidspunktV3: virkningstidspunkt, vedtakstype } = useGetBehandlingV2();
     const { getValues } = useFormContext<VirkningstidspunktFormValues>();
     const [activeTab] = useGetActiveAndDefaultVirkningstidspunktTab();
     const fieldIndex = getValues("roller").findIndex(({ rolle }) => rolle.ident === activeTab);
     const values = getValues(`roller.${fieldIndex}`);
-    const begrunnelseFraOpprinneligVedtak = virkningstidspunktV2.find(
+    const begrunnelseFraOpprinneligVedtak = virkningstidspunkt.barn.find(
         ({ rolle }) => rolle.ident === values.rolle.ident
     ).begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
@@ -447,8 +479,8 @@ const VirkningstidspunktBarn = ({
     const { setValue, clearErrors, getValues, watch, reset } = useFormContext();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const oppdaterBeregnTilDato = useOnUpdateBeregnTilDato();
-    const kunEtBarnIBehandlingen = behandling.virkningstidspunktV2.length === 1;
-    const selectedVirkningstidspunkt = behandling.virkningstidspunktV2.find(
+    const kunEtBarnIBehandlingen = behandling.virkningstidspunktV3.barn.length === 1;
+    const selectedVirkningstidspunkt = behandling.virkningstidspunktV3.barn.find(
         ({ rolle }) => rolle.ident === item.rolle.ident
     );
     const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
@@ -539,6 +571,7 @@ const VirkningstidspunktBarn = ({
                         ...currentData,
                         virkningstidspunkt: response.virkningstidspunkt,
                         virkningstidspunktV2: response.virkningstidspunktV2,
+                        virkningstidspunktV3: response.virkningstidspunktV3,
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                         inntekter: response.inntekter,
@@ -549,7 +582,7 @@ const VirkningstidspunktBarn = ({
                     };
                 });
                 const updatedValues = createInitialValues(
-                    response.virkningstidspunktV2,
+                    response.virkningstidspunktV3.barn,
                     response.stønadstype,
                     response.vedtakstype
                 );
@@ -593,7 +626,7 @@ const VirkningstidspunktBarn = ({
                         };
                     });
                     const updatedValues = createInitialValues(
-                        response.virkningstidspunktV2,
+                        response.virkningstidspunktV3.barn,
                         response.stønadstype,
                         response.vedtakstype
                     );
@@ -874,9 +907,13 @@ const VirkningstidspunktBarn = ({
 };
 
 const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }) => {
-    const { control } = useFormContext<VirkningstidspunktFormValues>();
-    const { onNavigateToTab } = useBehandlingProvider();
+    const { control, reset } = useFormContext<VirkningstidspunktFormValues>();
+    const { onNavigateToTab, setSaveErrorState } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
+    const { virkningstidspunktV3: virkningstidspunkt } = useGetBehandlingV2();
+    const mergeVirkningstidspunkterMutation = useOnMergeVirkningtidspunkt();
+    const [vurderSeparat, setVurderSeparat] = useState<boolean>(!virkningstidspunkt.erLikForAlle);
+    const ref = useRef<HTMLDialogElement>(null);
     const roller = useFieldArray({
         control,
         name: "roller",
@@ -894,54 +931,116 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
-    if (controlledFields.length > 1) {
-        return (
-            <Tabs
-                defaultValue={defaultTab}
-                value={selectedTab}
-                onChange={onNavigateToTab}
-                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
-            >
-                <Tabs.List>
-                    {controlledFields.map(({ rolle }) => (
-                        <Tabs.Tab
-                            key={rolle.ident}
-                            value={rolle.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
-                        />
-                    ))}
-                </Tabs.List>
-                {controlledFields.map((item, index) => {
-                    return (
-                        <Tabs.Panel key={item.rolle.ident} value={item.rolle.ident} className="grid gap-y-4 py-4">
-                            <VirkningstidspunktBarn
-                                item={item}
-                                barnIndex={index}
-                                initialValues={initialValues.roller[index]}
-                            />
-                        </Tabs.Panel>
-                    );
-                })}
-            </Tabs>
-        );
-    }
+    const onChangeVurderSeparat = () => {
+        mergeVirkningstidspunkterMutation.mutation.mutate(undefined, {
+            onSuccess: (response) => {
+                setVurderSeparat(false);
+                mergeVirkningstidspunkterMutation.queryClientUpdater((_) => response);
+                reset(
+                    createInitialValues(response.virkningstidspunktV3.barn, response.stønadstype, response.vedtakstype)
+                );
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onChangeVurderSeparat(),
+                    rollbackFn: () => {},
+                });
+            },
+            onSettled: () => {
+                ref?.current?.close();
+            },
+        });
+    };
 
     return (
-        <div className="grid gap-y-4 py-4">
-            <VirkningstidspunktBarn
-                key={controlledFields[0].id}
-                item={controlledFields[0]}
-                barnIndex={0}
-                initialValues={initialValues.roller[0]}
+        <div>
+            <ConfirmationModal
+                ref={ref}
+                closeable
+                description={text.varsel.ønskerDuÅSlåSammenVerdierDescription}
+                heading={<Heading size="small">{text.varsel.ønskerDuÅSlåSammenVerdier}</Heading>}
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            onClick={onChangeVurderSeparat}
+                            size="small"
+                            loading={mergeVirkningstidspunkterMutation.mutation.isPending}
+                        >
+                            {text.label.ja}
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={() => ref.current?.close()}>
+                            {text.label.avbryt}
+                        </Button>
+                    </>
+                }
             />
+            {virkningstidspunkt.barn.length > 1 && (
+                <Switch
+                    value="erLikForAlle"
+                    checked={vurderSeparat}
+                    onChange={(e) => {
+                        if (e.target.checked) {
+                            setVurderSeparat(e.target.checked);
+                        }
+                        if (!e.target.checked) {
+                            ref.current?.showModal();
+                        }
+                    }}
+                    size="small"
+                >
+                    {text.label.vurderSeparatPerBarn}
+                </Switch>
+            )}
+            {vurderSeparat && controlledFields.length > 1 && (
+                <Tabs
+                    defaultValue={defaultTab}
+                    value={selectedTab}
+                    onChange={onNavigateToTab}
+                    className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
+                >
+                    <Tabs.List>
+                        {controlledFields.map(({ rolle }) => (
+                            <Tabs.Tab
+                                key={rolle.ident}
+                                value={rolle.ident}
+                                label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
+                            />
+                        ))}
+                    </Tabs.List>
+                    {controlledFields.map((item, index) => {
+                        return (
+                            <Tabs.Panel key={item.rolle.ident} value={item.rolle.ident} className="grid gap-y-4 py-4">
+                                <VirkningstidspunktBarn
+                                    item={item}
+                                    barnIndex={index}
+                                    initialValues={initialValues.roller[index]}
+                                />
+                            </Tabs.Panel>
+                        );
+                    })}
+                </Tabs>
+            )}
+
+            {(controlledFields.length === 1 || !vurderSeparat) && (
+                <div className="grid gap-y-4 py-4">
+                    <VirkningstidspunktBarn
+                        key={controlledFields[0].id}
+                        item={controlledFields[0]}
+                        barnIndex={0}
+                        initialValues={initialValues.roller[0]}
+                    />
+                </div>
+            )}
         </div>
     );
 };
 
 const VirkningstidspunktForm = () => {
-    const { virkningstidspunktV2, stønadstype, vedtakstype } = useGetBehandlingV2();
+    const { virkningstidspunktV3: virkningstidspunkt, stønadstype, vedtakstype } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const initialValues = createInitialValues(virkningstidspunktV2, stønadstype, vedtakstype);
+    const initialValues = createInitialValues(virkningstidspunkt.barn, stønadstype, vedtakstype);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
