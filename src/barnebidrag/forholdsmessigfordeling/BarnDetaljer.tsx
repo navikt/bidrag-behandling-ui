@@ -4,6 +4,7 @@ import { BodyShort, Box, HGrid, Label } from "@navikt/ds-react";
 import { ForholdsmessigFordelingBarnDto } from "../../api/BidragBehandlingApiV1";
 import BehandlingLenke from "../../common/components/BehandlingLenke";
 import SakLenke from "../../common/components/SakLenke";
+import Søknadslenke from "../../common/components/Søknadslenke";
 import { dateOrNull, DateToMMYYYYString } from "../../utils/date-utils";
 
 interface BarnDetaljerProps {
@@ -49,12 +50,11 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
                     <Label size="small">Har åpen behandling?</Label>
                     <BodyShort>
                         {barn.åpenBehandling ? "Ja" : "Nei"}{" "}
-                        {barn.åpenBehandling?.behandlingId && (
+                        {barn.åpenBehandling?.behandlingId ? (
                             <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />
-                        )}
-                        {barn.åpenBehandling?.behandlingId && (
-                            <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />
-                        )}
+                        ) : barn.åpenBehandling?.søknadsid ? (
+                            <Søknadslenke id={barn.åpenBehandling.søknadsid} />
+                        ) : null}
                     </BodyShort>
                 </Box>
             </HGrid>
@@ -67,6 +67,7 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
             return (
                 <BodyShort size="small">
                     Revurdering fra {DateToMMYYYYString(dateOrNull(barn.åpenBehandling?.søktFraDato))}
+                    {barn.åpenBehandling?.søknadsid && <Søknadslenke id={barn.åpenBehandling.søknadsid} />}
                 </BodyShort>
             );
         }
@@ -107,7 +108,7 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
                     <BodyShort size="small">{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
                 </Box>
                 <Box>
-                    <Label size="small">Type</Label>
+                    <Label size="small">Søknad</Label>
                     <BodyShort size="small">{renderType()}</BodyShort>
                 </Box>
             </HGrid>

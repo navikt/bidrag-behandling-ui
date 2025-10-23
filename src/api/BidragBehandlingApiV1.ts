@@ -303,6 +303,7 @@ export enum PrivatAvtaleType {
 }
 
 export enum OpplysningerType {
+  UKJENT = "UKJENT",
   ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
   BARNETILLEGG = "BARNETILLEGG",
   BARNETILSYN = "BARNETILSYN",
@@ -970,8 +971,11 @@ export interface BehandlingDtoV2 {
   behandlerenhet: string;
   /** @uniqueItems true */
   roller: RolleDto[];
+  /** @uniqueItems true */
+  bpsBarnUtenLøpendeBidrag: BpsBarnUtenLopendeBidragDto[];
+  virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
+  virkningstidspunktV3: VirkningstidspunktDtoV3;
   virkningstidspunkt: VirkningstidspunktDto;
-  virkningstidspunktV2: VirkningstidspunktDtoV2[];
   inntekter: InntekterDtoV2;
   boforhold: BoforholdDtoV2;
   gebyr?: GebyrDto;
@@ -1179,6 +1183,8 @@ export interface ForholdsmessigFordelingApenBehandlingDto {
   behandlerEnhet: string;
   /** @format int64 */
   behandlingId?: number;
+  /** @format int64 */
+  søknadsid?: number;
 }
 
 export interface GebyrDto {
@@ -1561,8 +1567,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  harPeriodiseringsfeil: boolean;
   gjelderBarn?: string;
+  harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
 }
 
@@ -1605,8 +1611,8 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  harPeriodiseringsfeil: boolean;
   gjelderBarn?: string;
+  harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
 }
 
@@ -2571,6 +2577,7 @@ export interface OpprettBehandlingFraVedtakRequest {
   /** @format int64 */
   søknadsreferanseid?: number;
   søknadstype?: Behandlingstype;
+  behandlingstema?: Behandlingstema;
 }
 
 export interface KanBehandlesINyLosningRequest {
@@ -2613,7 +2620,7 @@ export interface SjekkForholdmessigFordelingResponse {
 }
 
 export interface FatteVedtakRequestDto {
-  skalIndeksreguleres: Record<string, boolean>;
+  skalIndeksreguleres?: Record<string, boolean>;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2622,6 +2629,20 @@ export interface FatteVedtakRequestDto {
 export interface FatteVedtakFeil {
   feilmelding: string;
   ugyldigPerioder: TypeArManedsperiode[];
+}
+
+export interface HentApneBehandlingerRequest {
+  barnIdent: string;
+}
+
+export interface HentApneBehandlingerRespons {
+  getåpneBehandling: TypeApenBehandling[];
+}
+
+export interface TypeApenBehandling {
+  stønadstype: Stonadstype;
+  /** @format int64 */
+  behandlingId: number;
 }
 
 export interface BeregnetBidragPerBarn {
@@ -2716,10 +2737,9 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3087,10 +3107,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
   type: OpplysningerType;
   rolle: RolleDto;
-  /** @format int64 */
-  underholdskostnadId?: number;
   /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
   gjelderBarn?: HusstandsmedlemDto;
+  /** @format int64 */
+  underholdskostnadId?: number;
 }
 
 export interface ArbeidOgInntektLenkeRequest {
@@ -3372,10 +3392,9 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattAlminneligInntektMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
   skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3445,13 +3464,10 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   erAvvisning: boolean;
-  avslagVisningsnavnUtenPrefiks?: string;
-  kategoriVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
-  erAvvisning: boolean;
   avslagVisningsnavnUtenPrefiks?: string;
   avslagVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3512,8 +3528,8 @@ export interface NotatGebyrRolleDto {
   begrunnelse?: string;
   beløpGebyrsats: number;
   rolle: DokumentmalPersonDto;
-  gebyrResultatVisningsnavn: string;
   erManueltOverstyrt: boolean;
+  gebyrResultatVisningsnavn: string;
 }
 
 export interface NotatInntektDto {
@@ -3845,6 +3861,7 @@ export interface NotatVirkningstidspunktBarnDto {
    */
   notat: NotatBegrunnelseDto;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVirkningstidspunktDto {
@@ -4847,6 +4864,25 @@ export class Api<
       }),
 
     /**
+     * @description Sjekk om behandling kan behandles i ny løsning
+     *
+     * @tags behandling-controller-v-2
+     * @name KanBehandlingBehandlesINyBisys
+     * @request POST:/api/v2/behandling/kanBehandles/bisys/{behandlingsid}
+     * @secure
+     */
+    kanBehandlingBehandlesINyBisys: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/v2/behandling/kanBehandles/bisys/${behandlingsid}`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags forholdsmessig-fordeling-controller
@@ -4920,6 +4956,28 @@ export class Api<
     ) =>
       this.request<number, FatteVedtakFeil>({
         path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Hent åpne behandlinger
+     *
+     * @tags behandling-controller-v-2
+     * @name HentApneBehandlinger
+     * @request POST:/api/v2/behandling/apnebehandlinger
+     * @secure
+     */
+    hentApneBehandlinger: (
+      data: HentApneBehandlingerRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<HentApneBehandlingerRespons, any>({
+        path: `/api/v2/behandling/apnebehandlinger`,
         method: "POST",
         body: data,
         secure: true,
