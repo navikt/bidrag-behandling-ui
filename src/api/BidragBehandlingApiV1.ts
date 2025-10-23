@@ -2526,6 +2526,7 @@ export interface OpprettBehandlingFraVedtakRequest {
   /** @format int64 */
   søknadsreferanseid?: number;
   søknadstype?: Behandlingstype;
+  behandlingstema?: Behandlingstema;
 }
 
 export interface KanBehandlesINyLosningRequest {
@@ -2546,9 +2547,9 @@ export interface KanBehandlesINyLosningRequest {
   /** @format date */
   mottattdato?: string;
   /** Rolle beskrivelse som er brukte til å opprette nye roller */
-  bidragspliktig?: SjekkRolleDto;
-  /** Rolle beskrivelse som er brukte til å opprette nye roller */
   bidragsmottaker?: SjekkRolleDto;
+  /** Rolle beskrivelse som er brukte til å opprette nye roller */
+  bidragspliktig?: SjekkRolleDto;
   søknadsbarn: SjekkRolleDto[];
 }
 
@@ -2561,7 +2562,7 @@ export interface SjekkRolleDto {
 }
 
 export interface FatteVedtakRequestDto {
-  skalIndeksreguleres: Record<string, boolean>;
+  skalIndeksreguleres?: Record<string, boolean>;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2570,6 +2571,20 @@ export interface FatteVedtakRequestDto {
 export interface FatteVedtakFeil {
   feilmelding: string;
   ugyldigPerioder: TypeArManedsperiode[];
+}
+
+export interface HentApneBehandlingerRequest {
+  barnIdent: string;
+}
+
+export interface HentApneBehandlingerRespons {
+  getåpneBehandling: TypeApenBehandling[];
+}
+
+export interface TypeApenBehandling {
+  stønadstype: Stonadstype;
+  /** @format int64 */
+  behandlingId: number;
 }
 
 export interface BeregnetBidragPerBarn {
@@ -3455,8 +3470,8 @@ export interface NotatGebyrRolleDto {
   begrunnelse?: string;
   beløpGebyrsats: number;
   rolle: DokumentmalPersonDto;
-  erManueltOverstyrt: boolean;
   gebyrResultatVisningsnavn: string;
+  erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -3554,8 +3569,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3787,8 +3802,8 @@ export interface NotatVirkningstidspunktBarnDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
 }
 
 export interface NotatVirkningstidspunktDto {
@@ -4806,6 +4821,28 @@ export class Api<
     ) =>
       this.request<number, FatteVedtakFeil>({
         path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Hent åpne behandlinger
+     *
+     * @tags behandling-controller-v-2
+     * @name HentApneBehandlinger
+     * @request POST:/api/v2/behandling/apnebehandlinger
+     * @secure
+     */
+    hentApneBehandlinger: (
+      data: HentApneBehandlingerRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<HentApneBehandlingerRespons, any>({
+        path: `/api/v2/behandling/apnebehandlinger`,
         method: "POST",
         body: data,
         secure: true,
