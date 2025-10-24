@@ -16,7 +16,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
         if (barn.åpenBehandling?.medInnkreving && !barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja</BodyShort>;
         }
-        if ((barn.åpenBehandling == null || barn.åpenBehandling?.medInnkreving) && barn.innkrevesFraDato) {
+        if ((barn.åpenBehandling == null || barn.åpenBehandling.medInnkreving) && barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja, fra {DateToMMYYYYString(dateOrNull(barn.innkrevesFraDato))}</BodyShort>;
         }
         return <BodyShort size="small">Nei</BodyShort>;
