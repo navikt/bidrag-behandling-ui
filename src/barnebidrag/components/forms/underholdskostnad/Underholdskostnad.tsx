@@ -154,7 +154,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes(fieldName) && (type === "change" || type === undefined)) {
+            if (name?.includes(fieldName) && (type === "change" || type === undefined)) {
                 if (tabIsAndreBarn && getValues("underholdskostnaderAndreBarn").length === 0) {
                     return;
                 }
