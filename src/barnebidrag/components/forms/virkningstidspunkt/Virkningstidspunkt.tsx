@@ -20,7 +20,6 @@ import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -36,7 +35,7 @@ import {
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { deductDays, ObjectUtils, PersonNavnIdent, toISODateString } from "@navikt/bidrag-ui-common";
 import {
     BodyShort,
     Box,
@@ -1005,7 +1004,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.ident}
-                                label={`${ROLE_FORKORTELSER.BA} ${rolle.ident}`}
+                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} />}
                             />
                         ))}
                     </Tabs.List>

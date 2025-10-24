@@ -20,7 +20,7 @@ import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { Buildings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
@@ -315,7 +315,7 @@ export const InntektTabel = ({
     const addPeriod = (periode: InntektFormPeriode) => {
         fieldArray.append({
             ...periode,
-            datoFom: dateToDDMMYYYYString(virkningsdato),
+            datoFom: toISODateString(virkningsdato),
             erRedigerbart: true,
             kanRedigeres: true,
         });

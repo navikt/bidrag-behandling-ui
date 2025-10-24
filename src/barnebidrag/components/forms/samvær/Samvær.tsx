@@ -15,7 +15,6 @@ import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { actionOnEnter } from "@common/helpers/keyboardHelpers";
@@ -32,7 +31,7 @@ import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "@common/hooks/useS
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { SamværBarnformvalues, SamværPeriodeFormvalues } from "@common/types/samværFormValues";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, deductDays, PersonNavn } from "@navikt/bidrag-ui-common";
+import { deductDays, PersonNavn, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Switch, Table, Tabs } from "@navikt/ds-react";
 import {
     addDays,
@@ -273,7 +272,7 @@ const Main = () => {
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.id.toString()}
-                                label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${rolle.ident}`}
+                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} />}
                             />
                         ))}
                     </Tabs.List>
@@ -446,7 +445,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             }
             return fomDato;
         }
-        return dateToDDMMYYYYString(virkningsdato);
+        return toISODateString(virkningsdato);
     };
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {

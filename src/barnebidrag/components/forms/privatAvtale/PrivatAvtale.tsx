@@ -18,7 +18,6 @@ import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
@@ -132,7 +131,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                         <Tabs.Tab
                             key={gjelderBarn.ident}
                             value={gjelderBarn.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${gjelderBarn.ident}`}
+                            label={<PersonNavnIdent ident={gjelderBarn.ident} rolle={Rolletype.BA} />}
                         />
                     ))}
                 </Tabs.List>
