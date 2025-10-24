@@ -131,7 +131,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                         <Tabs.Tab
                             key={gjelderBarn.ident}
                             value={gjelderBarn.ident}
-                            label={<PersonNavnIdent ident={gjelderBarn.ident} rolle={Rolletype.BA} />}
+                            label={<PersonNavnIdent ident={gjelderBarn.ident} rolle={Rolletype.BA} skjulNavn />}
                         />
                     ))}
                 </Tabs.List>

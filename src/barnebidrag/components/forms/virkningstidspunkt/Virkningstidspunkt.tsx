@@ -1004,7 +1004,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.ident}
-                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} />}
+                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
                             />
                         ))}
                     </Tabs.List>

@@ -272,7 +272,7 @@ const Main = () => {
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.id.toString()}
-                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} />}
+                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
                             />
                         ))}
                     </Tabs.List>
@@ -285,11 +285,17 @@ const Main = () => {
                     })}
                 </Tabs>
             )}
-            {(roller.length === 1 || !vurderSeparat) && <SamværBarn gjelderBarn={roller[0].ident} />}
+            {(roller.length === 1 || !vurderSeparat) && <SamværBarn gjelderBarn={roller[0].ident} displayRoleDetails />}
         </div>
     );
 };
-export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
+export const SamværBarn = ({
+    gjelderBarn,
+    displayRoleDetails,
+}: {
+    gjelderBarn: string;
+    displayRoleDetails?: boolean;
+}) => {
     const {
         lesemodus,
         erVirkningstidspunktNåværendeMånedEllerFramITid,
@@ -518,15 +524,17 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 className="overflow-hidden grid gap-2 py-2 px-4 w-full"
                 id={`${elementIds.seksjon_samvær}_${samværId}`}
             >
-                <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white">
-                    <div>
-                        <RolleTag rolleType={Rolletype.BA} />
+                {displayRoleDetails && (
+                    <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white">
+                        <div>
+                            <RolleTag rolleType={Rolletype.BA} />
+                        </div>
+                        <BodyShort size="small" className="flex items-center gap-4">
+                            <PersonNavn bold ident={gjelderBarn}></PersonNavn>
+                            <span>{DateToDDMMYYYYString(dateOrNull())}</span>
+                        </BodyShort>
                     </div>
-                    <BodyShort size="small" className="flex items-center gap-4">
-                        <PersonNavn bold ident={gjelderBarn}></PersonNavn>
-                        <span>{DateToDDMMYYYYString(dateOrNull())}</span>
-                    </BodyShort>
-                </div>
+                )}
                 {!lesemodus && valideringsfeil?.harPeriodiseringsfeil && (
                     <div className="mb-4">
                         <BehandlingAlert variant="warning">

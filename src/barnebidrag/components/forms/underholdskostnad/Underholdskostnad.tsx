@@ -54,7 +54,9 @@ const Main = () => {
                         <Tabs.Tab
                             key={`tab-${underhold.gjelderBarn.id}`}
                             value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
-                            label={<PersonNavnIdent ident={underhold.gjelderBarn.ident} rolle={Rolletype.BA} />}
+                            label={
+                                <PersonNavnIdent ident={underhold.gjelderBarn.ident} rolle={Rolletype.BA} skjulNavn />
+                            }
                         />
                     ))}
                     <Tabs.Tab
