@@ -41,13 +41,13 @@ export const NesteIndeksår = ({ nesteIndeksår, barnId }: { nesteIndeksår?: nu
     const { vedtakstype, lesemodus } = useGetBehandlingV2();
     const erInnkreving = vedtakstype === Vedtakstype.INNKREVING;
     useEffect(() => {
-        setSkalIndeksreguleres(barnId, nesteIndeksår !== undefined);
+        setSkalIndeksreguleres(barnId, !!nesteIndeksår);
     }, []);
     return (
         <HStack gap="2" className="items-center">
             {erInnkreving && (
                 <Switch
-                    defaultChecked={skalIndeksreguleres[barnId]}
+                    checked={skalIndeksreguleres.get(barnId)}
                     readOnly={!!lesemodus}
                     size="small"
                     onChange={(e) => setSkalIndeksreguleres(barnId, e.target.checked)}
@@ -55,7 +55,7 @@ export const NesteIndeksår = ({ nesteIndeksår, barnId }: { nesteIndeksår?: nu
                     Skal indeksreguleres
                 </Switch>
             )}
-            {skalIndeksreguleres[barnId] && (
+            {skalIndeksreguleres.get(barnId) && (
                 <ResultatDescription
                     data={[
                         {
@@ -76,12 +76,13 @@ export const VedtakProvider = ({ children, className }: { children: React.ReactN
         <VedtakContext
             value={{
                 skalIndeksreguleres,
-                setSkalIndeksreguleres: (barnId: string, value: boolean) =>
+                setSkalIndeksreguleres: (barnId: string, value: boolean) => {
                     setSkalIndeksreguleres((prev) => {
                         const newMap = new Map(prev);
                         newMap.set(barnId, value);
                         return newMap;
-                    }),
+                    });
+                },
             }}
         >
             <div className={className}>{children}</div>
