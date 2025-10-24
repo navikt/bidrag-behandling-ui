@@ -64,7 +64,7 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} />}
+                        label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
                     />
                 ))}
             </Tabs.List>
