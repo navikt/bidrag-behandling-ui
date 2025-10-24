@@ -3,7 +3,7 @@ import {
     Resultatkode,
     TypeArsakstype,
     Vedtakstype,
-    VirkningstidspunktDtoV2,
+    VirkningstidspunktBarnDtoV2,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -76,7 +76,7 @@ const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR, Re
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const createInitialValues = (response: VirkningstidspunktDtoV2[]): VirkningstidspunktFormValues => {
+const createInitialValues = (response: VirkningstidspunktBarnDtoV2[]): VirkningstidspunktFormValues => {
     return {
         roller: response.map((virkningstidspunkt) => {
             return {
@@ -175,6 +175,7 @@ const VirkningstidspunktRolle = ({
                         ...currentData,
                         virkningstidspunkt: response.virkningstidspunkt,
                         virkningstidspunktV2: response.virkningstidspunktV2,
+                        virkningstidspunktV3: response.virkningstidspunktV3,
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                         inntekter: response.inntekter,
@@ -184,7 +185,7 @@ const VirkningstidspunktRolle = ({
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
-                const updatedValues = createInitialValues(response.virkningstidspunktV2);
+                const updatedValues = createInitialValues(response.virkningstidspunktV3.barn);
                 const selectedBarn = Object.values(updatedValues.roller).find(
                     ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
                 );

@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 interface TableData {
     label?: string | number | ReactElement;
     labelBold?: boolean;
-    value: string | number | ReactElement;
+    value?: string | number | ReactElement;
     result?: string | number | ReactElement;
     textRight?: boolean;
 }

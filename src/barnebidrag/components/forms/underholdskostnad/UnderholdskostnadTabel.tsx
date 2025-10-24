@@ -11,6 +11,8 @@ import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
@@ -64,11 +66,8 @@ export const UnderholdskostnadTabel = ({
     createPayload: (index: number) => StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto;
     children: (props: UnderholdskostnadTableChildrenProps) => React.ReactNode;
 }) => {
-    const {
-        søktFomDato,
-        underholdskostnader,
-        virkningstidspunkt: { virkningstidspunkt },
-    } = useGetBehandlingV2();
+    const { underholdskostnader } = useGetBehandlingV2();
+    const virkningsdato = useVirkningsdato();
     const { lesemodus, setSaveErrorState, setErrorMessage, setErrorModalOpen } = useBehandlingProvider();
     const { control, clearErrors, getValues, getFieldState, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const fieldArray = useFieldArray({
@@ -239,7 +238,7 @@ export const UnderholdskostnadTabel = ({
     const addPeriod = (periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode) => {
         fieldArray.append({
             ...periode,
-            datoFom: virkningstidspunkt ?? søktFomDato,
+            datoFom: dateToDDMMYYYYString(virkningsdato),
             erRedigerbart: true,
             kanRedigeres: true,
         });

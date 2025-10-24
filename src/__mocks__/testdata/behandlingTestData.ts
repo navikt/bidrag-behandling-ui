@@ -29,6 +29,7 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
     erBisysVedtak: false,
     medInnkreving: false,
     kanBehandlesINyLøsning: true,
+    skalInnkrevingKunneUtsettes: false,
     underholdskostnader: [],
     roller: [
         {
@@ -123,11 +124,40 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
                 kunINotat: "",
                 innhold: "",
             },
+            harLøpendeForskudd: false,
             harLøpendeBidrag: false,
             kanSkriveVurderingAvSkolegang: false,
             manuelleVedtak: [],
         },
     ],
+    virkningstidspunktV3: {
+        erLikForAlle: false,
+        erAvslagForAlle: false,
+        eldsteVirkningstidspunkt: "",
+        barn: [
+            {
+                rolle: {
+                    id: 1,
+                    rolletype: Rolletype.BA,
+                    ident: "03522150877",
+                },
+                virkningstidspunkt: "",
+                årsak: null,
+                begrunnelse: {
+                    kunINotat: "",
+                    innhold: "",
+                },
+                notat: {
+                    kunINotat: "",
+                    innhold: "",
+                },
+                harLøpendeForskudd: false,
+                harLøpendeBidrag: false,
+                kanSkriveVurderingAvSkolegang: false,
+                manuelleVedtak: [],
+            },
+        ],
+    },
     aktiveGrunnlagsdata: {
         arbeidsforhold: [],
         husstandsbarn: [],

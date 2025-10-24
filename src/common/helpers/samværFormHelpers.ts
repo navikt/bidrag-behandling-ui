@@ -1,5 +1,5 @@
 import {
-    SamvaerDto,
+    SamvaerBarnDto,
     SamvaerskalkulatorDetaljer,
     SamvaerskalkulatorFerietype,
     SamvaerskalkulatorNetterFrekvens,
@@ -14,7 +14,7 @@ import {
     SamværskalkulatorFormValues,
 } from "../types/samværFormValues";
 
-export const createInitialValues = (samvær: SamvaerDto[]): SamværBarnformvalues => {
+export const createInitialValues = (samvær: SamvaerBarnDto[]): SamværBarnformvalues => {
     return samvær.reduce(
         (acc, barn) => ({
             ...acc,
@@ -23,7 +23,7 @@ export const createInitialValues = (samvær: SamvaerDto[]): SamværBarnformvalue
         {}
     );
 };
-export const createSamværInitialValues = (samvær: SamvaerDto): Samværformvalues => {
+export const createSamværInitialValues = (samvær: SamvaerBarnDto): Samværformvalues => {
     return {
         begrunnelse: samvær.begrunnelse.innhold,
         perioder: samvær.perioder.map((periode) => createSamværsperiodeInitialValues(periode)),
