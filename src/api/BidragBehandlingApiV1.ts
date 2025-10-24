@@ -1169,6 +1169,7 @@ export interface ForholdsmessigFordelingBarnDto {
   saksnr: string;
   enhet: string;
   erRevurdering: boolean;
+  stønadstype?: Stonadstype;
   harLøpendeBidrag: boolean;
   innkrevesFraDato?: string;
   sammeSakSomBehandling: boolean;
@@ -1569,8 +1570,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  harPeriodiseringsfeil: boolean;
   gjelderBarn?: string;
+  harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
 }
 
@@ -1613,8 +1614,8 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  harPeriodiseringsfeil: boolean;
   gjelderBarn?: string;
+  harPeriodiseringsfeil: boolean;
   gjelderBarnNavn?: string;
 }
 
@@ -3473,10 +3474,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  erAvvisning: boolean;
-  kategoriVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
+  erAvvisning: boolean;
+  avslagVisningsnavnUtenPrefiks?: string;
+  kategoriVisningsnavn?: string;
   avslagVisningsnavn?: string;
 }
 
@@ -5084,6 +5085,22 @@ export class Api<
     ignorerHentGrunnlag: (behandlingId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v2/admin/grunnlag/ignorer/${behandlingId}`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description Opprett aldersjustering behandling for sak
+     *
+     * @tags admin-controller
+     * @name AvsluttFfSoknad
+     * @request POST:/api/v2/admin/avslutt/ff/{behandlingId}
+     * @secure
+     */
+    avsluttFfSoknad: (behandlingId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/v2/admin/avslutt/ff/${behandlingId}`,
         method: "POST",
         secure: true,
         ...params,

@@ -7,76 +7,85 @@ import { BEHANDLING_API_V1 } from "../../common/constants/api";
 import { useGetBehandlingV2 } from "../../common/hooks/useApiData";
 import useFeatureToogle from "../../common/hooks/useFeatureToggle";
 
+type AdminAction = {
+    key: string;
+    label: string;
+    confirmLabel: string;
+    icon: React.ComponentType<any>;
+    mutation: ReturnType<typeof useMutation>;
+};
+
 export const AdminPanel: React.FC = () => {
     const { isAdminEnabled } = useFeatureToogle();
     const behandling = useGetBehandlingV2();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [confirmAction, setConfirmAction] = useState<
-        "reset_vedtak" | "delete" | "reset_grunnlag" | "ignore_grunnlag" | null
-    >(null);
+    const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
+    const avsluttFF = useMutation({
+        mutationFn: () => BEHANDLING_API_V1.api.avsluttFfSoknad(behandling.id),
+    });
     const slettBehandling = useMutation({
-        mutationFn: () => {
-            return BEHANDLING_API_V1.api.slettBehandling(behandling.id);
-        },
+        mutationFn: () => BEHANDLING_API_V1.api.slettBehandling(behandling.id),
     });
     const resetVedtak = useMutation({
-        mutationFn: () => {
-            return BEHANDLING_API_V1.api.resetFattetVedtak(behandling.id);
-        },
+        mutationFn: () => BEHANDLING_API_V1.api.resetFattetVedtak(behandling.id),
     });
     const resetGrunnlag = useMutation({
-        mutationFn: () => {
-            return BEHANDLING_API_V1.api.resetHentGrunnlag(behandling.id);
-        },
+        mutationFn: () => BEHANDLING_API_V1.api.resetHentGrunnlag(behandling.id),
     });
     const ignoreGrunnlag = useMutation({
-        mutationFn: () => {
-            return BEHANDLING_API_V1.api.ignorerHentGrunnlag(behandling.id);
-        },
+        mutationFn: () => BEHANDLING_API_V1.api.ignorerHentGrunnlag(behandling.id),
     });
-    const handleIgnorerGrunnlag = async () => {
-        if (confirmAction !== "ignore_grunnlag") {
-            setConfirmAction("ignore_grunnlag");
+
+    const actions: AdminAction[] = [
+        {
+            key: "ignore_grunnlag",
+            label: "Ignorer grunnlagsinnhenting",
+            confirmLabel: "Bekreft ignorer grunnlagsinnhenting",
+            icon: ArrowCirclepathIcon,
+            mutation: ignoreGrunnlag,
+        },
+        {
+            key: "reset_grunnlag",
+            label: "Reset grunnlagsinnhenting",
+            confirmLabel: "Bekreft reset grunnlagsinnhenting",
+            icon: ArrowCirclepathIcon,
+            mutation: resetGrunnlag,
+        },
+        {
+            key: "reset_vedtak",
+            label: "Tilbakestill behandling",
+            confirmLabel: "Bekreft tilbakestilling",
+            icon: ArrowCirclepathIcon,
+            mutation: resetVedtak,
+        },
+        {
+            key: "delete",
+            label: "Slett behandling",
+            confirmLabel: "Bekreft sletting",
+            icon: TrashIcon,
+            mutation: slettBehandling,
+        },
+        {
+            key: "avslutt_ff",
+            label: "Avslutt FF",
+            confirmLabel: "Bekreft avslutning",
+            icon: TrashIcon,
+            mutation: avsluttFF,
+        },
+    ];
+
+    const handleAction = async (action: AdminAction) => {
+        if (confirmAction !== action.key) {
+            setConfirmAction(action.key);
             return;
         }
-
-        await ignoreGrunnlag.mutate();
+        await action.mutation.mutate();
         setIsModalOpen(false);
         setConfirmAction(null);
     };
-    const handleResetGrunnlag = async () => {
-        if (confirmAction !== "reset_grunnlag") {
-            setConfirmAction("reset_grunnlag");
-            return;
-        }
 
-        await resetGrunnlag.mutate();
-        setIsModalOpen(false);
-        setConfirmAction(null);
-    };
-    const handleResetVedtak = async () => {
-        if (confirmAction !== "reset_vedtak") {
-            setConfirmAction("reset_vedtak");
-            return;
-        }
-
-        await resetVedtak.mutate();
-        setIsModalOpen(false);
-        setConfirmAction(null);
-    };
-
-    const handleDelete = async () => {
-        if (confirmAction !== "delete") {
-            setConfirmAction("delete");
-            return;
-        }
-
-        await slettBehandling.mutate();
-    };
-
-    const isLoading =
-        slettBehandling.isPending || resetVedtak.isPending || resetGrunnlag.isPending || ignoreGrunnlag.isPending;
+    const isLoading = actions.some((action) => action.mutation.isPending);
     const resetConfirmation = () => setConfirmAction(null);
 
     if (!isAdminEnabled) return null;
@@ -102,61 +111,23 @@ export const AdminPanel: React.FC = () => {
                         </Alert>
 
                         {confirmAction && (
-                            <Alert variant="error">
-                                Er du sikker på at du vil tilbakestille behandlingen? All data vil gå tapt.
-                            </Alert>
+                            <Alert variant="error">Er du sikker på at du vil tilbakestille behandlingen?.</Alert>
                         )}
 
                         <div className="flex flex-col gap-3">
-                            <Button
-                                variant={confirmAction === "ignore_grunnlag" ? "danger" : "secondary"}
-                                size="medium"
-                                icon={<ArrowCirclepathIcon />}
-                                onClick={handleIgnorerGrunnlag}
-                                loading={isLoading && confirmAction === "ignore_grunnlag"}
-                                disabled={isLoading}
-                            >
-                                {confirmAction === "ignore_grunnlag"
-                                    ? "Bekreft ignorer grunnlagsinnhenting"
-                                    : "Ignorer grunnlagsinnhenting"}
-                            </Button>
-
-                            <Button
-                                variant={confirmAction === "reset_grunnlag" ? "danger" : "secondary"}
-                                size="medium"
-                                icon={<ArrowCirclepathIcon />}
-                                onClick={handleResetGrunnlag}
-                                loading={isLoading && confirmAction === "reset_grunnlag"}
-                                disabled={isLoading}
-                            >
-                                {confirmAction === "reset_grunnlag"
-                                    ? "Bekreft reset grunnlagsinnhenting"
-                                    : "Reset grunnlagsinnhenting"}
-                            </Button>
-
-                            <Button
-                                variant={confirmAction === "reset_vedtak" ? "danger" : "secondary"}
-                                size="medium"
-                                icon={<ArrowCirclepathIcon />}
-                                onClick={handleResetVedtak}
-                                loading={isLoading && confirmAction === "reset_vedtak"}
-                                disabled={isLoading}
-                            >
-                                {confirmAction === "reset_vedtak"
-                                    ? "Bekreft tilbakestilling"
-                                    : "Tilbakestill behandling"}
-                            </Button>
-
-                            <Button
-                                variant={confirmAction === "delete" ? "danger" : "secondary"}
-                                size="medium"
-                                icon={<TrashIcon />}
-                                onClick={handleDelete}
-                                loading={isLoading && confirmAction === "delete"}
-                                disabled={isLoading}
-                            >
-                                {confirmAction === "delete" ? "Bekreft sletting" : "Slett behandling"}
-                            </Button>
+                            {actions.map((action) => (
+                                <Button
+                                    key={action.key}
+                                    variant={confirmAction === action.key ? "danger" : "secondary"}
+                                    size="medium"
+                                    icon={<action.icon />}
+                                    onClick={() => handleAction(action)}
+                                    loading={isLoading && confirmAction === action.key}
+                                    disabled={isLoading}
+                                >
+                                    {confirmAction === action.key ? action.confirmLabel : action.label}
+                                </Button>
+                            ))}
 
                             {confirmAction && (
                                 <Button

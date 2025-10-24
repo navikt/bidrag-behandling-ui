@@ -1,10 +1,11 @@
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, HGrid, Label } from "@navikt/ds-react";
 
-import { ForholdsmessigFordelingBarnDto } from "../../api/BidragBehandlingApiV1";
+import { ForholdsmessigFordelingBarnDto, Stonadstype } from "../../api/BidragBehandlingApiV1";
 import BehandlingLenke from "../../common/components/BehandlingLenke";
 import SakLenke from "../../common/components/SakLenke";
 import Søknadslenke from "../../common/components/Søknadslenke";
+import { useGetBehandlingV2 } from "../../common/hooks/useApiData";
 import { dateOrNull, DateToMMYYYYString } from "../../utils/date-utils";
 
 interface BarnDetaljerProps {
@@ -12,12 +13,16 @@ interface BarnDetaljerProps {
 }
 
 export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
+    const { stønadstype } = useGetBehandlingV2();
     function renderInnkreving() {
         if (barn.åpenBehandling?.medInnkreving && !barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja</BodyShort>;
         }
         if ((barn.åpenBehandling == null || barn.åpenBehandling.medInnkreving) && barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja, fra {DateToMMYYYYString(dateOrNull(barn.innkrevesFraDato))}</BodyShort>;
+        }
+        if (barn.harLøpendeBidrag) {
+            return <BodyShort size="small">Ja</BodyShort>;
         }
         return <BodyShort size="small">Nei</BodyShort>;
     }
@@ -51,10 +56,14 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
                         <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
                     </BodyShort>
                 </Box>
-                {/* <Box>
-                    <Label size="small">Har løpende bidrag?</Label>
-                    <BodyShort>{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
-                </Box> */}
+                {stønadstype !== barn.stønadstype && barn.stønadstype && (
+                    <Box>
+                        <Label size="small">Søkt om</Label>
+                        <BodyShort>
+                            {barn.stønadstype === Stonadstype.BIDRAG18AAR ? "Bidrag 18 år" : "Bidrag"}{" "}
+                        </BodyShort>
+                    </Box>
+                )}
                 <Box>
                     <Label size="small">Innkreving</Label>
                     <BodyShort>{renderInnkreving()} </BodyShort>
