@@ -16,6 +16,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdaterePrivatAvtaleBegrunnelseRequest,
     OppdaterePrivatAvtaleRequest,
     OppdaterePrivatAvtaleResponsDto,
     OppdatereUnderholdResponse,
@@ -764,7 +765,24 @@ export const useUpdateGebyr = () => {
         },
     });
 };
+export const useUpdatePrivatAvtaleBegrunnelse = () => {
+    const { behandlingId } = useBehandlingProvider();
 
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterePrivatAvtale(behandlingId),
+        mutationFn: async (
+            payload: OppdaterePrivatAvtaleBegrunnelseRequest
+        ): Promise<OppdaterePrivatAvtaleResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterPrivatAvtaleV2(Number(behandlingId), payload);
+
+            return data;
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+        },
+    });
+};
 export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
     const { behandlingId } = useBehandlingProvider();
 

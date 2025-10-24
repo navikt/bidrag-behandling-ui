@@ -19,6 +19,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
@@ -85,6 +86,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     const { onNavigateToTab } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
 
+    const { bidragFlereBarn } = useFeatureToogle();
     const roller = useFieldArray({
         control,
         name: "roller",
@@ -140,7 +142,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                                 }
                             />
                         ))}
-                        <Tabs.Tab key="andrebarn" value="andrebarn" label="Andre barn" />
+                        {bidragFlereBarn && <Tabs.Tab key="andrebarn" value="andrebarn" label="Andre barn" />}
                     </Tabs.List>
                     {controlledFields.map((item, index) => {
                         return (
@@ -159,9 +161,11 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                             </Tabs.Panel>
                         );
                     })}
-                    <Tabs.Panel key={"andrebarn"} value={"andrebarn"} className="grid gap-y-4">
-                        <PrivatAvtaleAndreBarn initialValues={initialValues} />
-                    </Tabs.Panel>
+                    {bidragFlereBarn && (
+                        <Tabs.Panel key={"andrebarn"} value={"andrebarn"} className="grid gap-y-4">
+                            <PrivatAvtaleAndreBarn initialValues={initialValues} />
+                        </Tabs.Panel>
+                    )}
                 </Tabs>
             </>
         );

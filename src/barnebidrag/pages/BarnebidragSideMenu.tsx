@@ -14,6 +14,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { Rolletype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import useFeatureToogle from "../../common/hooks/useFeatureToggle";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 import ForholdsmessigFordelingInfo from "../forholdsmessigfordeling/ForholdsmessigFordelingInfo";
@@ -731,6 +732,8 @@ const menuButtonMap = {
 
 export const BarnebidragSideMenu = () => {
     const { sideMenu } = useBehandlingProvider();
+    const { bidragFlereBarn } = useFeatureToogle();
+
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -749,10 +752,14 @@ export const BarnebidragSideMenu = () => {
         <div className="flex flex-col">
             <SideMenu
                 otherChildren={
-                    <VStack className="mt-4" gap="3">
-                        <OpprettForholdsmessigFordelingPrompt />
-                        <ForholdsmessigFordelingInfo />
-                    </VStack>
+                    <>
+                        {bidragFlereBarn && (
+                            <VStack className="mt-4" gap="3">
+                                <OpprettForholdsmessigFordelingPrompt />
+                                <ForholdsmessigFordelingInfo />
+                            </VStack>
+                        )}
+                    </>
                 }
             >
                 {sideMenu

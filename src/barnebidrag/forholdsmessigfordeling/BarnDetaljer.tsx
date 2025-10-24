@@ -12,6 +12,15 @@ interface BarnDetaljerProps {
 }
 
 export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
+    function renderInnkreving() {
+        if (barn.åpenBehandling?.medInnkreving && !barn.innkrevesFraDato) {
+            return <BodyShort size="small">Ja</BodyShort>;
+        }
+        if ((barn.åpenBehandling == null || barn.åpenBehandling?.medInnkreving) && barn.innkrevesFraDato) {
+            return <BodyShort size="small">Ja, fra {DateToMMYYYYString(dateOrNull(barn.innkrevesFraDato))}</BodyShort>;
+        }
+        return <BodyShort size="small">Nei</BodyShort>;
+    }
     return (
         <Box
             background="surface-subtle"
@@ -46,6 +55,10 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
                     <Label size="small">Har løpende bidrag?</Label>
                     <BodyShort>{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
                 </Box> */}
+                <Box>
+                    <Label size="small">Innkreving</Label>
+                    <BodyShort>{renderInnkreving()} </BodyShort>
+                </Box>
                 <Box>
                     <Label size="small">Har åpen behandling?</Label>
                     <BodyShort>

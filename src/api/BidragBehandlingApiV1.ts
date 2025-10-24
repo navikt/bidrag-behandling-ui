@@ -33,47 +33,6 @@ export enum BehandlingsrefKilde {
   ALDERSJUSTERING_FORSKUDD = "ALDERSJUSTERING_FORSKUDD",
 }
 
-export enum Valutakode {
-  ALL = "ALL",
-  ANG = "ANG",
-  AUD = "AUD",
-  BAM = "BAM",
-  BGN = "BGN",
-  BRL = "BRL",
-  CAD = "CAD",
-  CHF = "CHF",
-  CNY = "CNY",
-  CZK = "CZK",
-  DKK = "DKK",
-  EEK = "EEK",
-  EUR = "EUR",
-  GBP = "GBP",
-  HKD = "HKD",
-  HRK = "HRK",
-  HUF = "HUF",
-  INR = "INR",
-  ISK = "ISK",
-  JPY = "JPY",
-  LTL = "LTL",
-  LVL = "LVL",
-  MAD = "MAD",
-  NOK = "NOK",
-  NZD = "NZD",
-  PKR = "PKR",
-  PLN = "PLN",
-  RON = "RON",
-  RSD = "RSD",
-  SEK = "SEK",
-  THB = "THB",
-  TND = "TND",
-  TRY = "TRY",
-  UAH = "UAH",
-  USD = "USD",
-  VND = "VND",
-  ZAR = "ZAR",
-  PHP = "PHP",
-}
-
 export enum Utgiftstype {
   KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
   KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
@@ -163,6 +122,47 @@ export enum Vedtakstype {
   KLAGE = "KLAGE",
   ENDRING = "ENDRING",
   ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
+export enum Valutakode {
+  ALL = "ALL",
+  ANG = "ANG",
+  AUD = "AUD",
+  BAM = "BAM",
+  BGN = "BGN",
+  BRL = "BRL",
+  CAD = "CAD",
+  CHF = "CHF",
+  CNY = "CNY",
+  CZK = "CZK",
+  DKK = "DKK",
+  EEK = "EEK",
+  EUR = "EUR",
+  GBP = "GBP",
+  HKD = "HKD",
+  HRK = "HRK",
+  HUF = "HUF",
+  INR = "INR",
+  ISK = "ISK",
+  JPY = "JPY",
+  LTL = "LTL",
+  LVL = "LVL",
+  MAD = "MAD",
+  NOK = "NOK",
+  NZD = "NZD",
+  PKR = "PKR",
+  PLN = "PLN",
+  RON = "RON",
+  RSD = "RSD",
+  SEK = "SEK",
+  THB = "THB",
+  TND = "TND",
+  TRY = "TRY",
+  UAH = "UAH",
+  USD = "USD",
+  VND = "VND",
+  ZAR = "ZAR",
+  PHP = "PHP",
 }
 
 export enum SoktAvType {
@@ -1170,6 +1170,7 @@ export interface ForholdsmessigFordelingBarnDto {
   enhet: string;
   erRevurdering: boolean;
   harLøpendeBidrag: boolean;
+  innkrevesFraDato?: string;
   sammeSakSomBehandling: boolean;
   åpenBehandling?: ForholdsmessigFordelingApenBehandlingDto;
 }
@@ -1180,6 +1181,7 @@ export interface ForholdsmessigFordelingApenBehandlingDto {
   /** @format date */
   mottattDato?: string;
   stønadstype: Stonadstype;
+  medInnkreving: boolean;
   behandlerEnhet: string;
   /** @format int64 */
   behandlingId?: number;
@@ -1567,8 +1569,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarn?: string;
   gjelderBarnNavn?: string;
 }
 
@@ -1611,8 +1613,8 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarn?: string;
   gjelderBarnNavn?: string;
 }
 
@@ -2156,11 +2158,19 @@ export interface OppdaterePrivatAvtaleRequest {
   oppdaterPeriode?: OppdaterePrivatAvtalePeriodeDto;
   /** @format int64 */
   slettePeriodeId?: number;
+  samværsklasse?: Samvaersklasse;
+  valute?: Valutakode;
 }
 
 export interface OppdaterePrivatAvtaleResponsDto {
   /** Privat avtale som ble oppdatert */
   oppdatertPrivatAvtale?: PrivatAvtaleDto;
+}
+
+export interface OppdaterePrivatAvtaleBegrunnelseRequest {
+  /** @format int64 */
+  privatavtaleid?: number;
+  begrunnelse?: string;
 }
 
 export interface OppdaterOpphorsdatoRequestDto {
@@ -2737,10 +2747,10 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
+  skattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -3392,10 +3402,10 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  skattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
   trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
+  skattMånedsbeløp: number;
 }
 
 export interface DokumentmalUnderholdEgneBarnIHusstand {
@@ -3464,10 +3474,10 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   erAvvisning: boolean;
-  vedtakstypeVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
-  avslagVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
+  vedtakstypeVisningsnavn?: string;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3528,8 +3538,8 @@ export interface NotatGebyrRolleDto {
   begrunnelse?: string;
   beløpGebyrsats: number;
   rolle: DokumentmalPersonDto;
-  erManueltOverstyrt: boolean;
   gebyrResultatVisningsnavn: string;
+  erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -4462,6 +4472,28 @@ export class Api<
         path: `/api/v2/behandling/${behandlingsid}/privatavtale/${privatavtaleid}`,
         method: "DELETE",
         secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description Oppdatere privat avtale. Returnerer oppdatert element.
+     *
+     * @tags privat-avtale-controller
+     * @name OppdaterPrivatAvtaleBegrunnelse
+     * @request PUT:/api/v2/behandling/{behandlingsid}/privatavtale/begrunnelse
+     * @secure
+     */
+    oppdaterPrivatAvtaleBegrunnelse: (
+      behandlingsid: number,
+      data: OppdaterePrivatAvtaleBegrunnelseRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/v2/behandling/${behandlingsid}/privatavtale/begrunnelse`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         ...params,
       }),
 
