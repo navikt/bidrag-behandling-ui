@@ -143,10 +143,8 @@ const VedtakResultat = () => {
 const BeregningTabellBarn = ({ resultatBarn }: { resultatBarn: ResultatBidragsberegningBarnDto }) => {
     const { isFetching, isLoading } = useGetBeregningBidrag(false);
 
-    const {
-        virkningstidspunkt: { avslag },
-        vedtakstype,
-    } = useGetBehandlingV2();
+    const { virkningstidspunktV3: virkningstidspunkt, vedtakstype } = useGetBehandlingV2();
+    const avslag = virkningstidspunkt.barn.find((v) => v.rolle.ident === resultatBarn.barn.ident)?.avslag;
 
     const erAvslag = avslag !== null && avslag !== undefined;
     const avvistAldersjustering =
