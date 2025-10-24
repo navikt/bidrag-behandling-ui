@@ -5,14 +5,13 @@ import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
-import { PersonIdent } from "@common/components/PersonIdent";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { toUnderholdskostnadTabQueryParameter } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Tabs } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -55,11 +54,7 @@ const Main = () => {
                         <Tabs.Tab
                             key={`tab-${underhold.gjelderBarn.id}`}
                             value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
-                            label={
-                                <div className="flex flex-row gap-1">
-                                    {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
-                                </div>
-                            }
+                            label={<PersonNavnIdent ident={underhold.gjelderBarn.ident} rolle={Rolletype.BA} />}
                         />
                     ))}
                     <Tabs.Tab
@@ -159,7 +154,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes(fieldName) && (type === "change" || type === undefined)) {
+            if (name?.includes(fieldName) && (type === "change" || type === undefined)) {
                 if (tabIsAndreBarn && getValues("underholdskostnaderAndreBarn").length === 0) {
                     return;
                 }
