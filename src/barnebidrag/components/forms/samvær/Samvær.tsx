@@ -377,7 +377,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             }
             return fomDato;
         }
-        return behandling.virkningstidspunkt?.virkningstidspunkt;
+        return behandling.virkningstidspunktV2[0].virkningstidspunkt;
     };
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {

@@ -9,12 +9,16 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
+import { VStack } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { Rolletype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import useFeatureToogle from "../../common/hooks/useFeatureToggle";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
+import ForholdsmessigFordelingInfo from "../forholdsmessigfordeling/ForholdsmessigFordelingInfo";
+import OpprettForholdsmessigFordelingPrompt from "../forholdsmessigfordeling/OpprettForholdsmessigFordeling";
 
 const VirkingstidspunktMenuButton = ({ activeButton, step }: { activeButton: string; step: string }) => {
     const { onStepChange } = useBehandlingProvider();
@@ -73,11 +77,12 @@ const PrivatAvtaleMenuButton = ({
     interactive: boolean;
 }) => {
     const { onStepChange } = useBehandlingProvider();
+    const { vedtakstype } = useGetBehandlingV2();
     return (
         <MenuButton
             step={step}
             interactive={interactive}
-            title={text.title.privatAvtale}
+            title={vedtakstype === Vedtakstype.INNKREVING ? text.title.innkreving : text.title.privatAvtale}
             onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
             active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
         />
@@ -727,6 +732,8 @@ const menuButtonMap = {
 
 export const BarnebidragSideMenu = () => {
     const { sideMenu } = useBehandlingProvider();
+    const { bidragFlereBarn } = useFeatureToogle();
+
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
@@ -742,20 +749,33 @@ export const BarnebidragSideMenu = () => {
     }, [searchParams, location]);
 
     return (
-        <SideMenu>
-            {sideMenu
-                .filter((menu) => menu.visible)
-                .map((menuButton, index) => {
-                    const Component = menuButtonMap[menuButton.step];
-                    return (
-                        <Component
-                            key={index + menuButton.step}
-                            activeButton={activeButton}
-                            step={index + 1}
-                            interactive={menuButton.interactive}
-                        />
-                    );
-                })}
-        </SideMenu>
+        <div className="flex flex-col">
+            <SideMenu
+                otherChildren={
+                    <>
+                        {bidragFlereBarn && (
+                            <VStack className="mt-4" gap="3">
+                                <OpprettForholdsmessigFordelingPrompt />
+                                <ForholdsmessigFordelingInfo />
+                            </VStack>
+                        )}
+                    </>
+                }
+            >
+                {sideMenu
+                    .filter((menu) => menu.visible)
+                    .map((menuButton, index) => {
+                        const Component = menuButtonMap[menuButton.step];
+                        return (
+                            <Component
+                                key={index + menuButton.step}
+                                activeButton={activeButton}
+                                step={index + 1}
+                                interactive={menuButton.interactive}
+                            />
+                        );
+                    })}
+            </SideMenu>
+        </div>
     );
 };

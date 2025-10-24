@@ -30,6 +30,7 @@ import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } 
 import { SærligeutgifterStepper } from "../../særbidrag/enum/SærligeutgifterStepper";
 import behandlingQueryKeys from "../constants/behandlingQueryKeys";
 import useFeatureToogle from "../hooks/useFeatureToggle";
+import { useQueryParams } from "../hooks/useQueryParams";
 
 interface SaveErrorState {
     error: boolean;
@@ -39,6 +40,7 @@ interface SaveErrorState {
 interface IBehandlingContext {
     activeStep: string;
     behandlingId: string;
+    enhet: string;
     vedtakId: string;
     type: TypeBehandling;
     lesemodus: boolean;
@@ -137,6 +139,8 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [beregnetGebyrErEndret, setBeregnetGebyrErEndret] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
+    const enhet = useQueryParams().get("enhet");
+
     const activeStep = (searchParams.get(behandlingQueryKeys.steg) ?? defaultStep) as
         | BarnebidragStepper
         | ForskuddStepper
@@ -245,6 +249,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         () => ({
             activeStep,
             behandlingId,
+            enhet,
             vedtakId,
             erVirkningstidspunktNåværendeMånedEllerFramITid,
             beregnetGebyrErEndret,

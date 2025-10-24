@@ -16,6 +16,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdaterePrivatAvtaleBegrunnelseRequest,
     OppdaterePrivatAvtaleRequest,
     OppdaterePrivatAvtaleResponsDto,
     OppdatereUnderholdResponse,
@@ -35,6 +36,7 @@ import {
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
+    SjekkForholdmessigFordelingResponse,
     SletteSamvaersperiodeElementDto,
     SletteUnderholdselement,
     StonadTilBarnetilsynAktiveGrunnlagDto,
@@ -99,10 +101,19 @@ export const QueryKeys = {
         behandlingId,
         vedtakId,
     ],
+    sjekkFF: (behandlingId: string) => ["behandlingV2", "FF", QueryKeys.behandlingVersion, behandlingId],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person", ident],
     manuelleVedtak: (behandlingId: string) => ["manuelleVedtak", behandlingId],
+};
+export const useRefetchFFInfo = () => {
+    const { id } = useGetBehandlingV2();
+    const client = useQueryClient();
+    return () => {
+        client.refetchQueries({ queryKey: QueryKeys.behandlingV2(id.toString()) });
+        client.refetchQueries({ queryKey: QueryKeys.sjekkFF(id.toString()) });
+    };
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
@@ -241,6 +252,22 @@ export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     return useBehandlingV2(behandlingId, vedtakId);
 };
 
+export const useGetForholdsmessigFordelingDetaljer = (): SjekkForholdmessigFordelingResponse => {
+    const { behandlingId } = useBehandlingProvider();
+    const { data: response } = useSuspenseQuery({
+        queryKey: QueryKeys.sjekkFF(behandlingId),
+        queryFn: async () => {
+            try {
+                return (await BEHANDLING_API_V1.api.kanOppretteForholdsmessigFordeling(Number(behandlingId))).data;
+            } catch (e) {
+                console.log(e);
+                return { kanOppretteForholdsmessigFordeling: false } as SjekkForholdmessigFordelingResponse;
+            }
+        },
+        staleTime: Infinity,
+    });
+    return response;
+};
 export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
@@ -253,11 +280,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                         })
                     ).data;
                 }
-                return (
-                    await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
-                        inkluderHistoriskeInntekter: true,
-                    })
-                ).data;
+                return (await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId))).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status === 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
@@ -742,7 +765,24 @@ export const useUpdateGebyr = () => {
         },
     });
 };
+export const useUpdatePrivatAvtaleBegrunnelse = () => {
+    const { behandlingId } = useBehandlingProvider();
 
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterePrivatAvtale(behandlingId),
+        mutationFn: async (
+            payload: OppdaterePrivatAvtaleBegrunnelseRequest
+        ): Promise<OppdaterePrivatAvtaleResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterPrivatAvtaleV2(Number(behandlingId), payload);
+
+            return data;
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+        },
+    });
+};
 export const useUpdatePrivatAvtale = (privatAvtaleId: number) => {
     const { behandlingId } = useBehandlingProvider();
 

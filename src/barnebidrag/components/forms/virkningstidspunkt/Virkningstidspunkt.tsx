@@ -516,6 +516,7 @@ const VirkningstidspunktBarn = ({
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opphørsdato]);
 
+    const erInnkreving = behandling.vedtakstype === Vedtakstype.INNKREVING;
     const erSøktAVIkkeBM = behandling.søktAv !== SoktAvType.BIDRAGSMOTTAKER;
     const erTypeOpphør =
         behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
@@ -776,7 +777,7 @@ const VirkningstidspunktBarn = ({
                 )}
             </FlexRow>
 
-            {showChangedVirkningsDatoAlert && (
+            {showChangedVirkningsDatoAlert && !erInnkreving && (
                 <BehandlingAlert variant="warning" className={"w-[488px]"}>
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
                 </BehandlingAlert>

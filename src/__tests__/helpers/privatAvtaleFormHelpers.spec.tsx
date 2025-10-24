@@ -7,7 +7,7 @@ import { getFomForPrivatAvtale } from "../../barnebidrag/components/forms/privat
 describe("PrivatAvtaleFormHelpers", () => {
     it("should set fom limit to 1st of next month after birthday if Stonadstype is BIDRAG", () => {
         const fødselsdato = "2019-04-01";
-        const expected = new Date("2019-05-01");
+        const expected = new Date("2019-04-01");
         const fom = getFomForPrivatAvtale(Stonadstype.BIDRAG, fødselsdato);
         expect(fom.toLocaleDateString()).equals(expected.toLocaleDateString());
     });

@@ -100,6 +100,10 @@ export default {
                 "./Forskudd": "./src/app.tsx",
                 "./Behandling": "./src/app.tsx",
             },
+            remotes: {
+                // bidrag_sak_ui: buildConfig.configureRemoteApp("bidrag_sak_ui"),
+                bidrag_sak_ui: "bidrag_sak_ui@http://localhost:5252/remoteEntry.js",
+            },
             shared: {
                 react: { singleton: true, requiredVersion: deps.dependencies.react },
                 "react-dom": { singleton: true, requiredVersion: deps.dependencies.react },
