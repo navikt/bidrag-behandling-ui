@@ -322,6 +322,10 @@ const PrivatAvtaleForm = () => {
     });
 
     useEffect(() => {
+        useFormMethods.reset(initialValues);
+    }, [initialValues]);
+
+    useEffect(() => {
         setPageErrorsOrUnsavedState((prevState) => ({
             ...prevState,
             privatAvtale: {

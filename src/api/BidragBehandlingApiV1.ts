@@ -1166,7 +1166,7 @@ export interface ForholdsmessigFordelingBarnDto {
   navn: string;
   /** @format date */
   fødselsdato?: string;
-  saksnr: string;
+  saksnr?: string;
   enhet: string;
   erRevurdering: boolean;
   stønadstype?: Stonadstype;
@@ -1182,6 +1182,8 @@ export interface ForholdsmessigFordelingApenBehandlingDto {
   /** @format date */
   mottattDato?: string;
   stønadstype: Stonadstype;
+  behandlingstype?: Behandlingstype;
+  søktAvType: SoktAvType;
   medInnkreving: boolean;
   behandlerEnhet: string;
   /** @format int64 */
@@ -1570,8 +1572,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   ingenLøpendePeriode: boolean;
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarn?: string;
   gjelderBarnNavn?: string;
 }
 
@@ -1614,8 +1616,8 @@ export interface SamvaerValideringsfeilDto {
   overlappendePerioder: OverlappendePeriode[];
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
-  gjelderBarn?: string;
   harPeriodiseringsfeil: boolean;
+  gjelderBarn?: string;
   gjelderBarnNavn?: string;
 }
 
@@ -3474,10 +3476,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  vedtakstypeVisningsnavn?: string;
-  erAvvisning: boolean;
   avslagVisningsnavnUtenPrefiks?: string;
   kategoriVisningsnavn?: string;
+  vedtakstypeVisningsnavn?: string;
+  erAvvisning: boolean;
   avslagVisningsnavn?: string;
 }
 

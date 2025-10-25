@@ -1,11 +1,12 @@
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, HGrid, Label } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, HGrid, Label } from "@navikt/ds-react";
 
 import { ForholdsmessigFordelingBarnDto, Stonadstype } from "../../api/BidragBehandlingApiV1";
 import BehandlingLenke from "../../common/components/BehandlingLenke";
 import SakLenke from "../../common/components/SakLenke";
 import Søknadslenke from "../../common/components/Søknadslenke";
 import { useGetBehandlingV2 } from "../../common/hooks/useApiData";
+import { hentVisningsnavn } from "../../common/hooks/useVisningsnavn";
 import { dateOrNull, DateToMMYYYYString } from "../../utils/date-utils";
 
 interface BarnDetaljerProps {
@@ -26,6 +27,23 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
         }
         return <BodyShort size="small">Nei</BodyShort>;
     }
+    function renderÅpenBehandling() {
+        let link = null;
+        let behandlingstype = null;
+        if (barn.åpenBehandling?.behandlingId) {
+            link = <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />;
+            behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
+        } else if (barn.åpenBehandling?.søknadsid) {
+            link = <Søknadslenke id={barn.åpenBehandling.søknadsid} />;
+            behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
+        }
+        return (
+            <>
+                {barn.åpenBehandling ? "Ja" : "Nei"} {link}
+                {behandlingstype ? `, (${behandlingstype})` : ""}
+            </>
+        );
+    }
     return (
         <Box
             background="surface-subtle"
@@ -35,49 +53,51 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
             borderRadius="medium"
             className="shadow-sm"
         >
+            {!barn.saksnr && (
+                <Alert variant="warning" size="small" inline className="mb-2">
+                    Ingen bidragssak funnet for barnet. Legg til eksisterende eller opprett bidragssak for å opprette FF
+                </Alert>
+            )}
             <HGrid gap="space-6" columns={{ xs: 1, sm: 2, md: 2 }} className="border-t border-border-subtle">
                 <Box>
                     <Label size="small" className="mb-1">
                         Barn
                     </Label>
-                    <BodyShort className="ml-[-3px]">
+                    <BodyShort size="small" className="ml-[-3px]">
                         <PersonNavnIdent ident={barn.ident} variant="compact" />
                     </BodyShort>
                 </Box>
-                <Box>
-                    <Label size="small">Bidragsmottaker</Label>
-                    <BodyShort className="ml-[-3px]">
-                        <PersonNavnIdent ident={barn.bidragsmottaker.ident} variant="compact" />
-                    </BodyShort>
-                </Box>
-                <Box>
-                    <Label size="small">Sak / Enhet</Label>
-                    <BodyShort>
-                        <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
-                    </BodyShort>
-                </Box>
+                {barn.bidragsmottaker.ident && (
+                    <Box>
+                        <Label size="small">Bidragsmottaker</Label>
+                        <BodyShort size="small" className="ml-[-3px]">
+                            <PersonNavnIdent ident={barn.bidragsmottaker.ident} variant="compact" />
+                        </BodyShort>
+                    </Box>
+                )}
+                {barn.saksnr && (
+                    <Box>
+                        <Label size="small">Sak / Enhet</Label>
+                        <BodyShort size="small">
+                            <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
+                        </BodyShort>
+                    </Box>
+                )}
                 {stønadstype !== barn.stønadstype && barn.stønadstype && (
                     <Box>
                         <Label size="small">Søkt om</Label>
-                        <BodyShort>
+                        <BodyShort size="small">
                             {barn.stønadstype === Stonadstype.BIDRAG18AAR ? "Bidrag 18 år" : "Bidrag"}{" "}
                         </BodyShort>
                     </Box>
                 )}
                 <Box>
                     <Label size="small">Innkreving</Label>
-                    <BodyShort>{renderInnkreving()} </BodyShort>
+                    <BodyShort size="small">{renderInnkreving()} </BodyShort>
                 </Box>
                 <Box>
                     <Label size="small">Har åpen behandling?</Label>
-                    <BodyShort>
-                        {barn.åpenBehandling ? "Ja" : "Nei"}{" "}
-                        {barn.åpenBehandling?.behandlingId ? (
-                            <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />
-                        ) : barn.åpenBehandling?.søknadsid ? (
-                            <Søknadslenke id={barn.åpenBehandling.søknadsid} />
-                        ) : null}
-                    </BodyShort>
+                    <BodyShort size="small">{renderÅpenBehandling()}</BodyShort>
                 </Box>
             </HGrid>
         </Box>
@@ -109,19 +129,19 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerProps) {
                     <Label size="small" className="mb-1">
                         Barn
                     </Label>
-                    <BodyShort className="ml-[-3px]">
+                    <BodyShort size="small" className="ml-[-3px]">
                         <PersonNavnIdent ident={barn.ident} variant="compact" />
                     </BodyShort>
                 </Box>
                 <Box>
                     <Label size="small">Bidragsmottaker</Label>
-                    <BodyShort className="ml-[-3px]">
+                    <BodyShort size="small" className="ml-[-3px]">
                         <PersonNavnIdent ident={barn.bidragsmottaker.ident} variant="compact" />
                     </BodyShort>
                 </Box>
                 <Box>
                     <Label size="small">Sak / Enhet</Label>
-                    <BodyShort>
+                    <BodyShort size="small">
                         <SakLenke saksnummer={barn.saksnr} /> / {barn.enhet}
                     </BodyShort>
                 </Box>

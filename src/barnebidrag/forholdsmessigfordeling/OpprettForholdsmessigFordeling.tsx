@@ -1,18 +1,20 @@
 import { Alert, Button, HStack, Modal, VStack } from "@navikt/ds-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { BEHANDLING_API_V1 } from "../../common/constants/api";
-import { useBehandlingProvider } from "../../common/context/BehandlingContext";
-import { QueryKeys, useGetBehandlingV2, useGetForholdsmessigFordelingDetaljer } from "../../common/hooks/useApiData";
+import {
+    useGetBehandlingV2,
+    useGetForholdsmessigFordelingDetaljer,
+    useRefetchFFInfo,
+} from "../../common/hooks/useApiData";
 import { BarnListeOpprettFF } from "./BarnListe";
 
 export default function OpprettForholdsmessigFordelingPrompt() {
     const { forholdsmessigFordeling, id } = useGetBehandlingV2();
-    const { behandlingId } = useBehandlingProvider();
+    const refetchFF = useRefetchFFInfo();
 
     const detaljer = useGetForholdsmessigFordelingDetaljer();
-    const client = useQueryClient();
     const [modalOpen, setModalOpen] = useState(false);
     const opprettFFFn = useMutation({
         mutationFn: () => {
@@ -20,7 +22,7 @@ export default function OpprettForholdsmessigFordelingPrompt() {
         },
         onSuccess: () => {
             setModalOpen(false);
-            client.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+            refetchFF();
         },
     });
     if (detaljer.kanOppretteForholdsmessigFordeling === false) return null;
@@ -29,6 +31,8 @@ export default function OpprettForholdsmessigFordelingPrompt() {
     function opprettForholsmessigFordeling() {
         opprettFFFn.mutate();
     }
+    const harBarnMedSak = detaljer.barn.some((b) => b.saksnr !== undefined);
+
     return (
         <>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} aria-label="">
@@ -41,14 +45,16 @@ export default function OpprettForholdsmessigFordelingPrompt() {
                     </VStack>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button
-                        size="small"
-                        variant="primary"
-                        onClick={() => opprettForholsmessigFordeling()}
-                        loading={opprettFFFn.isPending}
-                    >
-                        {harOpprettetFF ? "Oppdater" : "Opprett"}
-                    </Button>
+                    {harBarnMedSak && (
+                        <Button
+                            size="small"
+                            variant="primary"
+                            onClick={() => opprettForholsmessigFordeling()}
+                            loading={opprettFFFn.isPending}
+                        >
+                            {harOpprettetFF ? "Oppdater" : "Opprett"}
+                        </Button>
+                    )}
                 </Modal.Footer>
             </Modal>
             <Alert size="small" variant={harOpprettetFF ? "warning" : "info"}>
