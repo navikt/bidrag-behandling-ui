@@ -12,7 +12,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
-import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
+import { toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
@@ -238,7 +238,7 @@ export const UnderholdskostnadTabel = ({
     const addPeriod = (periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode) => {
         fieldArray.append({
             ...periode,
-            datoFom: dateToDDMMYYYYString(virkningsdato),
+            datoFom: toISODateString(virkningsdato),
             erRedigerbart: true,
             kanRedigeres: true,
         });

@@ -20,7 +20,7 @@ import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Alert, Box, Button, Heading, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, formatDateToYearMonth, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
@@ -304,7 +304,7 @@ export const AndreVoksneIHusstanden = () => {
         } else {
             const perioderValues = getValues(`andreVoksneIHusstanden`);
             perioder.append({
-                datoFom: dateToDDMMYYYYString(virkningsdato),
+                datoFom: toISODateString(virkningsdato),
                 datoTom: null,
                 bostatus: Bostatuskode.BOR_MED_ANDRE_VOKSNE,
                 kilde: Kilde.MANUELL,
