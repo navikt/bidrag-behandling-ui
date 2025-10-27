@@ -6,6 +6,7 @@ import path from "path";
 import rehypeSlug from "rehype-slug";
 import webpack from "webpack";
 
+import buildConfig from "./buildConfig.mjs";
 import deps from "./package.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
