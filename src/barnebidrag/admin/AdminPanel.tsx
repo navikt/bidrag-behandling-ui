@@ -11,7 +11,7 @@ type AdminAction = {
     key: string;
     label: string;
     confirmLabel: string;
-    icon: React.ComponentType<any>;
+    icon: React.ComponentType<unknown>;
     mutation: ReturnType<typeof useMutation>;
 };
 
