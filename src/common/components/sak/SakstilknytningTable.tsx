@@ -55,7 +55,7 @@ export default function SakstilknytningTable({ gjelderBarnIdent, onClose }: Saks
                         {
                             rolleType: Rolletype.BA,
                             type: Rolletype.BA,
-                            foedselsnummer: gjelderBarnIdent,
+                            fodselsnummer: gjelderBarnIdent,
                             mottagerErVerge: false,
                         },
                     ],

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 import { Rolletype } from "../../api/BidragBehandlingApiV1";
 
-const OpprettSakComponent = React.lazy(() => import("bidrag_sak_ui_v2/OpprettSakPage"));
+const OpprettSakComponent = React.lazy(() => import("bidrag_sak_ui/OpprettSak"));
 
 export interface IOpprettSakModalProps {
     ident: string;

@@ -80,6 +80,7 @@ export const AdminPanel: React.FC = () => {
             setConfirmAction(action.key);
             return;
         }
+        //@ts-ignore
         await action.mutation.mutate();
         setIsModalOpen(false);
         setConfirmAction(null);
