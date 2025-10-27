@@ -49,7 +49,7 @@ export default function SakstilknytningTable({ gjelderBarnIdent, onClose }: Saks
                 throw new MåBekrefteOpplysningerStemmerError();
             }
             try {
-                const oppdatertSak = SAK_API.sak.oppdaterSak({
+                const oppdatertSak = SAK_API.sak.oppdaterSakRoller({
                     saksnummer: oppdaterSak.saksnummer,
                     roller: [
                         {
@@ -60,7 +60,7 @@ export default function SakstilknytningTable({ gjelderBarnIdent, onClose }: Saks
                         },
                     ],
                 });
-                console.log("oppdatertSak", oppdatertSak);
+                console.log("oppdatertSak med roller", oppdatertSak);
             } catch (e) {
                 LoggerService.error("Feil ved oppdatering av sak", e);
             }

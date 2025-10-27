@@ -93,6 +93,46 @@ export interface OpprettSakResponse {
   saksnummer: string;
 }
 
+export interface OpprettMidlertidligTilgangRequest {
+  saksnummer: string;
+  enhet: string;
+  /** @format date */
+  tilgangTilOgMedDato?: string;
+  getårsak:
+    | "ADRE"
+    | "AUTO"
+    | "BRUS"
+    | "DISK"
+    | "EIER"
+    | "EIUT"
+    | "ERST"
+    | "KLIN"
+    | "MAAN"
+    | "MAKO"
+    | "MAUT"
+    | "MOT"
+    | "OORG";
+}
+
+export interface FjernMidlertidligTilgangRequest {
+  saksnummer: string;
+  enhet: string;
+  getårsak?:
+    | "ADRE"
+    | "AUTO"
+    | "BRUS"
+    | "DISK"
+    | "EIER"
+    | "EIUT"
+    | "ERST"
+    | "KLIN"
+    | "MAAN"
+    | "MAKO"
+    | "MAUT"
+    | "MOT"
+    | "OORG";
+}
+
 export interface OppdaterSakRequest {
   saksnummer: string;
   status?: "AK" | "IN" | "NY" | "SA" | "SO";
@@ -148,6 +188,12 @@ export interface OppdaterSakResponse {
   /** @format date */
   konvensjonsdato?: string;
   ffuReferansenr?: string;
+  roller: RolleDto[];
+}
+
+export interface OppdaterRollerISakRequest {
+  saksnummer: string;
+  /** @uniqueItems true */
   roller: RolleDto[];
 }
 
@@ -264,7 +310,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "https://bidrag-sak-q2.dev.intern.nav.no",
+      baseURL: axiosConfig.baseURL || "https://bidrag-sak-q1.dev.intern.nav.no",
     });
     this.secure = secure;
     this.format = format;
@@ -378,7 +424,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-sak
  * @version v1
- * @baseUrl https://bidrag-sak-q2.dev.intern.nav.no
+ * @baseUrl https://bidrag-sak-q1.dev.intern.nav.no
  */
 export class Api<
   SecurityDataType extends unknown,
@@ -425,6 +471,48 @@ export class Api<
       }),
 
     /**
+     * @description Opprett midlertidlig tilgang til sak
+     *
+     * @tags bidrag-sak-controller
+     * @name OpprettMidlertidligTilgang
+     * @request POST:/sak/tilgang/opprett
+     * @secure
+     */
+    opprettMidlertidligTilgang: (
+      data: OpprettMidlertidligTilgangRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/sak/tilgang/opprett`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Fjern midlertidlig tilgang fra sak
+     *
+     * @tags bidrag-sak-controller
+     * @name FjernMidlertidligTilgang
+     * @request POST:/sak/tilgang/fjern
+     * @secure
+     */
+    fjernMidlertidligTilgang: (
+      data: FjernMidlertidligTilgangRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/sak/tilgang/fjern`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
      * @description Oppdater sak
      *
      * @tags bidrag-sak-controller
@@ -435,6 +523,27 @@ export class Api<
     oppdaterSak: (data: OppdaterSakRequest, params: RequestParams = {}) =>
       this.request<OppdaterSakResponse, any>({
         path: `/sak/oppdater`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Oppdater sak roller
+     *
+     * @tags bidrag-sak-controller
+     * @name OppdaterSakRoller
+     * @request POST:/sak/oppdater/roller
+     * @secure
+     */
+    oppdaterSakRoller: (
+      data: OppdaterRollerISakRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<OppdaterSakResponse, any>({
+        path: `/sak/oppdater/roller`,
         method: "POST",
         body: data,
         secure: true,

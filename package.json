@@ -17,7 +17,7 @@
     "dev:localq1": "cross-env ENABLE_MOCK=true NODE_ENV=development STATIC_FILES_URL=https://bidrag-ui-static-files.intern.dev.nav.no DEPLOY_ENV=feature webpack serve --env envfile=.env.localq1.private --config webpack.dev.config.mjs",
     "build": "webpack --config webpack.prod.config.mjs",
     "build:api": "npm-run-all -p api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling",
-    "api:sak": "swagger-typescript-api generate -p https://bidrag-sak-q2.dev.intern.nav.no/v3/api-docs --axios -n SakApi.ts -o src/api",
+    "api:sak": "swagger-typescript-api generate -p https://bidrag-sak-q1.dev.intern.nav.no/v3/api-docs --axios -n SakApi.ts -o src/api",
     "api:organisasjon": "swagger-typescript-api generate -p https://bidrag-organisasjon-feature.dev.intern.nav.no/bidrag-organisasjon/v3/api-docs --axios -n OrganisasjonApi.ts -o src/api",
     "api:person": "swagger-typescript-api generate -p https://bidrag-person-q2.dev.intern.nav.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "swagger-typescript-api generate -p https://bidrag-grunnlag.intern.dev.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
