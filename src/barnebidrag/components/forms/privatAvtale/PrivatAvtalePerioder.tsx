@@ -8,7 +8,7 @@ import { FormControlledSelectField } from "../../../../common/components/formFie
 import { FormControlledSwitch } from "../../../../common/components/formFields/FormControlledSwitch";
 import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
 import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
-import { useGetBehandlingV2, useRefetchFFInfo } from "../../../../common/hooks/useApiData";
+import { useGetBehandlingV2, useRefetchFFInfoFn } from "../../../../common/hooks/useApiData";
 import { useDebounce } from "../../../../common/hooks/useDebounce";
 import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
@@ -50,7 +50,7 @@ export const PrivatAvtalePerioder = ({
         () => getTomForPrivatAvtale(selectedPrivatAvtale.gjelderBarn.fødselsdato),
         [selectedPrivatAvtale.gjelderBarn.fødselsdato]
     );
-    const refetchFFInfo = useRefetchFFInfo();
+    const refetchFFInfo = useRefetchFFInfoFn();
 
     useEffect(() => {
         const { error: avtaleDatoError } = getFieldState(`${prefix}.${barnIndex}.privatAvtale.avtaleDato`);
