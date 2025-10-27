@@ -21,7 +21,7 @@ export default merge(webpackCommon, {
             BIDRAG_BEHANDLING_URL: "",
             BIDRAG_ORGANISASJON_URL: "",
             BIDRAG_GRUNNLAG_URL: "",
-            BIDRAG_INNTEKT: "",
+            LEGACY_ENVIRONMENT: "",
             BISYS_URL: "",
             BIDRAG_DOKUMENT_PRODUKSJON: "",
             TELEMETRY_URL: "",
