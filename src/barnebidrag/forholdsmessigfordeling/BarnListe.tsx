@@ -20,9 +20,8 @@ export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProp
             </HStack>
             {behandlerenhet !== skalBehandlesAvEnhet && (
                 <Alert variant="info" size="small">
-                    En eller flere saker til BP tilhører enhet {skalBehandlesAvEnhet}
-                    Behandlingen vil derfor bli overført til enhet {skalBehandlesAvEnhet} etter forholdsmessig fordeling
-                    er opprettet
+                    En eller flere saker til BP tilhører enhet {skalBehandlesAvEnhet}. Behandlingen vil derfor bli
+                    overført til enhet {skalBehandlesAvEnhet} etter forholdsmessig fordeling er opprettet
                 </Alert>
             )}
             <div>
