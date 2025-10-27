@@ -6,6 +6,7 @@ import path from "path";
 import rehypeSlug from "rehype-slug";
 import webpack from "webpack";
 
+import buildConfig from "./buildConfig.mjs";
 import deps from "./package.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
@@ -101,8 +102,8 @@ export default {
                 "./Behandling": "./src/app.tsx",
             },
             remotes: {
-                // bidrag_sak_ui: buildConfig.configureRemoteApp("bidrag_sak_ui"),
-                bidrag_sak_ui: "bidrag_sak_ui@http://localhost:5252/remoteEntry.js",
+                bidrag_sak_ui_v2: buildConfig.configureRemoteApp("bidrag_sak_ui_v2"),
+                // bidrag_sak_ui_v2: "bidrag_sak_ui@http://localhost:5252/remoteEntry.js",
             },
             shared: {
                 react: { singleton: true, requiredVersion: deps.dependencies.react },

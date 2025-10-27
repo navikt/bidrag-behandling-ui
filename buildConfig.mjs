@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-import deps from "./package.json" with { type: "json" };
 
 console.log(process.env.STATIC_FILES_URL, process.env.DEPLOY_ENV);
 function generateBidragUiStaticUrl(appName) {
@@ -73,19 +72,6 @@ function initFedrationScript(appName, assetsUrl) {
         })`;
 }
 export default {
-    federationConfig: {
-        name: "bidrag_dokument_ui",
-        filename: "remoteEntry.js",
-        exposes: {
-            "./RegistrerJouranlpost": "./src/pages/registrereJournalpost/index.tsx",
-            "./VisJournalpost": "./src/pages/visjournalpost/index.tsx",
-            "./OpenDocument": "./src/pages/opendocument/index.tsx",
-        },
-        shared: {
-            react: { singleton: true, requiredVersion: deps.react, eager: false },
-            "react-dom": { singleton: true, requiredVersion: deps.react, eager: false },
-        },
-    },
     configureRemoteApp: (appName, assetsUrl) => {
         return initFedrationScript(appName, assetsUrl ?? generateBidragUiStaticUrl(appName));
     },

@@ -1558,6 +1558,8 @@ export interface PrivatAvtalePeriodeDto {
   id?: number;
   periode: DatoperiodeDto;
   beløp: number;
+  samværsklasse?: Samvaersklasse;
+  valuta?: Valutakode;
 }
 
 export interface PrivatAvtaleValideringsfeilDto {
@@ -2145,6 +2147,8 @@ export interface OppdaterePrivatAvtalePeriodeDto {
   id?: number;
   periode: DatoperiodeDto;
   beløp: number;
+  samværsklasse?: Samvaersklasse;
+  valuta?: Valutakode;
 }
 
 export interface OppdaterePrivatAvtaleRequest {
@@ -2161,8 +2165,6 @@ export interface OppdaterePrivatAvtaleRequest {
   oppdaterPeriode?: OppdaterePrivatAvtalePeriodeDto;
   /** @format int64 */
   slettePeriodeId?: number;
-  samværsklasse?: Samvaersklasse;
-  valute?: Valutakode;
 }
 
 export interface OppdaterePrivatAvtaleResponsDto {
@@ -2751,8 +2753,8 @@ export interface Skatt {
   trinnskatt: number;
   trygdeavgift: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3406,8 +3408,8 @@ export interface DokumentmalSkattBeregning {
   trinnskatt: number;
   trygdeavgift: number;
   skattAlminneligInntektMånedsbeløp: number;
-  trinnskattMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
   skattMånedsbeløp: number;
 }
 
@@ -3476,10 +3478,10 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   kategoriVisningsnavn?: string;
-  vedtakstypeVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
   erAvvisning: boolean;
+  vedtakstypeVisningsnavn?: string;
   avslagVisningsnavn?: string;
 }
 
@@ -3873,8 +3875,8 @@ export interface NotatVirkningstidspunktBarnDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  avslagVisningsnavn?: string;
   årsakVisningsnavn?: string;
+  avslagVisningsnavn?: string;
 }
 
 export interface NotatVirkningstidspunktDto {

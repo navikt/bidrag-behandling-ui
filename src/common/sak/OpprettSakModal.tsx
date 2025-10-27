@@ -1,25 +1,37 @@
-import React from "react";
+import { Button } from "@navikt/ds-react";
+import React, { useState } from "react";
 
-const OpprettSakComponent = React.lazy(() => import("bidrag_sak_ui/OpprettSak"));
+import { Rolletype } from "../../api/BidragBehandlingApiV1";
+
+const OpprettSakComponent = React.lazy(() => import("bidrag_sak_ui_v2/OpprettSakPage"));
 
 export interface IOpprettSakModalProps {
-    isOpen: boolean;
     ident: string;
+    bpIdent: string;
     navn: string;
+    rolle: Rolletype;
     eierfogd: string;
     onSubmit: (saksnummer: string) => void;
-    onClose: () => void;
 }
 
-export default function OpprettSakModal({ isOpen, ident, navn, eierfogd, onSubmit, onClose }: IOpprettSakModalProps) {
+export default function OpprettSakModal({ ident, rolle, navn, eierfogd, onSubmit, bpIdent }: IOpprettSakModalProps) {
+    const [modalOpen, setModalOpen] = useState(false);
+
     return (
-        <OpprettSakComponent
-            isOpen={isOpen}
-            ident={ident}
-            navn={navn}
-            eierfogd={eierfogd}
-            onSubmit={onSubmit}
-            onClose={onClose}
-        />
+        <>
+            <Button variant="secondary" size="xsmall" onClick={() => setModalOpen(true)}>
+                Opprett sak
+            </Button>
+            <OpprettSakComponent
+                isOpen={modalOpen}
+                ident={ident}
+                navn={navn}
+                rolle={rolle}
+                initialSelectedForeldre={{ ident: bpIdent, rolle: Rolletype.BP }}
+                eierfogd={eierfogd}
+                onSubmit={onSubmit}
+                onClose={() => setModalOpen(false)}
+            />
+        </>
     );
 }

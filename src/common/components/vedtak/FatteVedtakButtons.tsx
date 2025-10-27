@@ -12,17 +12,13 @@ import { FatteVedtakFeil, TypeBehandling, Vedtakstype } from "../../../api/Bidra
 import { useVedtakProvider } from "../../../barnebidrag/components/vedtak/VedtakCommon";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
+import { MåBekrefteOpplysningerStemmerError } from "../../constants/MåBekrefteOpplysningerStemmerError";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import { useQueryParams } from "../../hooks/useQueryParams";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
-export class MåBekrefteOpplysningerStemmerError extends Error {
-    constructor() {
-        super("Bekreft at opplysningene stemmer");
-    }
-}
 
 const utsettDagerListe = [3, 4, 5, 6, 7, 8, 9];
 const fatteVedtakMutationKey = ["fatteVedtak"];
@@ -157,8 +153,8 @@ export const FatteVedtakButtons = ({
                         {opprettesForsendelse
                             ? tekster.varsel.vedtakFattetUtenNotatDistribuert
                             : erAldersjustering
-                              ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
-                              : tekster.varsel.vedtakFattet}
+                                ? tekster.varsel.vedtakFattetAvvistUtenNotatForsendelse
+                                : tekster.varsel.vedtakFattet}
                     </BodyShort>
                 </Alert>
             )}

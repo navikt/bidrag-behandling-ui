@@ -10,7 +10,7 @@ import { default as urlSearchParams } from "@common/constants/behandlingQueryKey
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
-import { useGetBehandlingV2, useRefetchFFInfo } from "@common/hooks/useApiData";
+import { useGetBehandlingV2, useRefetchFFInfoFn } from "@common/hooks/useApiData";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { Alert, Box, Button, Heading, Tabs } from "@navikt/ds-react";
@@ -198,7 +198,7 @@ const PrivatAvtaleBarn = ({
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const createPrivatAvtale = useOnCreatePrivatAvtale();
     const { setValue } = useFormContext<PrivatAvtaleFormValues>();
-    const refetchFFInfo = useRefetchFFInfo();
+    const refetchFFInfo = useRefetchFFInfoFn();
 
     const onCreatePrivatAvtale = () => {
         const payload: BarnDto = {

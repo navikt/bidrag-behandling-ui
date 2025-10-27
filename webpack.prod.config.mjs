@@ -19,6 +19,7 @@ export default merge(webpackCommon, {
             BIDRAG_SAK_URL: "",
             BIDRAG_VEDTAK_URL: "",
             BIDRAG_BEHANDLING_URL: "",
+            BIDRAG_ORGANISASJON_URL: "",
             BIDRAG_GRUNNLAG_URL: "",
             BIDRAG_INNTEKT: "",
             BISYS_URL: "",

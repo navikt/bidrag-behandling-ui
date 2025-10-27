@@ -1,4 +1,4 @@
-import { BarnDto } from "@api/BidragBehandlingApiV1";
+import { BarnDto, Rolletype } from "@api/BidragBehandlingApiV1";
 import { AddBarnForm } from "@common/components/AddBarnForm";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -9,8 +9,9 @@ import React, { useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { ConfirmationModal } from "../../../../common/components/modal/ConfirmationModal";
+import { SakstilknytningModal } from "../../../../common/components/sak/SakstilknytningTable";
 import SakLenke from "../../../../common/components/SakLenke";
-import { useGetBehandlingV2, useRefetchFFInfo } from "../../../../common/hooks/useApiData";
+import { useGetBehandlingV2, useRefetchFFInfoFn } from "../../../../common/hooks/useApiData";
 import OpprettSakModal from "../../../../common/sak/OpprettSakModal";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
@@ -37,7 +38,7 @@ export const PrivatAvtaleAndreBarn = ({ initialValues }: { initialValues: Privat
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
 
     const createPrivatAvtale = useOnCreatePrivatAvtale();
-    const refetchFFInfo = useRefetchFFInfo();
+    const refetchFFInfo = useRefetchFFInfoFn();
 
     const onCreatePrivatAvtale = (item: PrivatAvtaleFormValue, index?: number) => {
         const payload: BarnDto = {
@@ -163,29 +164,28 @@ function PrivatAvtaleAnnenBarnDetaljer({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) {
-    const { behandlerenhet } = useGetBehandlingV2();
-    const [modalOpen, setModalOpen] = useState(false);
+    const { behandlerenhet, roller } = useGetBehandlingV2();
+    const refetchFFInfo = useRefetchFFInfoFn();
 
+    const bpIdent = roller.find((rolle) => rolle.rolletype === Rolletype.BP)?.ident;
     function renderBarnUtenLøpendeBidragDetaljer() {
         if (item.harLøpendeBidrag) return;
         if (!item.saksnummer) {
             return (
                 <Box background="surface-subtle" padding="space-16">
-                    <Button variant="secondary" size="xsmall" onClick={() => setModalOpen(true)}>
-                        Opprett sak
-                    </Button>
-                    {modalOpen && (
+                    <HStack gap={"2"}>
                         <OpprettSakModal
-                            isOpen={modalOpen}
                             ident={item.gjelderBarn.ident}
                             navn={item.gjelderBarn.navn}
+                            bpIdent={bpIdent}
+                            rolle={Rolletype.BA}
                             eierfogd={behandlerenhet}
                             onSubmit={() => {
-                                setModalOpen(false);
+                                refetchFFInfo();
                             }}
-                            onClose={() => setModalOpen(false)}
                         />
-                    )}
+                        <SakstilknytningModal gjelderBarnIdent={item.gjelderBarn.ident} />
+                    </HStack>
                 </Box>
             );
         }

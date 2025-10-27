@@ -6,13 +6,13 @@ import { BEHANDLING_API_V1 } from "../../common/constants/api";
 import {
     useGetBehandlingV2,
     useGetForholdsmessigFordelingDetaljer,
-    useRefetchFFInfo,
+    useRefetchFFInfoFn,
 } from "../../common/hooks/useApiData";
 import { BarnListeOpprettFF } from "./BarnListe";
 
 export default function OpprettForholdsmessigFordelingPrompt() {
     const { forholdsmessigFordeling, id } = useGetBehandlingV2();
-    const refetchFF = useRefetchFFInfo();
+    const refetchFF = useRefetchFFInfoFn();
 
     const detaljer = useGetForholdsmessigFordelingDetaljer();
     const [modalOpen, setModalOpen] = useState(false);
