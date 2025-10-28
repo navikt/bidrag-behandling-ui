@@ -32,20 +32,20 @@ const Main = () => {
     const { beregnetGebyrErEndret, lesemodus, onNavigateToTab } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
 
-    const roller = behandlingRoller.sort((a, b) => {
-        if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
-        if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
-        return 0;
-    });
-
-    const defaultTab = useMemo(() => {
+    const { roller, defaultTab, selectedTab } = useMemo(() => {
+        const roller = behandlingRoller.sort((a, b) => {
+            if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
+            if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
+            return 0;
+        });
         const roleId = roller
             .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
             ?.id?.toString();
-        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
-    }, []);
+        const defaultTab = roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
+        const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
-    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
+        return { roller, defaultTab, selectedTab };
+    }, [behandlingRoller]);
 
     return (
         <>
