@@ -45,7 +45,7 @@ const Main = () => {
         const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
         return { roller, defaultTab, selectedTab };
-    }, [behandlingRoller]);
+    }, [behandlingRoller, searchParams.get(behandlingQueryKeys.tab)]);
 
     return (
         <>
