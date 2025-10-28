@@ -6,7 +6,6 @@ import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAl
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
@@ -15,7 +14,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { PersonIdent } from "@navikt/bidrag-ui-common";
+import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
@@ -68,12 +67,7 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={
-                            <div className="flex flex-row gap-1">
-                                {ROLE_FORKORTELSER[rolle.rolletype]}
-                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
-                            </div>
-                        }
+                        label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
                     />
                 ))}
             </Tabs.List>

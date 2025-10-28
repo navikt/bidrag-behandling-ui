@@ -7,10 +7,8 @@ import { useGetBehandlingV2 } from "../hooks/useApiData";
 import { BehandlingAlert } from "./BehandlingAlert";
 
 export const ManglerVirkningstidspunktAlert = () => {
-    const {
-        virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
-    } = useGetBehandlingV2();
-    const virkningstidspunktIsValid = isValidDate(dateOrNull(virkningstidspunktRes));
+    const { virkningstidspunktV3: virkningstidspunkt } = useGetBehandlingV2();
+    const virkningstidspunktIsValid = isValidDate(dateOrNull(virkningstidspunkt.eldsteVirkningstidspunkt));
 
     if (virkningstidspunktIsValid) return null;
 

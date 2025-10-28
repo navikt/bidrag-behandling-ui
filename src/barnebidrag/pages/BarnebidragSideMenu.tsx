@@ -73,11 +73,12 @@ const PrivatAvtaleMenuButton = ({
     interactive: boolean;
 }) => {
     const { onStepChange } = useBehandlingProvider();
+    const { vedtakstype } = useGetBehandlingV2();
     return (
         <MenuButton
             step={step}
             interactive={interactive}
-            title={text.title.privatAvtale}
+            title={vedtakstype === Vedtakstype.INNKREVING ? text.title.innkreving : text.title.privatAvtale}
             onStepChange={() => onStepChange(STEPS[BarnebidragStepper.PRIVAT_AVTALE])}
             active={activeButton === BarnebidragStepper.PRIVAT_AVTALE}
         />
@@ -689,8 +690,8 @@ const SamværMenuButton = ({
     interactive: boolean;
 }) => {
     const { onStepChange, lesemodus } = useBehandlingProvider();
-    const { samvær } = useGetBehandlingV2();
-    const samværValideringsFeil = samvær?.some(({ valideringsfeil }) => {
+    const { samværV2: samvær } = useGetBehandlingV2();
+    const samværValideringsFeil = samvær.barn?.some(({ valideringsfeil }) => {
         return (
             valideringsfeil?.manglerSamvær ||
             valideringsfeil?.manglerBegrunnelse ||

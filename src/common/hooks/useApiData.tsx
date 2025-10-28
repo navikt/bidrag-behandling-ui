@@ -253,11 +253,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                         })
                     ).data;
                 }
-                return (
-                    await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
-                        inkluderHistoriskeInntekter: true,
-                    })
-                ).data;
+                return (await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId))).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status === 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
@@ -567,7 +563,7 @@ export const useOppdatereVirkningstidspunktV2 = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
-        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdatereVirkningstidspunkt): Promise<BehandlingDtoV2> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereVirkningstidspunktV2(Number(behandlingId), payload);
             return data;
@@ -907,18 +903,64 @@ export const useOppdaterManuelleVedtak = (onSuccess?: () => void) => {
                         ...currentData,
                         underholdskostnader: response.underholdskostnader,
                         erVedtakUtenBeregning: response.erVedtakUtenBeregning,
-                        virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkingstidspunkt) => {
-                            if (virkingstidspunkt.rolle.id === payload.barnId) {
+                        virkningstidspunktV3: {
+                            ...currentData.virkningstidspunktV3,
+                            barn: currentData.virkningstidspunktV3.barn.map((virkningstidspunkt) => {
+                                if (virkningstidspunkt.rolle.id === payload.barnId) {
+                                    return {
+                                        ...virkningstidspunkt,
+                                        grunnlagFraVedtak: payload.vedtaksid,
+                                    };
+                                }
+                                return virkningstidspunkt;
+                            }),
+                        },
+                        virkningstidspunktV2: currentData.virkningstidspunktV2.map((virkningstidspunkt) => {
+                            if (virkningstidspunkt.rolle.id === payload.barnId) {
                                 return {
-                                    ...virkingstidspunkt,
+                                    ...virkningstidspunkt,
                                     grunnlagFraVedtak: payload.vedtaksid,
                                 };
                             }
-                            return virkingstidspunkt;
+                            return virkningstidspunkt;
                         }),
                     };
                 }
             );
+        },
+    });
+};
+
+export const useMergeVirkningstidspunkt = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
+        mutationFn: async (): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.brukSammeVirkningstidspunktForAlleBarna(Number(behandlingId));
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved merging av virkningstidsdpunkter", error);
+        },
+    });
+};
+
+export const useMergeSamvær = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
+        mutationFn: async (): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.brukSammeSamvaerForAlleBarna(Number(behandlingId));
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved merging av samvær", error);
         },
     });
 };

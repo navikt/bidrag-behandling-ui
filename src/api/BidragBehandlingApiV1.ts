@@ -571,6 +571,84 @@ export enum BeregnTil {
   ETTERFOLGENDEMANUELLVEDTAK = "ETTERFØLGENDE_MANUELL_VEDTAK",
 }
 
+export enum Behandlingstype {
+  ENDRING = "ENDRING",
+  EGET_TILTAK = "EGET_TILTAK",
+  SOKNAD = "SØKNAD",
+  INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+  FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+  ALDERSJUSTERING = "ALDERSJUSTERING",
+  INDEKSREGULERING = "INDEKSREGULERING",
+  KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
+  KLAGE = "KLAGE",
+  FOLGERKLAGE = "FØLGER_KLAGE",
+  KORRIGERING = "KORRIGERING",
+  KONVERTERING = "KONVERTERING",
+  OPPHOR = "OPPHØR",
+  PRIVAT_AVTALE = "PRIVAT_AVTALE",
+  BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
+  REVURDERING = "REVURDERING",
+  OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
+  OMGJORING = "OMGJØRING",
+  OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+  PARAGRAF_35_C = "PARAGRAF_35_C",
+  PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
+  MANEDLIGPALOP = "MÅNEDLIG_PÅLOP",
+}
+
+export enum Behandlingstema {
+  AVSKRIVNING = "AVSKRIVNING",
+  BIDRAG = "BIDRAG",
+  BIDRAG_PLUSS_TILLEGGSBIDRAG = "BIDRAG_PLUSS_TILLEGGSBIDRAG",
+  DIREKTEOPPGJOR = "DIREKTE_OPPGJØR",
+  EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+  ETTERGIVELSE = "ETTERGIVELSE",
+  ERSTATNING = "ERSTATNING",
+  FARSSKAP = "FARSSKAP",
+  KUNNSKAP_OM_BIOLOGISK_FAR = "KUNNSKAP_OM_BIOLOGISK_FAR",
+  FORSKUDD = "FORSKUDD",
+  GEBYR = "GEBYR",
+  INNKREVING = "INNKREVING",
+  MORSSKAP = "MORSSKAP",
+  MOTREGNING = "MOTREGNING",
+  OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+  REFUSJON_BIDRAG = "REFUSJON_BIDRAG",
+  SAKSOMKOSTNINGER = "SAKSOMKOSTNINGER",
+  SAeRBIDRAG = "SÆRBIDRAG",
+  TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+  TILBAKEKREVING_ETTERGIVELSE = "TILBAKEKREVING_ETTERGIVELSE",
+  TILBAKEKREVING = "TILBAKEKREVING",
+  BIDRAG18ARPLUSSTILLEGGSBIDRAG = "BIDRAG_18_ÅR_PLUSS_TILLEGGSBIDRAG",
+  BIDRAG18AR = "BIDRAG_18_ÅR",
+  REISEKOSTNADER = "REISEKOSTNADER",
+}
+
+export enum Behandlingstatus {
+  DOMTAVSLUTTET = "DØMT_AVSLUTTET",
+  ERKJENT_AVSLUTTET = "ERKJENT_AVSLUTTET",
+  AVVIST = "AVVIST",
+  MIDLERTIDLIG_VEDTAK = "MIDLERTIDLIG_VEDTAK",
+  VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK = "VEDTAK_FATTET_ETTER_MIDLERTIDLIG_VEDTAK",
+  UNNTAS_KLAGE = "UNNTAS_KLAGE",
+  G4 = "G4",
+  SENDT_UTLANDET_LUKKET = "SENDT_UTLANDET_LUKKET",
+  ERKLAeRINGSENDTREKOMMANDERT = "ERKLÆRING_SENDT_REKOMMANDERT",
+  FAR_UKJENT = "FAR_UKJENT",
+  HJEMSENDT_TIL_TK = "HJEMSENDT_TIL_TK",
+  INGEN_HENDELSE = "INGEN_HENDELSE",
+  OVERFORTKLAGEOGANKE = "OVERFØRT_KLAGE_OG_ANKE",
+  OVERFORTRTV = "OVERFØRT_RTV",
+  FOLKEHELSEINSTITUTTET = "FOLKEHELSEINSTITUTTET",
+  SENDT_NAV_FARSKAPSENHET = "SENDT_NAV_FARSKAPSENHET",
+  STEVNING_SENDT_TINGRETTEN = "STEVNING_SENDT_TINGRETTEN",
+  SENDT_UTLANDET = "SENDT_UTLANDET",
+  SENDT_UTENRIKSSTASJON = "SENDT_UTENRIKSSTASJON",
+  FEILREGISTRERT = "FEILREGISTRERT",
+  TRUKKET = "TRUKKET",
+  UNDER_BEHANDLING = "UNDER_BEHANDLING",
+  VEDTAK_FATTET = "VEDTAK_FATTET",
+}
+
 /** Grunnlag */
 export interface GrunnlagDto {
   /** Referanse (unikt navn på grunnlaget) */
@@ -887,8 +965,9 @@ export interface BehandlingDtoV2 {
   behandlerenhet: string;
   /** @uniqueItems true */
   roller: RolleDto[];
+  virkningstidspunktV2: VirkningstidspunktBarnDtoV2[];
+  virkningstidspunktV3: VirkningstidspunktDtoV3;
   virkningstidspunkt: VirkningstidspunktDto;
-  virkningstidspunktV2: VirkningstidspunktDtoV2[];
   inntekter: InntekterDtoV2;
   boforhold: BoforholdDtoV2;
   gebyr?: GebyrDto;
@@ -899,7 +978,8 @@ export interface BehandlingDtoV2 {
   /** Utgiftsgrunnlag for særbidrag. Vil alltid være null for forskudd og bidrag */
   utgift?: SaerbidragUtgifterDto;
   /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
-  samvær?: SamvaerDto[];
+  samvær?: SamvaerBarnDto[];
+  samværV2?: SamvaerDtoV2;
   privatAvtale?: PrivatAvtaleDto[];
   /** @uniqueItems true */
   underholdskostnader: UnderholdDto[];
@@ -1439,8 +1519,8 @@ export interface PrivatAvtaleValideringsfeilDto {
   /** @uniqueItems true */
   overlappendePerioder: OverlappendePeriode[];
   harPeriodiseringsfeil: boolean;
-  gjelderBarn?: string;
   gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface RolleDto {
@@ -1454,7 +1534,7 @@ export interface RolleDto {
   harInnvilgetTilleggsstønad?: boolean;
 }
 
-export interface SamvaerDto {
+export interface SamvaerBarnDto {
   /** @format int64 */
   id: number;
   gjelderBarn: string;
@@ -1462,6 +1542,11 @@ export interface SamvaerDto {
   begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
   valideringsfeil?: SamvaerValideringsfeilDto;
   perioder: SamvaersperiodeDto[];
+}
+
+export interface SamvaerDtoV2 {
+  erSammeForAlle: boolean;
+  barn: SamvaerBarnDto[];
 }
 
 export interface SamvaerValideringsfeilDto {
@@ -1476,8 +1561,8 @@ export interface SamvaerValideringsfeilDto {
   /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
   hullIPerioder: Datoperiode[];
   harPeriodiseringsfeil: boolean;
-  gjelderBarn?: string;
   gjelderBarnNavn?: string;
+  gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1721,9 +1806,9 @@ export interface UnderholdskostnadValideringsfeil {
   manglerPerioderForTilsynsordning: boolean;
   /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
   manglerBegrunnelse: boolean;
-  gjelderBarn: UnderholdBarnDto;
   /** @format int64 */
   id: number;
+  gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -1783,32 +1868,7 @@ export interface UtgiftspostDto {
   utgiftstypeVisningsnavn: string;
 }
 
-export interface VirkningstidspunktDto {
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  virkningstidspunkt?: string;
-  /**
-   * @format date
-   * @example "01.12.2025"
-   */
-  opprinneligVirkningstidspunkt?: string;
-  årsak?: TypeArsakstype;
-  avslag?: Resultatkode;
-  /** Saksbehandlers begrunnelse */
-  begrunnelse: BegrunnelseDto;
-  harLøpendeBidrag: boolean;
-  begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
-  opphør?: OpphorsdetaljerDto;
-  /**
-   * Bruk begrunnelse
-   * @deprecated
-   */
-  notat: BegrunnelseDto;
-}
-
-export interface VirkningstidspunktDtoV2 {
+export interface VirkningstidspunktBarnDtoV2 {
   rolle: RolleDto;
   /**
    * @format date
@@ -1856,6 +1916,38 @@ export interface VirkningstidspunktDtoV2 {
    * @deprecated
    */
   notat: BegrunnelseDto;
+}
+
+export interface VirkningstidspunktDto {
+  /**
+   * @format date
+   * @example "01.12.2025"
+   */
+  virkningstidspunkt?: string;
+  /**
+   * @format date
+   * @example "01.12.2025"
+   */
+  opprinneligVirkningstidspunkt?: string;
+  årsak?: TypeArsakstype;
+  avslag?: Resultatkode;
+  /** Saksbehandlers begrunnelse */
+  begrunnelse: BegrunnelseDto;
+  harLøpendeBidrag: boolean;
+  begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
+  opphør?: OpphorsdetaljerDto;
+  /**
+   * Bruk begrunnelse
+   * @deprecated
+   */
+  notat: BegrunnelseDto;
+}
+
+export interface VirkningstidspunktDtoV3 {
+  erLikForAlle: boolean;
+  erAvslagForAlle: boolean;
+  eldsteVirkningstidspunkt: string;
+  barn: VirkningstidspunktBarnDtoV2[];
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1973,7 +2065,7 @@ export interface OppdatereBegrunnelseRequest {
 }
 
 export interface OppdaterSamvaerDto {
-  gjelderBarn: string;
+  gjelderBarn?: string;
   periode?: OppdaterSamvaersperiodeDto;
   /** Oppdatere saksbehandlers begrunnelse */
   oppdatereBegrunnelse?: OppdatereBegrunnelse;
@@ -1989,7 +2081,7 @@ export interface OppdaterSamvaersperiodeDto {
 
 export interface OppdaterSamvaerResponsDto {
   /** Samvær som ble oppdatert */
-  oppdatertSamvær?: SamvaerDto;
+  oppdatertSamvær?: SamvaerBarnDto;
 }
 
 export interface OppdaterePrivatAvtalePeriodeDto {
@@ -2022,7 +2114,7 @@ export interface OppdaterePrivatAvtaleResponsDto {
 
 export interface OppdaterOpphorsdatoRequestDto {
   /** @format int64 */
-  idRolle: number;
+  idRolle?: number;
   /** @format date */
   opphørsdato?: string;
   simulerEndring: boolean;
@@ -2279,7 +2371,7 @@ export interface OppdatereBoforholdResponse {
 
 export interface OppdaterBeregnTilDatoRequestDto {
   /** @format int64 */
-  idRolle: number;
+  idRolle?: number;
   beregnTil?: BeregnTil;
 }
 
@@ -2321,6 +2413,8 @@ export interface OpprettRolleDto {
   erSlettet: boolean;
   erUkjent: boolean;
   harGebyrsøknad: boolean;
+  behandlingstatus?: Behandlingstatus;
+  behandlingstema?: Behandlingstema;
 }
 
 export interface OppdaterRollerResponse {
@@ -2333,7 +2427,9 @@ export interface DelberegningSamvaersklasse {
 }
 
 export interface OpprettBehandlingRequest {
-  søknadstype?: OpprettBehandlingRequestSoknadstypeEnum;
+  søknadstype?: Behandlingstype;
+  behandlingstype?: Behandlingstype;
+  behandlingstema?: Behandlingstema;
   vedtakstype: Vedtakstype;
   /** @format date */
   søktFomDato: string;
@@ -2350,11 +2446,7 @@ export interface OpprettBehandlingRequest {
    * @maxLength 4
    */
   behandlerenhet: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   * @uniqueItems true
-   */
+  /** @uniqueItems true */
   roller: OpprettRolleDto[];
   stønadstype: Stonadstype;
   engangsbeløpstype: Engangsbeloptype;
@@ -2433,7 +2525,8 @@ export interface OpprettBehandlingFraVedtakRequest {
   søknadsid: number;
   /** @format int64 */
   søknadsreferanseid?: number;
-  søknadstype?: OpprettBehandlingFraVedtakRequestSoknadstypeEnum;
+  søknadstype?: Behandlingstype;
+  behandlingstema?: Behandlingstema;
 }
 
 export interface KanBehandlesINyLosningRequest {
@@ -2442,15 +2535,11 @@ export interface KanBehandlesINyLosningRequest {
    * @maxLength 7
    */
   saksnummer: string;
-  /**
-   * @maxItems 2147483647
-   * @minItems 2
-   */
   roller: SjekkRolleDto[];
   stønadstype: Stonadstype;
   vedtakstype: Vedtakstype;
   engangsbeløpstype: Engangsbeloptype;
-  søknadstype?: KanBehandlesINyLosningRequestSoknadstypeEnum;
+  søknadstype?: Behandlingstype;
   harReferanseTilAnnenBehandling: boolean;
   skruddAvManuelt?: string;
   /** @format date */
@@ -2473,6 +2562,7 @@ export interface SjekkRolleDto {
 }
 
 export interface FatteVedtakRequestDto {
+  skalIndeksreguleres?: Record<string, boolean>;
   /** @format int64 */
   innkrevingUtsattAntallDager?: number;
   enhet?: string;
@@ -2481,6 +2571,20 @@ export interface FatteVedtakRequestDto {
 export interface FatteVedtakFeil {
   feilmelding: string;
   ugyldigPerioder: TypeArManedsperiode[];
+}
+
+export interface HentApneBehandlingerRequest {
+  barnIdent: string;
+}
+
+export interface HentApneBehandlingerRespons {
+  getåpneBehandling: TypeApenBehandling[];
+}
+
+export interface TypeApenBehandling {
+  stønadstype: Stonadstype;
+  /** @format int64 */
+  behandlingId: number;
 }
 
 export interface BeregnetBidragPerBarn {
@@ -2541,10 +2645,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
+  inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2575,10 +2679,10 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2945,10 +3049,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
   type: OpplysningerType;
   rolle: RolleDto;
-  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-  gjelderBarn?: HusstandsmedlemDto;
   /** @format int64 */
   underholdskostnadId?: number;
+  /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+  gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface ArbeidOgInntektLenkeRequest {
@@ -3207,10 +3311,10 @@ export interface DokumentmalResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  inntektBarnMånedlig?: number;
   totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
+  inntektBarnMånedlig?: number;
 }
 
 export type DokumentmalResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3230,10 +3334,10 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  trygdeavgiftMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
+  trygdeavgiftMånedsbeløp: number;
 }
 
 export interface DokumentmalUnderholdEgneBarnIHusstand {
@@ -3301,11 +3405,11 @@ export interface NotatBehandlingDetaljerDto {
   avslag?: Resultatkode;
   /** @format date */
   klageMottattDato?: string;
-  erAvvisning: boolean;
-  kategoriVisningsnavn?: string;
-  avslagVisningsnavnUtenPrefiks?: string;
   vedtakstypeVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
   avslagVisningsnavn?: string;
+  kategoriVisningsnavn?: string;
+  erAvvisning: boolean;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -3380,9 +3484,9 @@ export interface NotatInntektDto {
   gjelderBarn?: DokumentmalPersonDto;
   historisk: boolean;
   inntektsposter: NotatInntektspostDto[];
-  visningsnavn: string;
   /** Avrundet månedsbeløp for barnetillegg */
   månedsbeløp?: number;
+  visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -3465,8 +3569,8 @@ export interface NotatResultatPeriodeDto {
   vedtakstype?: Vedtakstype;
   /** @format int32 */
   antallBarnIHusstanden: number;
-  resultatKodeVisningsnavn: string;
   sivilstandVisningsnavn?: string;
+  resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
@@ -3490,8 +3594,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<
   enesteVoksenIHusstandenErEgetBarn?: boolean;
   erDirekteAvslag: boolean;
   bpHarEvne: boolean;
-  resultatVisningsnavn: string;
   beløpSomInnkreves: number;
+  resultatVisningsnavn: string;
 };
 
 export interface NotatSamvaerDto {
@@ -3663,7 +3767,8 @@ export interface NotatVedtakDetaljerDto {
   )[];
 }
 
-export interface NotatVirkningstidspunktDto {
+export interface NotatVirkningstidspunktBarnDto {
+  rolle: DokumentmalPersonDto;
   søknadstype?: string;
   vedtakstype?: Vedtakstype;
   søktAv?: SoktAvType;
@@ -3678,6 +3783,7 @@ export interface NotatVirkningstidspunktDto {
    */
   søktFraDato?: string;
   beregnTilDato?: string;
+  opphørsdato?: string;
   beregnTil?: BeregnTil;
   etterfølgendeVedtakVirkningstidspunkt?: string;
   /**
@@ -3696,8 +3802,13 @@ export interface NotatVirkningstidspunktDto {
    * @deprecated
    */
   notat: NotatBegrunnelseDto;
-  årsakVisningsnavn?: string;
   avslagVisningsnavn?: string;
+  årsakVisningsnavn?: string;
+}
+
+export interface NotatVirkningstidspunktDto {
+  erLikForAlle: boolean;
+  barn: NotatVirkningstidspunktBarnDto[];
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3749,7 +3860,8 @@ export interface VedtakNotatDto {
   saksnummer: string;
   behandling: NotatBehandlingDetaljerDto;
   saksbehandlerNavn?: string;
-  virkningstidspunkt: NotatVirkningstidspunktDto;
+  virkningstidspunkt: NotatVirkningstidspunktBarnDto;
+  virkningstidspunktV2: NotatVirkningstidspunktDto;
   utgift?: NotatSaerbidragUtgifterDto;
   boforhold: NotatBoforholdDto;
   samvær: NotatSamvaerDto[];
@@ -3825,75 +3937,6 @@ export enum StonadTilBarnetilsynDtoTilsynstypeEnum {
 export enum OppdaterRollerResponseStatusEnum {
   BEHANDLING_SLETTET = "BEHANDLING_SLETTET",
   ROLLER_OPPDATERT = "ROLLER_OPPDATERT",
-}
-
-export enum OpprettBehandlingRequestSoknadstypeEnum {
-  ENDRING = "ENDRING",
-  EGET_TILTAK = "EGET_TILTAK",
-  SOKNAD = "SØKNAD",
-  INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
-  ALDERSJUSTERING = "ALDERSJUSTERING",
-  INDEKSREGULERING = "INDEKSREGULERING",
-  KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
-  KLAGE = "KLAGE",
-  FOLGERKLAGE = "FØLGER_KLAGE",
-  KORRIGERING = "KORRIGERING",
-  KONVERTERING = "KONVERTERING",
-  OPPHOR = "OPPHØR",
-  PRIVAT_AVTALE = "PRIVAT_AVTALE",
-  BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
-  REVURDERING = "REVURDERING",
-  OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
-  OMGJORING = "OMGJØRING",
-  OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
-  PARAGRAF_35_C = "PARAGRAF_35_C",
-  PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
-}
-
-export enum OpprettBehandlingFraVedtakRequestSoknadstypeEnum {
-  ENDRING = "ENDRING",
-  EGET_TILTAK = "EGET_TILTAK",
-  SOKNAD = "SØKNAD",
-  INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
-  ALDERSJUSTERING = "ALDERSJUSTERING",
-  INDEKSREGULERING = "INDEKSREGULERING",
-  KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
-  KLAGE = "KLAGE",
-  FOLGERKLAGE = "FØLGER_KLAGE",
-  KORRIGERING = "KORRIGERING",
-  KONVERTERING = "KONVERTERING",
-  OPPHOR = "OPPHØR",
-  PRIVAT_AVTALE = "PRIVAT_AVTALE",
-  BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
-  REVURDERING = "REVURDERING",
-  OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
-  OMGJORING = "OMGJØRING",
-  OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
-  PARAGRAF_35_C = "PARAGRAF_35_C",
-  PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
-}
-
-export enum KanBehandlesINyLosningRequestSoknadstypeEnum {
-  ENDRING = "ENDRING",
-  EGET_TILTAK = "EGET_TILTAK",
-  SOKNAD = "SØKNAD",
-  INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
-  ALDERSJUSTERING = "ALDERSJUSTERING",
-  INDEKSREGULERING = "INDEKSREGULERING",
-  KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
-  KLAGE = "KLAGE",
-  FOLGERKLAGE = "FØLGER_KLAGE",
-  KORRIGERING = "KORRIGERING",
-  KONVERTERING = "KONVERTERING",
-  OPPHOR = "OPPHØR",
-  PRIVAT_AVTALE = "PRIVAT_AVTALE",
-  BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
-  REVURDERING = "REVURDERING",
-  OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
-  OMGJORING = "OMGJØRING",
-  OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
-  PARAGRAF_35_C = "PARAGRAF_35_C",
-  PARAGRAF_35_C_BEGRENSET_SATS = "PARAGRAF_35_C_BEGRENSET_SATS",
 }
 
 export enum UgyldigResultatPeriodeTypeEnum {
@@ -4013,7 +4056,8 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "http://localhost:8990",
+      baseURL:
+        axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
     });
     this.secure = secure;
     this.format = format;
@@ -4127,7 +4171,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<
   SecurityDataType extends unknown,
@@ -4574,6 +4618,26 @@ export class Api<
       }),
 
     /**
+     * @description Bruk samme virkning for alle barna
+     *
+     * @tags virkningstidspunkt-controller
+     * @name BrukSammeVirkningstidspunktForAlleBarna
+     * @request POST:/api/v2/behandling/{behandlingsid}/virkningstidspunkt/merge
+     * @secure
+     */
+    brukSammeVirkningstidspunktForAlleBarna: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<BehandlingDtoV2, any>({
+        path: `/api/v2/behandling/${behandlingsid}/virkningstidspunkt/merge`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Oppretter underholdselement med faktiske utgifter for BMs andre barn. Legges manuelt inn av saksbehandler.
      *
      * @tags underhold-controller
@@ -4592,6 +4656,26 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Bruk samme samvær for alle barna
+     *
+     * @tags samv-ær-controller
+     * @name BrukSammeSamvaerForAlleBarna
+     * @request POST:/api/v2/behandling/{behandlingsid}/samvar/merge
+     * @secure
+     */
+    brukSammeSamvaerForAlleBarna: (
+      behandlingsid: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<BehandlingDtoV2, any>({
+        path: `/api/v2/behandling/${behandlingsid}/samvar/merge`,
+        method: "POST",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -4737,6 +4821,28 @@ export class Api<
     ) =>
       this.request<number, FatteVedtakFeil>({
         path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Hent åpne behandlinger
+     *
+     * @tags behandling-controller-v-2
+     * @name HentApneBehandlinger
+     * @request POST:/api/v2/behandling/apnebehandlinger
+     * @secure
+     */
+    hentApneBehandlinger: (
+      data: HentApneBehandlingerRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<HentApneBehandlingerRespons, any>({
+        path: `/api/v2/behandling/apnebehandlinger`,
         method: "POST",
         body: data,
         secure: true,
@@ -5087,17 +5193,10 @@ export class Api<
      * @request GET:/api/v2/behandling/{behandlingsid}
      * @secure
      */
-    henteBehandlingV2: (
-      behandlingsid: number,
-      query?: {
-        inkluderHistoriskeInntekter?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    henteBehandlingV2: (behandlingsid: number, params: RequestParams = {}) =>
       this.request<BehandlingDtoV2, BehandlingDtoV2>({
         path: `/api/v2/behandling/${behandlingsid}`,
         method: "GET",
-        query: query,
         secure: true,
         format: "json",
         ...params,

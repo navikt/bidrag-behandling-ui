@@ -18,7 +18,6 @@ import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
@@ -28,8 +27,8 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
-import { addMonths, firstDayOfMonth, isBeforeDate } from "@utils/date-utils";
-import React, { useEffect, useMemo, useRef } from "react";
+import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
+import React, { Fragment, useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -38,6 +37,7 @@ import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale"
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
+import { VedtaksListeBeregning } from "../../Vedtakliste";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
@@ -48,8 +48,14 @@ export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: s
         const firstMonthAfterEighteenBirthday = getFirstDayOfMonthAfterEighteenYears(new Date(fødselsdato));
         return isBeforeDate(firstMonthAfterEighteenBirthday, fomMin) ? fomMin : firstMonthAfterEighteenBirthday;
     }
-    const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    const birthMonth = firstDayOfMonth(new Date(fødselsdato));
     return isBeforeDate(birthMonth, fomMin) ? fomMin : birthMonth;
+};
+
+export const getTomForPrivatAvtale = (fødselsdato: string) => {
+    const tomMax = new Date();
+    const birthMonth = addMonths(firstDayOfMonth(new Date(fødselsdato)), 1);
+    return isAfterDate(birthMonth, tomMax) ? birthMonth : tomMax;
 };
 
 export const RemoveButton = ({ onDelete }: { onDelete: () => void }) => {
@@ -125,7 +131,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                         <Tabs.Tab
                             key={gjelderBarn.ident}
                             value={gjelderBarn.ident}
-                            label={`${ROLE_FORKORTELSER.BA} ${gjelderBarn.ident}`}
+                            label={<PersonNavnIdent ident={gjelderBarn.ident} rolle={Rolletype.BA} skjulNavn />}
                         />
                     ))}
                 </Tabs.List>
@@ -245,18 +251,26 @@ const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale, stønadstype } = useGetBehandlingV2();
+    const { privatAvtale, stønadstype, vedtakstype, virkningstidspunktV2 } = useGetBehandlingV2();
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
+    const manuelleVedtak = virkningstidspunktV2.find(
+        (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
+    ).manuelleVedtak;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
+    const isInnkrevingOgVedtakFraNav =
+        vedtakstype === Vedtakstype.INNKREVING && item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => {
         return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
     }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
-    const tom = useMemo(() => new Date(), []);
+    const tom = useMemo(
+        () => getTomForPrivatAvtale(selectedPrivatAvtale.gjelderBarn.fødselsdato),
+        [selectedPrivatAvtale.gjelderBarn.fødselsdato]
+    );
 
     useEffect(() => {
         const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);
@@ -362,7 +376,7 @@ const PrivatAvtalePerioder = ({
                         defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
                         fromDate={fom}
                         toDate={tom}
-                        readonly={lesemodus}
+                        readonly={lesemodus || isInnkrevingOgVedtakFraNav}
                         required
                     />
                     <FormControlledSelectField
@@ -370,22 +384,31 @@ const PrivatAvtalePerioder = ({
                         label={"Avtaletype"}
                         className="w-max max-h-[10px]"
                     >
-                        {Object.keys(PrivatAvtaleType).map((value) => (
-                            <option key={value} value={value}>
-                                {hentVisningsnavn(value)}
-                            </option>
-                        ))}
+                        {Object.keys(PrivatAvtaleType)
+                            .filter((value) =>
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak.length : true
+                            )
+                            .map((value) => (
+                                <option key={value} value={value}>
+                                    {hentVisningsnavn(value)}
+                                </option>
+                            ))}
                     </FormControlledSelectField>
                 </div>
                 <RemoveButton onDelete={onDeletePrivatAvtale} />
             </FlexRow>
-            <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            {!isInnkrevingOgVedtakFraNav && (
+                <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
+            )}
+            {isInnkrevingOgVedtakFraNav && (
+                <VedtaksListeBeregning barnIdent={item.gjelderBarn.ident} omgjøring={false} />
+            )}
             <FlexRow>
                 <FormControlledSwitch
                     name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}
                     legend={text.label.skalIndeksreguleres}
                     onChange={onToggle}
-                    readOnly={!item.privatAvtale.perioder.length}
+                    readOnly={!item.privatAvtale.perioder.length || isInnkrevingOgVedtakFraNav}
                 />
             </FlexRow>
             {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (
@@ -410,7 +433,7 @@ const Side = () => {
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
 
     return (
-        <>
+        <Fragment key={selectedBarnIdent}>
             {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
                 <FormControlledCustomTextareaEditor
                     name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
@@ -428,7 +451,7 @@ const Side = () => {
                 />
             )}
             <ActionButtons onNext={() => onStepChange(getNextStep(BarnebidragStepper.PRIVAT_AVTALE))} />
-        </>
+        </Fragment>
     );
 };
 

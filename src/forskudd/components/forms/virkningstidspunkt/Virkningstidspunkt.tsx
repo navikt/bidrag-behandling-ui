@@ -3,7 +3,7 @@ import {
     Resultatkode,
     TypeArsakstype,
     Vedtakstype,
-    VirkningstidspunktDtoV2,
+    VirkningstidspunktBarnDtoV2,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -14,7 +14,6 @@ import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -27,7 +26,7 @@ import {
     VirkningstidspunktFormValues,
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
-import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, PersonNavnIdent, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label, Tabs } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect, useMemo, useState } from "react";
@@ -76,7 +75,7 @@ const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR, Re
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const createInitialValues = (response: VirkningstidspunktDtoV2[]): VirkningstidspunktFormValues => {
+const createInitialValues = (response: VirkningstidspunktBarnDtoV2[]): VirkningstidspunktFormValues => {
     return {
         roller: response.map((virkningstidspunkt) => {
             return {
@@ -175,6 +174,7 @@ const VirkningstidspunktRolle = ({
                         ...currentData,
                         virkningstidspunkt: response.virkningstidspunkt,
                         virkningstidspunktV2: response.virkningstidspunktV2,
+                        virkningstidspunktV3: response.virkningstidspunktV3,
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                         inntekter: response.inntekter,
@@ -184,7 +184,7 @@ const VirkningstidspunktRolle = ({
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
-                const updatedValues = createInitialValues(response.virkningstidspunktV2);
+                const updatedValues = createInitialValues(response.virkningstidspunktV3.barn);
                 const selectedBarn = Object.values(updatedValues.roller).find(
                     ({ rolle }) => rolle.ident === selectedVirkningstidspunkt.rolle.ident
                 );
@@ -350,7 +350,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                         <Tabs.Tab
                             key={rolle.ident}
                             value={rolle.ident}
-                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${rolle.ident}`}
+                            label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
                         />
                     ))}
                 </Tabs.List>

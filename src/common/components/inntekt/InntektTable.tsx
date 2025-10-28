@@ -20,7 +20,7 @@ import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { Buildings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
@@ -203,6 +203,7 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: (props: InntektTabelChildrenProps) => React.ReactNode;
 }) => {
+    const [inntektType, ident, barnIdent] = fieldName.split(".");
     const {
         lesemodus,
         setPageErrorsOrUnsavedState,
@@ -211,12 +212,9 @@ export const InntektTabel = ({
         setErrorMessage,
         setErrorModalOpen,
     } = useBehandlingProvider();
-    const {
-        inntekter,
-        søktFomDato,
-        erBisysVedtak,
-        virkningstidspunkt: { virkningstidspunkt, opphør },
-    } = useGetBehandlingV2();
+    const { inntekter, erBisysVedtak, virkningstidspunktV3: virkningstidspunkt } = useGetBehandlingV2();
+    const selectedVirkningstidspunkt = virkningstidspunkt.barn.find((v) => v.rolle.ident === ident);
+    const opphørsdato = selectedVirkningstidspunkt?.opphørsdato;
     const virkningsdato = useVirkningsdato();
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue, resetField, formState } =
@@ -235,7 +233,6 @@ export const InntektTabel = ({
             ...watchFieldArray?.[index],
         };
     });
-    const [inntektType, ident, barnIdent] = fieldName.split(".");
 
     useEffect(() => {
         setPageErrorsOrUnsavedState((state) => ({
@@ -318,7 +315,7 @@ export const InntektTabel = ({
     const addPeriod = (periode: InntektFormPeriode) => {
         fieldArray.append({
             ...periode,
-            datoFom: virkningstidspunkt ?? søktFomDato,
+            datoFom: toISODateString(virkningsdato),
             erRedigerbart: true,
             kanRedigeres: true,
         });
@@ -457,7 +454,7 @@ export const InntektTabel = ({
                         <BodyShort size="small">
                             {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
                                 "{}",
-                                DateToDDMMYYYYString(dateOrNull(opphør.opphørsdato))
+                                DateToDDMMYYYYString(dateOrNull(opphørsdato))
                             )}
                         </BodyShort>
                     )}

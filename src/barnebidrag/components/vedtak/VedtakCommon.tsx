@@ -2,9 +2,9 @@ import text from "@common/constants/texts";
 import { QueryKeys, useGetBehandlingV2, useOppdaterOpprettP35c } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { BodyShort, Button, Checkbox, Heading, Link, Modal, Table } from "@navikt/ds-react";
+import { BodyShort, Button, Checkbox, Heading, HStack, Link, Modal, Switch, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import {
     ResultatBarnebidragsberegningPeriodeDto,
@@ -16,11 +16,79 @@ import {
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
 import { RolleTag } from "../../../common/components/RolleTag";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useQueryParams } from "../../../common/hooks/useQueryParams";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { VedtaksListeBeregning } from "../Vedtakliste";
 import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
+
+type VedtakContextProps = {
+    skalIndeksreguleres: Map<string, boolean>;
+    setSkalIndeksreguleres: (barnId: string, value: boolean) => void;
+};
+export const VedtakContext = createContext<VedtakContextProps | null>(null);
+export function useVedtakProvider() {
+    const context = useContext(VedtakContext);
+    if (!context) {
+        throw new Error("useVedtakProvider must be used within a VedtakProvider");
+    }
+    return context;
+}
+
+export const NesteIndeksår = ({ nesteIndeksår, barnId }: { nesteIndeksår?: number; barnId: string }) => {
+    const { skalIndeksreguleres, setSkalIndeksreguleres } = useVedtakProvider();
+    const { vedtakstype, lesemodus } = useGetBehandlingV2();
+    const erInnkreving = vedtakstype === Vedtakstype.INNKREVING;
+    useEffect(() => {
+        setSkalIndeksreguleres(barnId, !!nesteIndeksår);
+    }, []);
+    return (
+        <HStack gap="2" className="items-center">
+            {erInnkreving && (
+                <Switch
+                    checked={skalIndeksreguleres.get(barnId)}
+                    readOnly={!!lesemodus}
+                    size="small"
+                    onChange={(e) => setSkalIndeksreguleres(barnId, e.target.checked)}
+                >
+                    Skal indeksreguleres
+                </Switch>
+            )}
+            {skalIndeksreguleres.get(barnId) && (
+                <ResultatDescription
+                    data={[
+                        {
+                            label: "Neste indeksår",
+                            textRight: false,
+                            labelBold: true,
+                            value: nesteIndeksår,
+                        },
+                    ].filter((d) => d)}
+                />
+            )}
+        </HStack>
+    );
+};
+export const VedtakProvider = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+    const [skalIndeksreguleres, setSkalIndeksreguleres] = useState<Map<string, boolean>>(new Map());
+    return (
+        <VedtakContext
+            value={{
+                skalIndeksreguleres,
+                setSkalIndeksreguleres: (barnId: string, value: boolean) => {
+                    setSkalIndeksreguleres((prev) => {
+                        const newMap = new Map(prev);
+                        newMap.set(barnId, value);
+                        return newMap;
+                    });
+                },
+            }}
+        >
+            <div className={className}>{children}</div>
+        </VedtakContext>
+    );
+};
 
 export const GrunnlagFraVedtakButton = () => {
     const { grunnlagFraVedtaksid, saksnummer } = useGetBehandlingV2();

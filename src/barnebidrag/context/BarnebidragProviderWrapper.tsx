@@ -91,12 +91,13 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
             interactive:
                 !behandling.erBisysVedtak &&
-                !behandling.virkningstidspunkt.avslag &&
+                !behandling.virkningstidspunktV3?.erAvslagForAlle &&
                 behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: BarnebidragStepper.UNDERHOLDSKOSTNAD,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 !(
                     behandling.erVedtakUtenBeregning &&
                     behandling.lesemodus &&
@@ -109,39 +110,47 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
                     (behandling.lesemodus?.opprettetAvBatch || behandling.lesemodus?.erAvvist)
                 ),
             interactive:
-                !behandling.virkningstidspunkt.avslag &&
+                !behandling.virkningstidspunktV3?.erAvslagForAlle &&
                 behandling.vedtakstype !== Vedtakstype.OPPHOR &&
                 !behandling.erVedtakUtenBeregning,
         },
         {
             step: BarnebidragStepper.INNTEKT,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
-            interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+            interactive:
+                !behandling.virkningstidspunktV3?.erAvslagForAlle && behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: BarnebidragStepper.GEBYR,
             visible:
-                (behandling.lesemodus?.erAvvist && behandling.gebyr) ||
-                (!behandling.erKlageEllerOmgjøring &&
-                    behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
-                    !(behandling.erVedtakUtenBeregning && behandling.lesemodus)),
+                (behandling.lesemodus?.erAvvist && !!behandling.gebyr) ||
+                (behandling.vedtakstype !== Vedtakstype.INNKREVING &&
+                    ((behandling.lesemodus?.erAvvist && !!behandling.gebyr) ||
+                        (!behandling.erKlageEllerOmgjøring &&
+                            behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
+                            !(behandling.erVedtakUtenBeregning && behandling.lesemodus)))),
             interactive: !!behandling.gebyr?.gebyrRoller.length,
         },
         {
             step: BarnebidragStepper.BOFORHOLD,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
-            interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+            interactive:
+                !behandling.virkningstidspunktV3?.erAvslagForAlle && behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: BarnebidragStepper.SAMVÆR,
             visible:
+                behandling.vedtakstype !== Vedtakstype.INNKREVING &&
                 behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING &&
                 !(behandling.erVedtakUtenBeregning && behandling.lesemodus),
-            interactive: !behandling.virkningstidspunkt?.avslag && behandling.vedtakstype !== Vedtakstype.OPPHOR,
+            interactive:
+                !behandling.virkningstidspunktV3?.erAvslagForAlle && behandling.vedtakstype !== Vedtakstype.OPPHOR,
         },
         {
             step: BarnebidragStepper.VEDTAK,
@@ -180,7 +189,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
             JSON.stringify(pageErrorsOrUnsavedState),
             behandling.gebyr?.gebyrRoller,
             behandling.vedtakstype,
-            behandling.virkningstidspunkt?.avslag,
+            behandling.virkningstidspunktV3?.erAvslagForAlle,
             behandling.erVedtakUtenBeregning,
             behandling.lesemodus,
             behandling.lesemodus?.opprettetAvBatch,

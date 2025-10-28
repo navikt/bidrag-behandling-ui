@@ -49,7 +49,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     useEffect(() => {
         if (viewOnly) return;
         const subscription = watch((_, { name, type }) => {
-            if (name.includes("beregning") && type === "change") {
+            if (name?.includes("beregning") && type === "change") {
                 debouncedOnSave();
             }
         });
