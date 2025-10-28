@@ -40,7 +40,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerProps) {
         return (
             <>
                 {barn.åpenBehandling ? "Ja" : "Nei"} {link}
-                {behandlingstype ? `, (${behandlingstype})` : ""}
+                {behandlingstype ? `, ${behandlingstype?.toLowerCase()}` : ""}
             </>
         );
     }
