@@ -21,7 +21,7 @@ import { InntektFormValues } from "@common/types/inntektFormValues";
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -31,20 +31,19 @@ const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
     const { beregnetGebyrErEndret, lesemodus, onNavigateToTab } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
+    const behandlingRollerRef = useRef(behandlingRoller);
 
-    const roller = behandlingRoller.sort((a, b) => {
-        if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
-        if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
-        return 0;
-    });
+    const roller = useMemo(() => {
+        const roller = behandlingRollerRef.current.toSorted((a, b) => {
+            if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
+            if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
+            return 0;
+        });
+        return roller;
+    }, [behandlingRollerRef.current]);
 
-    const defaultTab = useMemo(() => {
-        const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
-            ?.id?.toString();
-        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
-    }, []);
-
+    const roleId = roller.find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))?.id?.toString();
+    const defaultTab = roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
@@ -79,7 +78,7 @@ const Main = () => {
                                 <div className="mt-4">
                                     <InntektHeader ident={rolle.ident} />
                                 </div>
-                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType, index) => (
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType, index: number) => (
                                     <Fragment key={tableType + index}>{InntektTableComponent[tableType]()}</Fragment>
                                 ))}
                             </Tabs.Panel>
