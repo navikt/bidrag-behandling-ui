@@ -42,7 +42,7 @@ export function BarnDetaljerOpprettFF({ barns }: BarnDetaljerOpprettFFProps) {
             link = <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />;
             behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
         } else if (barn.åpenBehandling?.søknadsid) {
-            link = <Søknadslenke id={barn.åpenBehandling.søknadsid} />;
+            link = <Søknadslenke id={barn.åpenBehandling.søknadsid} saksnr={saksnr} />;
             behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
         }
         return (
@@ -127,7 +127,9 @@ export default function BarnDetaljerFF({ barns }: BarnDetaljerFFProps) {
             return (
                 <BodyShort size="small">
                     Revurdering fra {DateToMMYYYYString(dateOrNull(barn.åpenBehandling?.søktFraDato))}
-                    {barn.åpenBehandling?.søknadsid && <Søknadslenke id={barn.åpenBehandling.søknadsid} />}
+                    {barn.åpenBehandling?.søknadsid && (
+                        <Søknadslenke id={barn.åpenBehandling.søknadsid} saksnr={saksnr} />
+                    )}
                 </BodyShort>
             );
         }
