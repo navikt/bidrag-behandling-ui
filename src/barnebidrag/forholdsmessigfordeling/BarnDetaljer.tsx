@@ -10,24 +10,25 @@ import { hentVisningsnavn } from "../../common/hooks/useVisningsnavn";
 import { dateOrNull, DateToMMYYYYString } from "../../utils/date-utils";
 
 interface BarnDetaljerFFProps {
-    barns: ForholdsmessigFordelingBarnDto[];
+    barn: ForholdsmessigFordelingBarnDto[];
 }
 
 interface BarnDetaljerOpprettFFProps {
-    barns: ForholdsmessigFordelingBarnDto[];
+    barn: ForholdsmessigFordelingBarnDto[];
 }
 
-export function BarnDetaljerOpprettFF({ barns }: BarnDetaljerOpprettFFProps) {
-    if (barns.length === 0) return null;
+export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
+    if (barn.length === 0) return null;
     const { stønadstype } = useGetBehandlingV2();
-    const saksnr = barns[0].saksnr;
-    const bidragsmottaker = barns[0].bidragsmottaker;
-    const enhet = barns[0].enhet;
+    const saksnr = barn[0].saksnr;
+    const bidragsmottaker = barn[0].bidragsmottaker;
+    const enhet = barn[0].enhet;
     function renderInnkreving(barn: ForholdsmessigFordelingBarnDto) {
-        if (barn.åpenBehandling?.medInnkreving && !barn.innkrevesFraDato) {
+        const medInnkreving = barn.åpneBehandlinger.some((b) => b.medInnkreving);
+        if (medInnkreving && !barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja</BodyShort>;
         }
-        if ((barn.åpenBehandling == null || barn.åpenBehandling.medInnkreving) && barn.innkrevesFraDato) {
+        if ((barn.åpneBehandlinger.length === 0 || medInnkreving) && barn.innkrevesFraDato) {
             return <BodyShort size="small">Ja, fra {DateToMMYYYYString(dateOrNull(barn.innkrevesFraDato))}</BodyShort>;
         }
         if (barn.harLøpendeBidrag) {
@@ -38,18 +39,25 @@ export function BarnDetaljerOpprettFF({ barns }: BarnDetaljerOpprettFFProps) {
     function renderÅpenBehandling(barn: ForholdsmessigFordelingBarnDto) {
         let link = null;
         let behandlingstype = null;
-        if (barn.åpenBehandling?.behandlingId) {
-            link = <BehandlingLenke saksnummer={barn.saksnr} id={barn.åpenBehandling.behandlingId} />;
-            behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
-        } else if (barn.åpenBehandling?.søknadsid) {
-            link = <Søknadslenke id={barn.åpenBehandling.søknadsid} saksnr={saksnr} />;
-            behandlingstype = hentVisningsnavn(barn.åpenBehandling.behandlingstype);
-        }
-        return (
-            <>
-                {barn.åpenBehandling ? "Ja" : "Nei"} {link}
-                {behandlingstype ? `, ${behandlingstype?.toLowerCase()}` : ""}
-            </>
+        const åpneBehandling = barn.åpneBehandlinger.map((b) => {
+            if (b?.behandlingId) {
+                link = <BehandlingLenke saksnummer={barn.saksnr} id={b.behandlingId} />;
+                behandlingstype = hentVisningsnavn(b.behandlingstype);
+            } else if (b?.søknadsid) {
+                link = <Søknadslenke id={b.søknadsid} saksnr={saksnr} />;
+                behandlingstype = hentVisningsnavn(b.behandlingstype);
+            }
+            return (
+                <BodyShort size="small">
+                    {"Ja"} {link}
+                    {behandlingstype ? `, ${behandlingstype?.toLowerCase()}` : ""}
+                </BodyShort>
+            );
+        });
+        return åpneBehandling.length > 0 ? (
+            <HStack>{åpneBehandling.map((b) => b)}</HStack>
+        ) : (
+            <BodyShort size="small">Nei</BodyShort>
         );
     }
     return (
@@ -88,7 +96,7 @@ export function BarnDetaljerOpprettFF({ barns }: BarnDetaljerOpprettFFProps) {
                     </HStack>
                 </Box>
             )}
-            {barns.map((barn, index) => (
+            {barn.map((barn, index) => (
                 <Box key={barn.ident} padding="1" className="border-t border-border-subtle">
                     {index > 0 && <hr className="my-1 border-t border-border-subtle" />}
                     <BodyShort size="small" className="ml-[-2px] font-semibold">
@@ -117,23 +125,26 @@ export function BarnDetaljerOpprettFF({ barns }: BarnDetaljerOpprettFFProps) {
         </Box>
     );
 }
-export default function BarnDetaljerFF({ barns }: BarnDetaljerFFProps) {
-    if (barns.length === 0) return null;
-    const saksnr = barns[0].saksnr;
-    const bidragsmottaker = barns[0].bidragsmottaker;
-    const enhet = barns[0].enhet;
+export default function BarnDetaljerFF({ barn }: BarnDetaljerFFProps) {
+    if (barn.length === 0) return null;
+    const saksnr = barn[0].saksnr;
+    const bidragsmottaker = barn[0].bidragsmottaker;
+    const enhet = barn[0].enhet;
     function renderType(barn: ForholdsmessigFordelingBarnDto) {
+        const åpenBehandling = barn.åpneBehandlinger.length > 0 ? barn.åpneBehandlinger[0] : null;
         if (barn.erRevurdering) {
             return (
                 <BodyShort size="small">
-                    Revurdering fra {DateToMMYYYYString(dateOrNull(barn.åpenBehandling?.søktFraDato))}
-                    {barn.åpenBehandling?.søknadsid && (
-                        <Søknadslenke id={barn.åpenBehandling.søknadsid} saksnr={saksnr} />
-                    )}
+                    Revurdering fra {DateToMMYYYYString(dateOrNull(åpenBehandling.søktFraDato))}
+                    {åpenBehandling?.søknadsid && <Søknadslenke id={åpenBehandling.søknadsid} saksnr={saksnr} />}
                 </BodyShort>
             );
         }
-        return <BodyShort size="small">Del av hovedbehandling</BodyShort>;
+        let behandlingerInfo = "";
+        if (barn.åpneBehandlinger.length > 0) {
+            behandlingerInfo = ` (${barn.åpneBehandlinger.length} behandlinger)`;
+        }
+        return <BodyShort size="small">Del av hovedbehandling{behandlingerInfo}</BodyShort>;
     }
     return (
         <Box
@@ -160,7 +171,7 @@ export default function BarnDetaljerFF({ barns }: BarnDetaljerFFProps) {
                     </div>
                 </HStack>
             </Box>
-            {barns.map((barn, index) => (
+            {barn.map((barn, index) => (
                 <Box key={barn.ident} padding="2" className="border-t border-border-subtle">
                     {index > 0 && <hr className="my-1 border-t border-border-subtle" />}
                     <BodyShort size="small" className="ml-[-3px] font-semibold">

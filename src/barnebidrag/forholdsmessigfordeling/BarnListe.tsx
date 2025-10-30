@@ -40,7 +40,7 @@ export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProp
                 {Object.keys(groupedSammeSak).length > 0 &&
                     Object.values(groupedSammeSak).map((group) => (
                         <div key={group[0].saksnr || "unknown"}>
-                            <BarnDetaljerOpprettFF barns={group} />
+                            <BarnDetaljerOpprettFF barn={group} />
                         </div>
                     ))}
             </VStack>
@@ -48,7 +48,7 @@ export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProp
                 {Object.keys(groupedAndreSaker).length > 0 &&
                     Object.values(groupedAndreSaker).map((group) => (
                         <div key={group[0].saksnr || "unknown"}>
-                            <BarnDetaljerOpprettFF barns={group} />
+                            <BarnDetaljerOpprettFF barn={group} />
                         </div>
                     ))}
             </VStack>
@@ -71,7 +71,7 @@ export function BarnListe({ barn }: BarnListeProps) {
             <VStack gap="2">
                 {Object.values(groupedBarn).map((group) => (
                     <div key={group[0].saksnr || "unknown"}>
-                        <BarnDetaljerFF barns={group} />
+                        <BarnDetaljerFF barn={group} />
                     </div>
                 ))}
             </VStack>
