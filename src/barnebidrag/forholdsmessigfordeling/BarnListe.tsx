@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Heading, HStack, Label, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, HStack, Label, VStack } from "@navikt/ds-react";
 
 import { ForholdsmessigFordelingBarnDto } from "../../api/BidragBehandlingApiV1";
 import { useGetBehandlingV2 } from "../../common/hooks/useApiData";
@@ -12,6 +12,18 @@ export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProp
     const { behandlerenhet } = useGetBehandlingV2();
     const barnFraSammeSak = barn.filter((b) => b.sammeSakSomBehandling);
     const barnFraAndreSaker = barn.filter((b) => !b.sammeSakSomBehandling);
+    const groupBySaksnr = (list: ForholdsmessigFordelingBarnDto[]) =>
+        list.reduce(
+            (acc, b) => {
+                const key = b.saksnr || "unknown";
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(b);
+                return acc;
+            },
+            {} as Record<string, ForholdsmessigFordelingBarnDto[]>
+        );
+    const groupedSammeSak = groupBySaksnr(barnFraSammeSak);
+    const groupedAndreSaker = groupBySaksnr(barnFraAndreSaker);
     return (
         <VStack gap="2">
             <HStack gap={"2"}>
@@ -24,45 +36,42 @@ export function BarnListeOpprettFF({ barn, skalBehandlesAvEnhet }: BarnListeProp
                     overført til enhet {skalBehandlesAvEnhet} etter forholdsmessig fordeling er opprettet
                 </Alert>
             )}
-            <div>
-                <Heading size="xsmall">Barn fra samme sak:</Heading>
-                <VStack gap="2">
-                    {barnFraSammeSak.length > 0 ? (
-                        barnFraSammeSak.map((b) => (
-                            <div key={b.ident}>
-                                <BarnDetaljerOpprettFF barn={b} />
-                            </div>
-                        ))
-                    ) : (
-                        <BodyShort size="small">Ingen flere barn fra samme sak</BodyShort>
-                    )}
-                </VStack>
-            </div>
-            <div>
-                <Heading size="xsmall">Barn fra andre saker:</Heading>
-                <VStack gap="2">
-                    {barnFraAndreSaker.length > 0 ? (
-                        barnFraAndreSaker.map((b) => (
-                            <div key={b.ident}>
-                                <BarnDetaljerOpprettFF barn={b} />
-                            </div>
-                        ))
-                    ) : (
-                        <BodyShort size="small">Ingen flere barn fra andre saker</BodyShort>
-                    )}
-                </VStack>
-            </div>
+            <VStack gap="2">
+                {Object.keys(groupedSammeSak).length > 0 &&
+                    Object.values(groupedSammeSak).map((group) => (
+                        <div key={group[0].saksnr || "unknown"}>
+                            <BarnDetaljerOpprettFF barns={group} />
+                        </div>
+                    ))}
+            </VStack>
+            <VStack gap="2">
+                {Object.keys(groupedAndreSaker).length > 0 &&
+                    Object.values(groupedAndreSaker).map((group) => (
+                        <div key={group[0].saksnr || "unknown"}>
+                            <BarnDetaljerOpprettFF barns={group} />
+                        </div>
+                    ))}
+            </VStack>
         </VStack>
     );
 }
 
 export function BarnListe({ barn }: BarnListeProps) {
+    const groupedBarn = barn.reduce(
+        (acc, b) => {
+            const key = b.saksnr || "unknown";
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(b);
+            return acc;
+        },
+        {} as Record<string, ForholdsmessigFordelingBarnDto[]>
+    );
     return (
         <VStack gap="2">
             <VStack gap="2">
-                {barn.map((b) => (
-                    <div key={b.ident}>
-                        <BarnDetaljerFF barn={b} />
+                {Object.values(groupedBarn).map((group) => (
+                    <div key={group[0].saksnr || "unknown"}>
+                        <BarnDetaljerFF barns={group} />
                     </div>
                 ))}
             </VStack>
