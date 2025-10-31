@@ -21,6 +21,7 @@ export function FormControlledCustomTextareaEditor({
     const { field, fieldState } = useController({ name, control });
 
     function onChange(value: string) {
+        console.log("CHAGNE", value, name);
         setValue(name, value);
         trigger(name);
     }

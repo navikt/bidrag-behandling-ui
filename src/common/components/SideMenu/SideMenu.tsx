@@ -91,7 +91,7 @@ export const MenuButton = ({
         </>
     );
 };
-export const SideMenu = ({ children }) => {
+export const SideMenu = ({ children, otherChildren }) => {
     const [menuOpen, setMenuOpen] = useState<boolean>(true);
     const closedMenuCss = "p-0 w-6 min-w-0";
     const openMenuCss = "p-6 w-[298px] min-w-[298px] min-[1440px]:w-[412px]";
@@ -116,6 +116,7 @@ export const SideMenu = ({ children }) => {
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
             />
+            {otherChildren}
         </div>
     );
 };

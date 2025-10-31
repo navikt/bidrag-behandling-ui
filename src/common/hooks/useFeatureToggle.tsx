@@ -14,6 +14,7 @@ export default function useFeatureToogle() {
     const utvikler = useFlag("bidrag.utvikler");
     const vedtaksperre = useFlag("vedtakssperre");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
+    const bidragFlereBarn = useFlag("behandling.behandle_bidrag_flere_barn");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
         queryKey: ["user"],
@@ -44,6 +45,7 @@ export default function useFeatureToogle() {
         );
     }, [enableFatteVedtak, enableAdmin]);
     return {
+        bidragFlereBarn: bidragFlereBarn,
         vedtaksperre: vedtaksperre,
         isAdminEnabled: enableAdmin,
         isDeveloper: utvikler,

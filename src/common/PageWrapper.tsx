@@ -7,6 +7,8 @@ import { useThemedStylesWithMdx } from "@theme-ui/mdx";
 import React, { PropsWithChildren } from "react";
 import { Theme, ThemeUIProvider } from "theme-ui";
 
+import { AdminPanel } from "../barnebidrag/admin/AdminPanel";
+
 interface PageWrapperProps {
     name: string;
 }
@@ -77,6 +79,7 @@ export default function PageWrapper({ children, name }: PropsWithChildren<PageWr
             <MDXProvider components={{ ...mdxComponents, ...componentsWithStyles }}>
                 <div className={name}>{children}</div>
             </MDXProvider>
+            <AdminPanel />
         </ThemeUIProvider>
     );
 }
