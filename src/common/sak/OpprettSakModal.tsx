@@ -23,6 +23,7 @@ export default function OpprettSakModal({ ident, rolle, navn, eierfogd, onSubmit
                 Opprett sak
             </Button>
             <OpprettSakComponent
+                id={`opprett${ident}`}
                 isOpen={modalOpen}
                 ident={ident}
                 navn={navn}
