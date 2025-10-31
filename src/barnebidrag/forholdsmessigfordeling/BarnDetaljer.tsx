@@ -49,13 +49,14 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
             }
             return (
                 <BodyShort size="small">
-                    {"Ja"} {link}
-                    {behandlingstype ? `, ${behandlingstype?.toLowerCase()}` : ""}
+                    {behandlingstype ? ` ${behandlingstype?.toLowerCase()}` : " "} {link}{" "}
                 </BodyShort>
             );
         });
         return åpneBehandling.length > 0 ? (
-            <HStack>{åpneBehandling.map((b) => b)}</HStack>
+            <HStack gap="2" className="items-center">
+                <BodyShort size="small">Ja,</BodyShort> {åpneBehandling.map((b) => b)}
+            </HStack>
         ) : (
             <BodyShort size="small">Nei</BodyShort>
         );
@@ -141,8 +142,8 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerFFProps) {
             );
         }
         let behandlingerInfo = "";
-        if (barn.åpneBehandlinger.length > 0) {
-            behandlingerInfo = ` (${barn.åpneBehandlinger.length} behandlinger)`;
+        if (barn.åpneBehandlinger.length > 1) {
+            behandlingerInfo = ` (${barn.åpneBehandlinger.length} behandlinger: ${barn.åpneBehandlinger.map((b) => hentVisningsnavn(b.behandlingstype)).join(", ")})`;
         }
         return <BodyShort size="small">Del av hovedbehandling{behandlingerInfo}</BodyShort>;
     }
