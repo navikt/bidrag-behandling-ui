@@ -45,7 +45,7 @@ import {
     TilleggsstonadDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
-import { PersonDto } from "@api/PersonApi";
+import { ForelderBarnRelasjon, PersonDto } from "@api/PersonApi";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";
 import {
@@ -110,7 +110,7 @@ export const QueryKeys = {
         vedtakId,
     ],
     sjekkFF: (behandlingId: string) => ["behandlingV2", "FF", QueryKeys.behandlingVersion, behandlingId],
-    hentSakerForIdent: (ident: string) => ["saker", ident],
+    hentSakerForIdent: (ident: string, barn: string) => ["saker", ident, barn],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person", ident],
@@ -305,11 +305,15 @@ const hentPersonDetaljer = async (ident: string): Promise<PersonDto> => {
         return { navn: "Ukjent person", ident, visningsnavn: "Ukjent person" };
     }
 };
-export const useGetSakerForBp = (): Sak[] => {
+export const useGetSakerForBp = (gjelderBarnIdent: string): Sak[] => {
     const { roller } = useGetBehandlingV2();
+    const foreldre = useHentPersonForeldre(gjelderBarnIdent);
     const bpIdent = roller.find((r) => r.rolletype === Rolletype.BP)?.ident;
+    const motsattRolle = foreldre.data.find(
+        (relasjon) => relasjon.relatertPersonsIdent !== bpIdent
+    )?.relatertPersonsIdent;
     const { data: response } = useSuspenseQuery<Sak[]>({
-        queryKey: QueryKeys.hentSakerForIdent(bpIdent),
+        queryKey: QueryKeys.hentSakerForIdent(bpIdent, gjelderBarnIdent),
         queryFn: async () => {
             try {
                 const saker = (await SAK_API.person.finnForFodselsnummer(JSON.stringify(bpIdent))).data;
@@ -319,6 +323,12 @@ export const useGetSakerForBp = (): Sak[] => {
                         .filter(
                             (sak) => sak.roller.find((rolle) => rolle.fodselsnummer === bpIdent)?.type === Rolletype.BP
                         )
+                        .filter((sak) => {
+                            return (
+                                motsattRolle === undefined ||
+                                sak.roller.some((rolle) => rolle.fodselsnummer === motsattRolle)
+                            );
+                        })
                         .map(async (sak) => {
                             const enhetInfo = await hentOrganisasjonDetaljer(sak.eierfogd);
                             const bpRolle = sak.roller.find((rolle) => rolle.fodselsnummer === bpIdent);
@@ -399,7 +409,20 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
     });
     return behandling;
 };
-
+export const useHentPersonForeldre = (ident?: string) =>
+    useSuspenseQuery({
+        queryKey: ["persons", "foreldre", ident],
+        queryFn: async (): Promise<ForelderBarnRelasjon[]> => {
+            if (!ident) return [];
+            const { data } = await PERSON_API.forelderbarnrelasjon.hentForelderBarnRelasjon1({ ident: ident });
+            return data.forelderBarnRelasjon
+                .filter((b) => b.minRolleForPerson === "BARN")
+                .filter(
+                    (relasjon) => relasjon.relatertPersonsRolle === "FAR" || relasjon.relatertPersonsRolle === "MOR"
+                );
+        },
+        staleTime: Infinity,
+    });
 export const useHentPersonData = (ident?: string) =>
     useSuspenseQuery({
         queryKey: ["persons", ident],

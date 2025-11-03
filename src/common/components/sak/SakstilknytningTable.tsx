@@ -38,7 +38,7 @@ export function SakstilknytningModal({ gjelderBarnIdent }: { gjelderBarnIdent: s
 export default function SakstilknytningTable({ gjelderBarnIdent, onClose }: SakstilknytningTableProps) {
     const [oppdaterSak, setOppdaterSak] = React.useState<Sak>();
     const [bekreftetSakstilknytning, setBekreftetSakstilknytning] = useState(false);
-    const saker = useGetSakerForBp();
+    const saker = useGetSakerForBp(gjelderBarnIdent);
     const refetchFFInfo = useRefetchFFInfoFn();
     const leggTilSakFn = useMutation({
         mutationFn: async () => {

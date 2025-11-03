@@ -276,6 +276,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
     const selectedBarnsVirkningstidspunkt = behandling.virkningstidspunktV3.barn.find(
         ({ rolle }) => rolle.ident === item.rolle.ident
     );
+    const stønadstype = item.rolle.stønadstype ?? behandling.stønadstype;
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
     const { getValues, reset, setValue } = useFormContext();
@@ -292,7 +293,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
         ) {
             return dateOrNull(selectedBarnsVirkningstidspunkt.etterfølgendeVedtak.virkningstidspunkt);
         }
-        if (behandling.stønadstype === Stonadstype.BIDRAG)
+        if (stønadstype === Stonadstype.BIDRAG)
             return getFirstDayOfMonthAfterEighteenYears(new Date(item.rolle.fødselsdato));
         return addMonths(new Date(), 50 * 12);
     }, [selectedBarnsVirkningstidspunkt]);
@@ -401,7 +402,7 @@ const Opphør = ({ item, barnIndex, initialValues, previousValues, setPreviousVa
                 >
                     {getOpphørOptions(
                         selectedBarnsVirkningstidspunkt.eksisterendeOpphør,
-                        behandling.stønadstype,
+                        stønadstype,
                         selectedBarnsVirkningstidspunkt.rolle.fødselsdato
                     ).map((value) => (
                         <option key={value} value={value}>
@@ -482,6 +483,11 @@ const VirkningstidspunktBarn = ({
     const selectedVirkningstidspunkt = behandling.virkningstidspunktV3.barn.find(
         ({ rolle }) => rolle.ident === item.rolle.ident
     );
+    const vedtakstype = selectedVirkningstidspunkt.vedtakstype ?? behandling.vedtakstype;
+    const søktAv = selectedVirkningstidspunkt.søktAv ?? behandling.søktAv;
+    const søktFomDato = selectedVirkningstidspunkt.søktFomDato ?? behandling.søktFomDato;
+    const saksnummer = selectedVirkningstidspunkt.saksnummer ?? behandling.saksnummer;
+    const stønadstype = item.rolle.stønadstype ?? behandling.stønadstype;
     const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
@@ -534,7 +540,7 @@ const VirkningstidspunktBarn = ({
     };
     const erÅrsakAvslagIkkeValgt = getValues(`roller.${barnIndex}.årsakAvslag`) === "";
 
-    const [fom] = useFomTomDato(false, new Date(behandling.søktFomDato));
+    const [fom] = useFomTomDato(false, new Date(søktFomDato));
 
     const tom = useMemo(() => {
         const etterfølgendeVedtak =
@@ -547,12 +553,11 @@ const VirkningstidspunktBarn = ({
         return addMonths(new Date(), 50 * 12);
     }, [selectedVirkningstidspunkt.opphørsdato]);
 
-    const erInnkreving = behandling.vedtakstype === Vedtakstype.INNKREVING;
-    const erSøktAVIkkeBM = behandling.søktAv !== SoktAvType.BIDRAGSMOTTAKER;
-    const erTypeOpphør =
-        behandling.vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
+    const erInnkreving = vedtakstype === Vedtakstype.INNKREVING;
+    const erSøktAVIkkeBM = søktAv !== SoktAvType.BIDRAGSMOTTAKER;
+    const erTypeOpphør = vedtakstype === Vedtakstype.OPPHOR || behandling.opprinneligVedtakstype === Vedtakstype.OPPHOR;
     const erTypeOpphørOrLøpendeBidrag = erTypeOpphør || selectedVirkningstidspunkt.harLøpendeBidrag;
-    const er18ÅrsBidrag = behandling.stønadstype === Stonadstype.BIDRAG18AAR;
+    const er18ÅrsBidrag = stønadstype === Stonadstype.BIDRAG18AAR;
     const virkningsårsaker = lesemodus
         ? årsakslisteAlle
         : er18ÅrsBidrag
@@ -660,7 +665,7 @@ const VirkningstidspunktBarn = ({
                 <optgroup label={erTypeOpphørOrLøpendeBidrag ? text.label.opphør : text.label.avslag}>
                     {(erTypeOpphørOrLøpendeBidrag ? avslagsListe18ÅrOpphør : avslagsListe18År).map((value) => (
                         <option key={value} value={value}>
-                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            {hentVisningsnavnVedtakstype(value, vedtakstype)}
                         </option>
                     ))}
                 </optgroup>
@@ -674,14 +679,14 @@ const VirkningstidspunktBarn = ({
                     <optgroup label={text.label.opphør}>
                         {avslagsliste.map((value) => (
                             <option key={value} value={value}>
-                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                {hentVisningsnavnVedtakstype(value, vedtakstype)}
                             </option>
                         ))}
                         {avslagsListeDeprekert.includes(getValues(`roller.${barnIndex}.årsakAvslag`)) && (
                             <>
                                 {avslagsListeDeprekert.map((value) => (
                                     <option key={value} value={value} disabled>
-                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                        {hentVisningsnavnVedtakstype(value, vedtakstype)}
                                     </option>
                                 ))}
                             </>
@@ -690,7 +695,7 @@ const VirkningstidspunktBarn = ({
                     <optgroup label={text.label.avslag}>
                         {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map((value) => (
                             <option key={value} value={value}>
-                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                {hentVisningsnavnVedtakstype(value, vedtakstype)}
                             </option>
                         ))}
                     </optgroup>
@@ -703,7 +708,7 @@ const VirkningstidspunktBarn = ({
                 {(lesemodus ? avslaglisteAlle : erTypeOpphørOrLøpendeBidrag ? avslagsListeOpphør : avslagsListe).map(
                     (value) => (
                         <option key={value} value={value}>
-                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            {hentVisningsnavnVedtakstype(value, vedtakstype)}
                         </option>
                     )
                 )}
@@ -711,14 +716,14 @@ const VirkningstidspunktBarn = ({
                     <>
                         {avslagsListeDeprekert.map((value) => (
                             <option key={value} value={value} disabled>
-                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                {hentVisningsnavnVedtakstype(value, vedtakstype)}
                             </option>
                         ))}
                     </>
                 )}
                 {(erSøktAVIkkeBM && erTypeOpphør ? avvisningsListeOpphør : avvisningsListe).map((value) => (
                     <option key={value} value={value}>
-                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                        {hentVisningsnavnVedtakstype(value, vedtakstype)}
                     </option>
                 ))}
             </optgroup>
@@ -730,20 +735,28 @@ const VirkningstidspunktBarn = ({
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
+                    <BodyShort size="small">{hentVisningsnavn(vedtakstype)}</BodyShort>
                     <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
-                    <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
+                    <BodyShort size="small">{SOKNAD_LABELS[søktAv]}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.mottattdato}:</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
+                    <BodyShort size="small">
+                        {DateToDDMMYYYYString(
+                            new Date(selectedVirkningstidspunkt.mottattdato ?? behandling.mottattdato)
+                        )}
+                    </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søktfradato}:</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
+                    <BodyShort size="small">
+                        {DateToDDMMYYYYString(
+                            new Date(selectedVirkningstidspunkt.søktFomDato ?? behandling.søktFomDato)
+                        )}
+                    </BodyShort>
                 </div>
                 {behandling.erKlageEllerOmgjøring && selectedVirkningstidspunkt.opprinneligVedtakstidspunkt && (
                     <div className="flex gap-x-2">
@@ -757,7 +770,7 @@ const VirkningstidspunktBarn = ({
             </FlexRow>
 
             <FlexRow className="gap-x-8">
-                {behandling.vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
+                {vedtakstype !== Vedtakstype.ALDERSJUSTERING && (
                     <FormControlledSelectField
                         name={`roller.${barnIndex}.årsakAvslag`}
                         label={text.label.årsak}
@@ -766,10 +779,7 @@ const VirkningstidspunktBarn = ({
                     >
                         {lesemodus && (
                             <option value={getValues(`roller.${barnIndex}.årsakAvslag`)}>
-                                {hentVisningsnavnVedtakstype(
-                                    getValues(`roller.${barnIndex}.årsakAvslag`),
-                                    behandling.vedtakstype
-                                )}
+                                {hentVisningsnavnVedtakstype(getValues(`roller.${barnIndex}.årsakAvslag`), vedtakstype)}
                             </option>
                         )}
                         {!lesemodus && erÅrsakAvslagIkkeValgt && (
@@ -784,7 +794,7 @@ const VirkningstidspunktBarn = ({
                                     })
                                     .map((value) => (
                                         <option key={value} value={value}>
-                                            {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                            {hentVisningsnavnVedtakstype(value, vedtakstype)}
                                         </option>
                                     ))}
                             </optgroup>
@@ -802,7 +812,7 @@ const VirkningstidspunktBarn = ({
                             defaultValue={initialValues.virkningstidspunkt}
                             fromDate={fom}
                             toDate={tom}
-                            readonly={lesemodus || behandling.vedtakstype === Vedtakstype.ALDERSJUSTERING}
+                            readonly={lesemodus || vedtakstype === Vedtakstype.ALDERSJUSTERING}
                             required
                         />
                     </HStack>
@@ -861,7 +871,7 @@ const VirkningstidspunktBarn = ({
                                 {selectedVirkningstidspunkt.etterfølgendeVedtak && (
                                     <Link
                                         className="w-max"
-                                        to={`/sak/${behandling.saksnummer}/vedtak/${selectedVirkningstidspunkt.etterfølgendeVedtak?.vedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
+                                        to={`/sak/${saksnummer}/vedtak/${selectedVirkningstidspunkt.etterfølgendeVedtak?.vedtaksid}/?steg=vedtak&enhet=${enhet}&sessionState=${sessionState}`}
                                         target="_blank"
                                         rel="noreferrer"
                                     >
