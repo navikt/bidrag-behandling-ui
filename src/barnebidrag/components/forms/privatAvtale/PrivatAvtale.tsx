@@ -319,9 +319,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((value, { name, type }) => {
-            console.log("name", name);
-            console.log("type", type);
-            if (name?.includes("privatAvtale.begrunnelse" && type === "change")) {
+            if (name?.includes("privatAvtale.begrunnelse") && type === "change") {
                 const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
                     privatavtaleid: selectedPrivatAvtale?.id,
                     begrunnelse: value.roller[rolleIndex].privatAvtale.begrunnelse,
