@@ -116,7 +116,7 @@ export const SideMenu = ({ children, otherChildren }) => {
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
             />
-            {otherChildren}
+            {menuOpen && otherChildren}
         </div>
     );
 };
