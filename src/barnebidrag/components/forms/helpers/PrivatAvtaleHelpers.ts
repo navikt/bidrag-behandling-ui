@@ -1,70 +1,36 @@
-import {
-    BpsBarnUtenLopendeBidragDto,
-    PrivatAvtaleBarnDto,
-    PrivatAvtalePeriodeDto,
-    RolleDto,
-} from "@api/BidragBehandlingApiV1";
+import { PrivatAvtaleBarnDto, PrivatAvtaleDto, PrivatAvtalePeriodeDto } from "@api/BidragBehandlingApiV1";
 
-import {
-    PrivatAvtaleFormValue,
-    PrivatAvtaleFormValues,
-    PrivatAvtaleFormValuesPerBarn,
-} from "../../../types/privatAvtaleFormValues";
+import { PrivatAvtaleFormValues, PrivatAvtaleFormValuesPerBarn } from "../../../types/privatAvtaleFormValues";
 
-export const createInitialValues = (
-    privatAvtaler: PrivatAvtaleBarnDto[],
-    baRoller: RolleDto[],
-    bpsBarnUtenLøpendeBidrag: BpsBarnUtenLopendeBidragDto[]
-): PrivatAvtaleFormValues => {
-    const paSøknadsbarn: PrivatAvtaleFormValue[] = baRoller.map((rolle) => {
-        const privatAvtale = privatAvtaler.find(
-            (avtale) => avtale.erSøknadsbarn && avtale.gjelderBarn.ident === rolle.ident
-        );
-        return {
-            gjelderBarn: {
-                ident: rolle.ident,
-                navn: rolle.navn,
-                fødselsdato: rolle.fødselsdato,
-            },
-            harLøpendeBidrag: true,
-            saksnummer: undefined,
-            privatAvtale: privatAvtale ? createPrivatAvtaleInitialValues(privatAvtale) : null,
-        };
-    });
-    const paBarnUtenLøpendeBidrag = bpsBarnUtenLøpendeBidrag.map((rolle) => {
-        const privatAvtale = privatAvtaler.find((avtale) => avtale.gjelderBarn.ident === rolle.ident);
-        return {
-            gjelderBarn: {
-                ident: rolle.ident,
-                navn: rolle.navn,
-                fødselsdato: rolle.fødselsdato,
-            },
-            harLøpendeBidrag: false,
-            saksnummer: rolle.saksnummer,
-            enhet: rolle.enhet,
-            privatAvtale: privatAvtale ? createPrivatAvtaleInitialValues(privatAvtale) : null,
-        };
-    });
-    const paIkkeSøknadsbarn = privatAvtaler
-        .filter((p) => !p.erSøknadsbarn && !bpsBarnUtenLøpendeBidrag.some((b) => b.ident === p.gjelderBarn.ident))
-        .map((privatAvtale) => {
-            const rolle = privatAvtale.gjelderBarn;
-            return {
-                gjelderBarn: {
-                    ident: rolle.ident,
-                    navn: rolle.navn,
-                    fødselsdato: rolle.fødselsdato,
-                },
-                harLøpendeBidrag: false,
-                saksnummer: undefined,
-                enhet: undefined,
-                lagtTilManuelt: true,
-                privatAvtale: privatAvtale ? createPrivatAvtaleInitialValues(privatAvtale) : null,
-            };
-        });
+export const createInitialValues = (privatAvtale: PrivatAvtaleDto): PrivatAvtaleFormValues => {
+    const privatAvtaleBarn = privatAvtale.barn.map((avtale) => ({
+        gjelderBarn: {
+            ident: avtale.gjelderBarn.ident,
+            navn: avtale.gjelderBarn.navn,
+            fødselsdato: avtale.gjelderBarn.fødselsdato,
+        },
+        harLøpendeBidrag: true,
+        saksnummer: undefined,
+        privatAvtale: avtale ? createPrivatAvtaleInitialValues(avtale) : null,
+    }));
+
+    const privatAvtaleAndreBarn = privatAvtale.andreBarn.barn.map((avtale) => ({
+        gjelderBarn: {
+            ident: avtale.gjelderBarn.ident,
+            navn: avtale.gjelderBarn.navn,
+            fødselsdato: avtale.gjelderBarn.fødselsdato,
+        },
+        harLøpendeBidrag: false,
+        saksnummer: undefined,
+        enhet: undefined,
+        lagtTilManuelt: true,
+        privatAvtale: avtale ? createPrivatAvtaleInitialValues(avtale) : null,
+    }));
+
     return {
-        roller: paSøknadsbarn,
-        andreBarn: paBarnUtenLøpendeBidrag.concat(paIkkeSøknadsbarn),
+        roller: privatAvtaleBarn,
+        andreBarn: privatAvtaleAndreBarn,
+        andreBarnBegrunnelse: privatAvtale.andreBarn.begrunnelse,
     };
 };
 export const transformPrivatAvtalePeriode = (periode: PrivatAvtalePeriodeDto) => ({

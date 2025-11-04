@@ -357,18 +357,12 @@ const Side = () => {
 };
 
 const PrivatAvtaleForm = () => {
-    const { privatAvtale, roller: behandlingRoller, bpsBarnUtenLøpendeBidrag } = useGetBehandlingV2();
+    const { privatAvtaleV2: privatAvtale } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const baRoller = behandlingRoller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const initialValues = useMemo(
-        () => createInitialValues(privatAvtale, baRoller, bpsBarnUtenLøpendeBidrag),
-        [JSON.stringify(privatAvtale), JSON.stringify(baRoller), JSON.stringify(bpsBarnUtenLøpendeBidrag)]
-    );
+    const privatAvtaleRef = useRef(privatAvtale);
+    const initialValues = useMemo(() => createInitialValues(privatAvtale), [privatAvtaleRef]);
 
     useEffect(() => {
-        const privatAvtaleBarn = privatAvtale.filter((avtale) => avtale.erSøknadsbarn);
-        const privatAvtaleAndreBarn = privatAvtale.filter((avtale) => !avtale.erSøknadsbarn);
-
         const checkForBegrunnelseValidationError = (avtale: PrivatAvtaleBarnDto) =>
             avtale?.valideringsfeil?.manglerBegrunnelse;
 
@@ -381,12 +375,12 @@ const PrivatAvtaleForm = () => {
             });
         };
 
-        privatAvtaleBarn.forEach((avtale, index) => {
+        privatAvtale.barn.forEach((avtale, index) => {
             if (checkForBegrunnelseValidationError(avtale)) {
                 setBegrunnelseError(`roller.${index}.privatAvtale.begrunnelse`);
             }
         });
-        if (privatAvtaleAndreBarn.some(checkForBegrunnelseValidationError)) {
+        if (privatAvtale.andreBarn.manglerBegrunnelse) {
             setBegrunnelseError("andreBarnBegrunnelse");
         }
     }, []);

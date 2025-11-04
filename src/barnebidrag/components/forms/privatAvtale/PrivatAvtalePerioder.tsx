@@ -29,17 +29,22 @@ export const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const { privatAvtale, stønadstype, virkningstidspunktV2 } = useGetBehandlingV2();
+    const {
+        privatAvtaleV2: privatAvtale,
+        stønadstype,
+        virkningstidspunktV3: virkningstidspunkt,
+    } = useGetBehandlingV2();
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
-    const selectedVirkningstidspunktObjekt = virkningstidspunktV2.find(
+    const selectedVirkningstidspunktObjekt = virkningstidspunkt.barn.find(
         (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
     );
-    const manuelleVedtakUtenInnkreving = privatAvtale.find(
+    const privatAvtaleForSøknadsBarnAndAndreBarn = privatAvtale.barn.concat(privatAvtale.andreBarn.barn);
+    const manuelleVedtakUtenInnkreving = privatAvtaleForSøknadsBarnAndAndreBarn.find(
         (avtale) => avtale.gjelderBarn.ident === item.gjelderBarn.ident
     )?.manuelleVedtakUtenInnkreving;
-    const hasManuelleVedtakUtenInnkreving = !!manuelleVedtakUtenInnkreving.length;
+    const hasManuelleVedtakUtenInnkreving = !!manuelleVedtakUtenInnkreving?.length;
     const valgManuelleVedtakUtenInnkreving = manuelleVedtakUtenInnkreving?.find((vedtak) => vedtak.valgt)?.vedtaksid;
     const manuelleVedtak = {
         vedtaksliste: hasManuelleVedtakUtenInnkreving
@@ -49,17 +54,19 @@ export const PrivatAvtalePerioder = ({
             ? valgManuelleVedtakUtenInnkreving
             : selectedVirkningstidspunktObjekt?.grunnlagFraVedtak,
     };
-    const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
+    const selectedPrivatAvtale = privatAvtaleForSøknadsBarnAndAndreBarn.find(
+        (avtale) => avtale?.id === item.privatAvtale?.avtaleId
+    );
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const vedtakFraNav = item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
     const fom = useMemo(() => {
-        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
-    }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
+        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato);
+    }, [stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato]);
     const tom = useMemo(
-        () => getTomForPrivatAvtale(selectedPrivatAvtale.gjelderBarn.fødselsdato),
-        [selectedPrivatAvtale.gjelderBarn.fødselsdato]
+        () => getTomForPrivatAvtale(selectedPrivatAvtale?.gjelderBarn?.fødselsdato),
+        [selectedPrivatAvtale?.gjelderBarn?.fødselsdato]
     );
     const refetchFFInfo = useRefetchFFInfoFn();
 
@@ -107,10 +114,28 @@ export const PrivatAvtalePerioder = ({
                 updatePrivatAvtaleQuery.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,
-                        privatAvtale: currentData.privatAvtale.map((avtale) => {
-                            if (avtale.id === item.privatAvtale.avtaleId) return response.oppdatertPrivatAvtale;
-                            return avtale;
-                        }),
+                        privatAvtaleV2: {
+                            ...currentData.privatAvtaleV2,
+                            barn:
+                                prefix === "roller"
+                                    ? currentData.privatAvtaleV2.barn.map((avtale) => {
+                                          if (avtale.id === item.privatAvtale.avtaleId)
+                                              return response.oppdatertPrivatAvtale;
+                                          return avtale;
+                                      })
+                                    : currentData.privatAvtaleV2.barn,
+                            andreBarn: {
+                                ...currentData.privatAvtaleV2.andreBarn,
+                                barn:
+                                    prefix === "andreBarn"
+                                        ? currentData.privatAvtaleV2.andreBarn.barn.map((avtale) => {
+                                              if (avtale.id === item.privatAvtale.avtaleId)
+                                                  return response.oppdatertPrivatAvtale;
+                                              return avtale;
+                                          })
+                                        : currentData.privatAvtaleV2.andreBarn.barn,
+                            },
+                        },
                     };
                 });
             },
@@ -205,7 +230,7 @@ export const PrivatAvtalePerioder = ({
                     name={`${prefix}.${barnIndex}.privatAvtale.skalIndeksreguleres`}
                     legend={text.label.skalIndeksreguleres}
                     onChange={onToggle}
-                    readOnly={!item.privatAvtale.perioder.length || vedtakFraNav}
+                    readOnly={!item.privatAvtale?.perioder?.length || vedtakFraNav}
                 />
             </FlexRow>
             {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (

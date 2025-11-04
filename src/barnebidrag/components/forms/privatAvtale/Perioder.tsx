@@ -329,7 +329,7 @@ export const Perioder = ({
 
     return (
         <div className="grid gap-2">
-            {!lesemodus && selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
+            {!lesemodus && selectedPrivatAvtale?.perioderLøperBidrag?.length > 0 && (
                 <BehandlingAlert variant="info">
                     <Heading size="xsmall" level="6">
                         {text.alert.løpendeBidrag}.

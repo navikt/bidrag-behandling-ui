@@ -63,7 +63,13 @@ export const PrivatAvtaleAndreBarn = ({ initialValues }: { initialValues: Privat
 
                 createPrivatAvtale.queryClientUpdater((currentData) => ({
                     ...currentData,
-                    privatAvtale: currentData.privatAvtale.concat(response.oppdatertPrivatAvtale),
+                    privatAvtaleV2: {
+                        ...currentData.privatAvtaleV2,
+                        andreBarn: {
+                            ...currentData.privatAvtaleV2.andreBarn,
+                            barn: currentData.privatAvtaleV2.andreBarn.barn.concat(response.oppdatertPrivatAvtale),
+                        },
+                    },
                 }));
                 refetchFFInfo();
                 setOpenForm(false);
@@ -83,9 +89,15 @@ export const PrivatAvtaleAndreBarn = ({ initialValues }: { initialValues: Privat
                 fieldArray.remove(index);
                 deletePrivatAvtale.queryClientUpdater((currentData) => ({
                     ...currentData,
-                    privatAvtale: currentData.privatAvtale.filter(
-                        (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
-                    ),
+                    privatAvtaleV2: {
+                        ...currentData.privatAvtaleV2,
+                        andreBarn: {
+                            ...currentData.privatAvtaleV2.andreBarn,
+                            barn: currentData.privatAvtaleV2.andreBarn.barn.filter(
+                                (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
+                            ),
+                        },
+                    },
                 }));
                 refetchFFInfo();
             },

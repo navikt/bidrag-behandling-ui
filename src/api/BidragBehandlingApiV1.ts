@@ -2790,10 +2790,10 @@ export interface ResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2824,10 +2824,10 @@ export interface Skatt {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -3456,10 +3456,10 @@ export interface DokumentmalResultatBeregningInntekterDto {
   inntektBP?: number;
   inntektBarn?: number;
   barnEndeligInntekt?: number;
-  totalEndeligInntekt: number;
   inntektBPMånedlig?: number;
   inntektBMMånedlig?: number;
   inntektBarnMånedlig?: number;
+  totalEndeligInntekt: number;
 }
 
 export type DokumentmalResultatBidragsberegningBarnDto = UtilRequiredKeys<
@@ -3479,10 +3479,10 @@ export interface DokumentmalSkattBeregning {
   skattAlminneligInntekt: number;
   trinnskatt: number;
   trygdeavgift: number;
-  trinnskattMånedsbeløp: number;
-  skattAlminneligInntektMånedsbeløp: number;
   trygdeavgiftMånedsbeløp: number;
   skattMånedsbeløp: number;
+  trinnskattMånedsbeløp: number;
+  skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface DokumentmalUnderholdEgneBarnIHusstand {
@@ -3551,10 +3551,10 @@ export interface NotatBehandlingDetaljerDto {
   /** @format date */
   klageMottattDato?: string;
   vedtakstypeVisningsnavn?: string;
-  erAvvisning: boolean;
-  avslagVisningsnavnUtenPrefiks?: string;
-  avslagVisningsnavn?: string;
   kategoriVisningsnavn?: string;
+  erAvvisning: boolean;
+  avslagVisningsnavn?: string;
+  avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
