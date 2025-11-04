@@ -31,7 +31,7 @@ import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "@common/hooks/useS
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { SamværBarnformvalues, SamværPeriodeFormvalues } from "@common/types/samværFormValues";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { deductDays, PersonNavn, PersonNavnIdent } from "@navikt/bidrag-ui-common";
+import { deductDays, PersonNavn } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Switch, Table, Tabs } from "@navikt/ds-react";
 import {
     addDays,
@@ -49,6 +49,7 @@ import { CustomTextareaEditor } from "../../../../common/components/CustomEditor
 import elementIds from "../../../../common/constants/elementIds";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnMergeSamvær } from "../../../hooks/useOnMergeSamvær";
+import PersonIdentSak from "../../PersonIdentSak";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
 import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
 import { Samværsperiode } from "./Samværsperiode";
@@ -272,7 +273,7 @@ const Main = () => {
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.id.toString()}
-                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
+                                label={<PersonIdentSak ident={rolle.ident} rolle={rolle.rolletype} />}
                             />
                         ))}
                     </Tabs.List>
