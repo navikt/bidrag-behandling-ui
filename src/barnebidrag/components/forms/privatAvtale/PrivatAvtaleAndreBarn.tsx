@@ -220,7 +220,7 @@ function PrivatAvtaleAnnenBarnDetaljer({
             <VStack gap="2">
                 <RolleInfoBox item={item} onDelete={() => onDeletePrivatAvtale(item, barnIndex)} />
                 {renderBarnUtenLøpendeBidragDetaljer()}
-                {!item.privatAvtale && (
+                {!item.privatAvtale?.avtaleId && (
                     <Button
                         type="button"
                         onClick={() => onCreatePrivatAvtale(item, barnIndex)}
@@ -232,7 +232,7 @@ function PrivatAvtaleAnnenBarnDetaljer({
                         {text.label.opprettePrivatAvtale}
                     </Button>
                 )}
-                {item.privatAvtale && (
+                {item.privatAvtale?.avtaleId && (
                     <PrivatAvtalePerioder
                         prefix="andreBarn"
                         initialValues={initialValues}
