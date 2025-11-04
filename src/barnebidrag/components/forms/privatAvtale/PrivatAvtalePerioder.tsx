@@ -13,7 +13,7 @@ import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
-import { VedtaksListeBeregning } from "../../Vedtakliste";
+import { VedtaksListe } from "../../Vedtakliste";
 import { BeregnetTabel } from "./BeregnetTabel";
 import { Perioder } from "./Perioder";
 import { getFomForPrivatAvtale, getTomForPrivatAvtale, RemoveButton } from "./PrivatAvtale";
@@ -33,15 +33,22 @@ export const PrivatAvtalePerioder = ({
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
-    const manuelleVedtakFraVirkningstidspunktObjekt = virkningstidspunktV2.find(
+    const selectedVirkningstidspunktObjekt = virkningstidspunktV2.find(
         (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
-    )?.manuelleVedtak;
+    );
     const manuelleVedtakUtenInnkreving = privatAvtale.find(
         (avtale) => avtale.gjelderBarn.ident === item.gjelderBarn.ident
     )?.manuelleVedtakUtenInnkreving;
-    const manuelleVedtak = manuelleVedtakUtenInnkreving.length
-        ? manuelleVedtakUtenInnkreving
-        : manuelleVedtakFraVirkningstidspunktObjekt;
+    const hasManuelleVedtakUtenInnkreving = !!manuelleVedtakUtenInnkreving.length;
+    const valgManuelleVedtakUtenInnkreving = manuelleVedtakUtenInnkreving.find((vedtak) => vedtak.valgt).vedtaksid;
+    const manuelleVedtak = {
+        vedtaksliste: hasManuelleVedtakUtenInnkreving
+            ? manuelleVedtakUtenInnkreving
+            : selectedVirkningstidspunktObjekt.manuelleVedtak,
+        valgtVedtak: hasManuelleVedtakUtenInnkreving
+            ? valgManuelleVedtakUtenInnkreving
+            : selectedVirkningstidspunktObjekt.grunnlagFraVedtak,
+    };
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
@@ -164,7 +171,7 @@ export const PrivatAvtalePerioder = ({
                     >
                         {Object.keys(PrivatAvtaleType)
                             .filter((value) =>
-                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak?.length : true
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak?.vedtaksliste.length : true
                             )
                             .map((value) => (
                                 <option key={value} value={value}>
@@ -183,7 +190,14 @@ export const PrivatAvtalePerioder = ({
                     valideringsfeil={valideringsfeil}
                 />
             )}
-            {vedtakFraNav && <VedtaksListeBeregning barnIdent={item.gjelderBarn.ident} omgjøring={false} />}
+            {vedtakFraNav && (
+                <VedtaksListe
+                    barnIdent={item.gjelderBarn.ident}
+                    omgjøring={false}
+                    vedtaksLista={manuelleVedtak.vedtaksliste}
+                    valgVedtak={manuelleVedtak.valgtVedtak}
+                />
+            )}
             <FlexRow>
                 <FormControlledSwitch
                     name={`${prefix}.${barnIndex}.privatAvtale.skalIndeksreguleres`}
