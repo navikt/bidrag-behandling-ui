@@ -243,7 +243,7 @@ const Main = () => {
                     </>
                 }
             />
-            {roller.length > 1 && (
+            {roller.length > 1 && !forholdsmessigFordeling && (
                 <Switch
                     value="erLikForAlle"
                     checked={vurderSeparat}
@@ -260,7 +260,7 @@ const Main = () => {
                     {text.label.vurderSeparatPerBarn}
                 </Switch>
             )}
-            {vurderSeparat && roller.length > 1 && !forholdsmessigFordeling && (
+            {vurderSeparat && roller.length > 1 && (
                 <Tabs
                     defaultValue={defaultTab}
                     value={selectedTab}
