@@ -231,7 +231,7 @@ const PrivatAvtaleBarn = ({
                         </div>
                     </div>
                 )}
-                {!item.privatAvtale && (
+                {!item.privatAvtale?.avtaleId && (
                     <Button
                         type="button"
                         onClick={onCreatePrivatAvtale}
@@ -243,7 +243,7 @@ const PrivatAvtaleBarn = ({
                         {text.label.opprettePrivatAvtale}
                     </Button>
                 )}
-                {item.privatAvtale && (
+                {item.privatAvtale?.avtaleId && (
                     <PrivatAvtalePerioder
                         prefix="roller"
                         item={item}
@@ -282,22 +282,22 @@ const Side = () => {
                         const privatAvtale =
                             tabBarnIdent === "andrebarn"
                                 ? currentData.privatAvtale.map((avtale) => {
-                                      if (!avtale?.id)
-                                          return {
-                                              ...avtale,
-                                              begrunnelse: response.begrunnelseAndreBarn,
-                                              valideringsfeil: {
-                                                  ...avtale.valideringsfeil,
-                                                  manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
-                                              },
-                                          };
-                                      return avtale;
-                                  })
+                                    if (!avtale?.id)
+                                        return {
+                                            ...avtale,
+                                            begrunnelse: response.begrunnelseAndreBarn,
+                                            valideringsfeil: {
+                                                ...avtale.valideringsfeil,
+                                                manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
+                                            },
+                                        };
+                                    return avtale;
+                                })
                                 : currentData.privatAvtale.map((avtale) => {
-                                      if (response.oppdatertPrivatAvtale.id === avtale?.id)
-                                          return response.oppdatertPrivatAvtale;
-                                      return avtale;
-                                  });
+                                    if (response.oppdatertPrivatAvtale.id === avtale?.id)
+                                        return response.oppdatertPrivatAvtale;
+                                    return avtale;
+                                });
                         return {
                             ...currentData,
                             privatAvtale,
