@@ -180,7 +180,7 @@ const Side = () => {
 };
 
 const Main = () => {
-    const { roller: behandlingRoller, samværV2: samvær } = useGetBehandlingV2();
+    const { roller: behandlingRoller, samværV2: samvær, forholdsmessigFordeling } = useGetBehandlingV2();
     const { reset } = useFormContext<SamværBarnformvalues>();
     const { onNavigateToTab, setSaveErrorState } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
@@ -260,7 +260,7 @@ const Main = () => {
                     {text.label.vurderSeparatPerBarn}
                 </Switch>
             )}
-            {vurderSeparat && roller.length > 1 && (
+            {vurderSeparat && roller.length > 1 && !forholdsmessigFordeling && (
                 <Tabs
                     defaultValue={defaultTab}
                     value={selectedTab}

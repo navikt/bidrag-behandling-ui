@@ -35,7 +35,7 @@ import {
     VirkningstidspunktFormValuesPerBarn,
 } from "@common/types/virkningstidspunktFormValues";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { deductDays, ObjectUtils, PersonNavnIdent, toISODateString } from "@navikt/bidrag-ui-common";
+import { deductDays, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import {
     BodyShort,
     Box,
@@ -63,6 +63,7 @@ import { useOnMergeVirkningtidspunkt } from "../../../hooks/useOnMergeVirkningti
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { useOnUpdateBeregnTilDato } from "../../../hooks/useOnUpdateBeregnTilDato";
 import { useOnUpdateOpphørsdato } from "../../../hooks/useOnUpdateOpphørsdato";
+import PersonIdentSak from "../../PersonIdentSak";
 import { VedtaksListeVirkningstidspunkt } from "../../Vedtakliste";
 
 const årsakListe = [
@@ -919,7 +920,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
     const { control, reset } = useFormContext<VirkningstidspunktFormValues>();
     const { onNavigateToTab, setSaveErrorState } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
-    const { virkningstidspunktV3: virkningstidspunkt } = useGetBehandlingV2();
+    const { virkningstidspunktV3: virkningstidspunkt, forholdsmessigFordeling } = useGetBehandlingV2();
     const mergeVirkningstidspunkterMutation = useOnMergeVirkningtidspunkt();
     const [vurderSeparat, setVurderSeparat] = useState<boolean>(!virkningstidspunkt.erLikForAlle);
     const ref = useRef<HTMLDialogElement>(null);
@@ -985,7 +986,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                     </>
                 }
             />
-            {virkningstidspunkt.barn.length > 1 && (
+            {virkningstidspunkt.barn.length > 1 && !forholdsmessigFordeling && (
                 <Switch
                     value="erLikForAlle"
                     checked={vurderSeparat}
@@ -1014,7 +1015,7 @@ const Main = ({ initialValues }: { initialValues: VirkningstidspunktFormValues }
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.ident}
-                                label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
+                                label={<PersonIdentSak ident={rolle.ident} rolle={rolle.rolletype} />}
                             />
                         ))}
                     </Tabs.List>

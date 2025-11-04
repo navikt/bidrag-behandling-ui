@@ -1616,6 +1616,7 @@ export interface RolleDto {
   delAvOpprinneligBehandling?: boolean;
   erRevurdering?: boolean;
   stønadstype?: Stonadstype;
+  saksnummer: string;
 }
 
 export interface SamvaerBarnDto {
@@ -2012,7 +2013,6 @@ export interface VirkningstidspunktBarnDtoV2 {
    */
   klageMottattdato?: string;
   søktAv: SoktAvType;
-  saksnummer: string;
   /**
    * Bruk begrunnelse
    * @deprecated

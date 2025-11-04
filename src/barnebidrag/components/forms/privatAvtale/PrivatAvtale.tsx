@@ -23,6 +23,7 @@ import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
+import PersonIdentSak from "../../PersonIdentSak";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { PrivatAvtaleAndreBarn } from "./PrivatAvtaleAndreBarn";
 import { PrivatAvtalePerioder } from "./PrivatAvtalePerioder";
@@ -106,80 +107,54 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
-    if (controlledFields.length > 1 || andreBarn.length > 0) {
-        return (
-            <>
-                {andreBarn.length > 0 && (
-                    <Alert variant="info" size="small">
-                        Bidragspliktig har barn uten bidragsak/løpende bidrag. De er listet under "Andre barn". Hvis BP
-                        har privat avtale for andre barn kan du fylle ut bidragsbeløpene for å se om det slår ut til
-                        forholdsmessig fordeling.
-                    </Alert>
-                )}
-                <Tabs
-                    defaultValue={defaultTab}
-                    value={selectedTab}
-                    onChange={onNavigateToTab}
-                    className={`lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full`}
-                >
-                    <Tabs.List>
-                        {controlledFields.map(({ gjelderBarn, harLøpendeBidrag }) => (
-                            <Tabs.Tab
-                                key={gjelderBarn.ident}
-                                value={gjelderBarn.ident}
-                                className={!harLøpendeBidrag ? "bg-gray-50 border border-gray-50 w-full" : ""}
-                                label={
-                                    !harLøpendeBidrag ? (
-                                        <PersonNavnIdent ident={gjelderBarn.ident} variant="compact" />
-                                    ) : (
-                                        <PersonNavnIdent
-                                            skjulNavn
-                                            rolle={RolleTypeFullName.BARN}
-                                            ident={gjelderBarn.ident}
-                                            variant="compact"
-                                        />
-                                    )
-                                }
-                            />
-                        ))}
-                        {bidragFlereBarn && <Tabs.Tab key="andrebarn" value="andrebarn" label="Andre barn" />}
-                    </Tabs.List>
-                    {controlledFields.map((item, index) => {
-                        return (
-                            <Tabs.Panel
-                                key={item.gjelderBarn.ident}
-                                value={item.gjelderBarn.ident}
-                                className="grid gap-y-4"
-                            >
-                                <PrivatAvtaleBarn
-                                    multiple
-                                    key={item.id}
-                                    item={item}
-                                    barnIndex={index}
-                                    initialValues={initialValues}
-                                />
-                            </Tabs.Panel>
-                        );
-                    })}
-                    {bidragFlereBarn && (
-                        <Tabs.Panel key={"andrebarn"} value={"andrebarn"} className="grid gap-y-4">
-                            <PrivatAvtaleAndreBarn initialValues={initialValues} />
-                        </Tabs.Panel>
-                    )}
-                </Tabs>
-            </>
-        );
-    }
-
     return (
         <>
-            <PrivatAvtaleBarn
-                multiple={false}
-                key={controlledFields[0].id}
-                item={controlledFields[0]}
-                barnIndex={0}
-                initialValues={initialValues}
-            />
+            {andreBarn.length > 0 && (
+                <Alert variant="info" size="small">
+                    Bidragspliktig har barn uten bidragsak/løpende bidrag. De er listet under "Andre barn". Hvis BP har
+                    privat avtale for andre barn kan du fylle ut bidragsbeløpene for å se om det slår ut til
+                    forholdsmessig fordeling.
+                </Alert>
+            )}
+            <Tabs
+                defaultValue={defaultTab}
+                value={selectedTab}
+                onChange={onNavigateToTab}
+                className={`lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full`}
+            >
+                <Tabs.List>
+                    {controlledFields.map(({ gjelderBarn }) => (
+                        <Tabs.Tab
+                            key={gjelderBarn.ident}
+                            value={gjelderBarn.ident}
+                            label={<PersonIdentSak ident={gjelderBarn.ident} rolle={RolleTypeFullName.BARN} />}
+                        />
+                    ))}
+                    {bidragFlereBarn && <Tabs.Tab key="andrebarn" value="andrebarn" label="Andre barn" />}
+                </Tabs.List>
+                {controlledFields.map((item, index) => {
+                    return (
+                        <Tabs.Panel
+                            key={item.gjelderBarn.ident}
+                            value={item.gjelderBarn.ident}
+                            className="grid gap-y-4"
+                        >
+                            <PrivatAvtaleBarn
+                                multiple
+                                key={item.id}
+                                item={item}
+                                barnIndex={index}
+                                initialValues={initialValues}
+                            />
+                        </Tabs.Panel>
+                    );
+                })}
+                {bidragFlereBarn && (
+                    <Tabs.Panel key={"andrebarn"} value={"andrebarn"} className="grid gap-y-4">
+                        <PrivatAvtaleAndreBarn initialValues={initialValues} />
+                    </Tabs.Panel>
+                )}
+            </Tabs>
         </>
     );
 };
