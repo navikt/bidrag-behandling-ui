@@ -11,7 +11,6 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Tabs } from "@navikt/ds-react";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -20,6 +19,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
 import { useOnUpdateUnderholdBegrunnelse } from "../../../hooks/useOnUpdateUnderhold";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import PersonIdentSak from "../../PersonIdentSak";
 import { createInitialValues } from "../helpers/UnderholdskostnadFormHelpers";
 import { AndreBarn } from "./AndreBarn";
 import { Barnetilsyn } from "./Barnetilsyn";
@@ -54,9 +54,7 @@ const Main = () => {
                         <Tabs.Tab
                             key={`tab-${underhold.gjelderBarn.id}`}
                             value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
-                            label={
-                                <PersonNavnIdent ident={underhold.gjelderBarn.ident} rolle={Rolletype.BA} skjulNavn />
-                            }
+                            label={<PersonIdentSak ident={underhold.gjelderBarn.ident} rolle={Rolletype.BA} />}
                         />
                     ))}
                     <Tabs.Tab

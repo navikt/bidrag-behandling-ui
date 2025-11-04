@@ -40,6 +40,11 @@ export default function OpprettForholdsmessigFordelingPrompt() {
                     {harOpprettetFF ? "Oppdater forholdsmessig fordeling" : "Opprett forholdsmessig fordeling"}
                 </Modal.Header>
                 <Modal.Body className="min-w-[700px]">
+                    {opprettFFFn.isError && (
+                        <Alert variant="error" size="small" className="mb-4">
+                            Noe gikk galt ved oppretting av forholdsmessig fordeling. Vennligst prøv på nytt
+                        </Alert>
+                    )}
                     <VStack gap="2">
                         <BarnListeOpprettFF barn={detaljer.barn} skalBehandlesAvEnhet={detaljer.skalBehandlesAvEnhet} />
                     </VStack>

@@ -1,23 +1,22 @@
-import { BarnDto, Rolletype } from "@api/BidragBehandlingApiV1";
+import { BarnDto } from "@api/BidragBehandlingApiV1";
 import { AddBarnForm } from "@common/components/AddBarnForm";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { PlusIcon } from "@navikt/aksel-icons";
 import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, HStack, Label, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, Label, Loader, VStack } from "@navikt/ds-react";
 import React, { useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { ConfirmationModal } from "../../../../common/components/modal/ConfirmationModal";
-import { SakstilknytningModal } from "../../../../common/components/sak/SakstilknytningTable";
 import SakLenke from "../../../../common/components/SakLenke";
-import { useGetBehandlingV2, useRefetchFFInfoFn } from "../../../../common/hooks/useApiData";
-import OpprettSakModal from "../../../../common/sak/OpprettSakModal";
+import { useRefetchFFInfoFn } from "../../../../common/hooks/useApiData";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
 import { createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { DeleteButton } from "../underholdskostnad/Barnetilsyn";
+import PrivatAvtaleAndreBarnLeggTilSak from "./PrivatAvtaleAndreBarnLeggTilSak";
 import { PrivatAvtalePerioder } from "./PrivatAvtalePerioder";
 
 export const PrivatAvtaleAndreBarn = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
@@ -133,20 +132,28 @@ export const PrivatAvtaleAndreBarn = ({ initialValues }: { initialValues: Privat
                 )}
             </div>
             {andreBarnFieldArray.length < 1 && <BodyShort>{text.description.ingenBarn}</BodyShort>}
-            <VStack gap="2">
-                {andreBarnFieldArray.map((privatAvtale, index) => {
-                    return (
-                        <PrivatAvtaleAnnenBarnDetaljer
-                            key={privatAvtale.gjelderBarn?.ident}
-                            item={privatAvtale}
-                            barnIndex={index}
-                            initialValues={initialValues}
-                            onCreatePrivatAvtale={onCreatePrivatAvtale}
-                            onDeletePrivatAvtale={onDeletePrivatAvtale}
-                        />
-                    );
-                })}
-            </VStack>
+            <React.Suspense
+                fallback={
+                    <VStack gap="2" align="center">
+                        <Loader size="medium" />
+                    </VStack>
+                }
+            >
+                <VStack gap="2">
+                    {andreBarnFieldArray.map((privatAvtale, index) => {
+                        return (
+                            <PrivatAvtaleAnnenBarnDetaljer
+                                key={privatAvtale.gjelderBarn?.ident}
+                                item={privatAvtale}
+                                barnIndex={index}
+                                initialValues={initialValues}
+                                onCreatePrivatAvtale={onCreatePrivatAvtale}
+                                onDeletePrivatAvtale={onDeletePrivatAvtale}
+                            />
+                        );
+                    })}
+                </VStack>
+            </React.Suspense>
         </div>
     );
 };
@@ -164,28 +171,12 @@ function PrivatAvtaleAnnenBarnDetaljer({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) {
-    const { behandlerenhet, roller } = useGetBehandlingV2();
-    const refetchFFInfo = useRefetchFFInfoFn();
-
-    const bpIdent = roller.find((rolle) => rolle.rolletype === Rolletype.BP)?.ident;
     function renderBarnUtenLøpendeBidragDetaljer() {
         if (item.harLøpendeBidrag) return;
         if (!item.saksnummer) {
             return (
                 <Box background="surface-subtle" padding="space-16">
-                    <HStack gap={"2"}>
-                        <OpprettSakModal
-                            ident={item.gjelderBarn.ident}
-                            navn={item.gjelderBarn.navn}
-                            bpIdent={bpIdent}
-                            rolle={Rolletype.BA}
-                            eierfogd={behandlerenhet}
-                            onSubmit={() => {
-                                refetchFFInfo();
-                            }}
-                        />
-                        <SakstilknytningModal gjelderBarnIdent={item.gjelderBarn.ident} />
-                    </HStack>
+                    <PrivatAvtaleAndreBarnLeggTilSak item={item} />
                 </Box>
             );
         }

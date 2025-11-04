@@ -18,7 +18,6 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { PersonNavnIdent } from "@navikt/bidrag-ui-common";
 import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
@@ -26,6 +25,7 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
+import PersonIdentSak from "../../PersonIdentSak";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
@@ -67,7 +67,7 @@ const Main = () => {
                         <Tabs.Tab
                             key={rolle.ident + index}
                             value={rolle.id.toString()}
-                            label={<PersonNavnIdent ident={rolle.ident} rolle={rolle.rolletype} skjulNavn />}
+                            label={<PersonIdentSak ident={rolle.ident} rolle={rolle.rolletype} />}
                         />
                     ))}
                 </Tabs.List>
