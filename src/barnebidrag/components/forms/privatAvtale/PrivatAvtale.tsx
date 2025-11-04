@@ -282,22 +282,22 @@ const Side = () => {
                         const privatAvtale =
                             tabBarnIdent === "andrebarn"
                                 ? currentData.privatAvtale.map((avtale) => {
-                                    if (!avtale?.id)
-                                        return {
-                                            ...avtale,
-                                            begrunnelse: response.begrunnelseAndreBarn,
-                                            valideringsfeil: {
-                                                ...avtale.valideringsfeil,
-                                                manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
-                                            },
-                                        };
-                                    return avtale;
-                                })
+                                      if (!avtale?.id)
+                                          return {
+                                              ...avtale,
+                                              begrunnelse: response.begrunnelseAndreBarn,
+                                              valideringsfeil: {
+                                                  ...avtale.valideringsfeil,
+                                                  manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
+                                              },
+                                          };
+                                      return avtale;
+                                  })
                                 : currentData.privatAvtale.map((avtale) => {
-                                    if (response.oppdatertPrivatAvtale.id === avtale?.id)
-                                        return response.oppdatertPrivatAvtale;
-                                    return avtale;
-                                });
+                                      if (response.oppdatertPrivatAvtale.id === avtale?.id)
+                                          return response.oppdatertPrivatAvtale;
+                                      return avtale;
+                                  });
                         return {
                             ...currentData,
                             privatAvtale,
@@ -357,10 +357,20 @@ const Side = () => {
 };
 
 const PrivatAvtaleForm = () => {
-    const { privatAvtaleV2: privatAvtale } = useGetBehandlingV2();
+    const { privatAvtaleV2: privatAvtale, roller: behandlingRoller, bpsBarnUtenLøpendeBidrag } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const privatAvtaleRef = useRef(privatAvtale);
-    const initialValues = useMemo(() => createInitialValues(privatAvtale), [privatAvtaleRef]);
+    const behandlingRollerRef = useRef(behandlingRoller);
+    const bpsBarnUtenLøpendeBidragRef = useRef(bpsBarnUtenLøpendeBidrag);
+    const initialValues = useMemo(
+        () =>
+            createInitialValues(
+                privatAvtaleRef.current,
+                behandlingRollerRef.current,
+                bpsBarnUtenLøpendeBidragRef.current
+            ),
+        [privatAvtaleRef, behandlingRollerRef, bpsBarnUtenLøpendeBidragRef]
+    );
 
     useEffect(() => {
         const checkForBegrunnelseValidationError = (avtale: PrivatAvtaleBarnDto) =>
