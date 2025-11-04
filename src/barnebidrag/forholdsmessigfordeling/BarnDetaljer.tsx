@@ -116,6 +116,14 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
                             <Label size="small">Innkreving</Label>
                             <BodyShort size="small">{renderInnkreving(barn)} </BodyShort>
                         </div>
+                        {barn.eldsteSøktFraDato && (
+                            <div>
+                                <Label size="small">Eldste søkt fra dato</Label>
+                                <BodyShort size="small">
+                                    {DateToMMYYYYString(dateOrNull(barn.eldsteSøktFraDato))}
+                                </BodyShort>
+                            </div>
+                        )}
                         <div>
                             <Label size="small">Har åpen behandling?</Label>
                             <BodyShort size="small">{renderÅpenBehandling(barn)}</BodyShort>
@@ -183,6 +191,14 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerFFProps) {
                             <Label size="small">Har løpende bidrag?</Label>
                             <BodyShort size="small">{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
                         </div>
+                        {barn.eldsteSøktFraDato && (
+                            <div>
+                                <Label size="small">Senest søkt fra dato</Label>
+                                <BodyShort size="small">
+                                    {DateToMMYYYYString(dateOrNull(barn.eldsteSøktFraDato))}
+                                </BodyShort>
+                            </div>
+                        )}
                         <div>
                             <Label size="small">Søknad</Label>
                             <BodyShort size="small">{renderType(barn)}</BodyShort>

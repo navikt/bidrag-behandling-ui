@@ -235,7 +235,7 @@ const PrivatAvtaleBarn = ({
                     <Button
                         type="button"
                         onClick={onCreatePrivatAvtale}
-                        variant="secondary"
+                        variant="tertiary"
                         size="small"
                         className="w-fit"
                         disabled={lesemodus}
@@ -362,7 +362,7 @@ const PrivatAvtaleForm = () => {
     const { privatAvtaleV2: privatAvtale, roller: behandlingRoller, bpsBarnUtenLøpendeBidrag } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const privatAvtaleRef = useRef(privatAvtale);
-    const behandlingRollerRef = useRef(behandlingRoller);
+    const behandlingRollerRef = useRef(behandlingRoller.filter((b) => b.rolletype === Rolletype.BA));
     const bpsBarnUtenLøpendeBidragRef = useRef(bpsBarnUtenLøpendeBidrag);
     const initialValues = useMemo(
         () =>
