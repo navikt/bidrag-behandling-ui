@@ -318,15 +318,17 @@ const Side = () => {
     const debouncedOnSave = useDebounce(updatePrivatAvtaleBegrunnelse);
 
     useEffect(() => {
-        const subscription = watch((value, { name }) => {
-            if (name?.includes("privatAvtale.begrunnelse")) {
+        const subscription = watch((value, { name, type }) => {
+            console.log("name", name);
+            console.log("type", type);
+            if (name?.includes("privatAvtale.begrunnelse" && type === "change")) {
                 const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
-                    privatavtaleid: selectedPrivatAvtale.id,
+                    privatavtaleid: selectedPrivatAvtale?.id,
                     begrunnelse: value.roller[rolleIndex].privatAvtale.begrunnelse,
                 };
                 debouncedOnSave(payload);
             }
-            if (name === "andreBarnBegrunnelse") {
+            if (name === "andreBarnBegrunnelse" && type === "change") {
                 const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
                     privatavtaleid: null,
                     begrunnelse: value.andreBarnBegrunnelse,
