@@ -40,14 +40,14 @@ export const PrivatAvtalePerioder = ({
         (avtale) => avtale.gjelderBarn.ident === item.gjelderBarn.ident
     )?.manuelleVedtakUtenInnkreving;
     const hasManuelleVedtakUtenInnkreving = !!manuelleVedtakUtenInnkreving.length;
-    const valgManuelleVedtakUtenInnkreving = manuelleVedtakUtenInnkreving.find((vedtak) => vedtak.valgt).vedtaksid;
+    const valgManuelleVedtakUtenInnkreving = manuelleVedtakUtenInnkreving?.find((vedtak) => vedtak.valgt)?.vedtaksid;
     const manuelleVedtak = {
         vedtaksliste: hasManuelleVedtakUtenInnkreving
             ? manuelleVedtakUtenInnkreving
-            : selectedVirkningstidspunktObjekt.manuelleVedtak,
+            : selectedVirkningstidspunktObjekt?.manuelleVedtak,
         valgtVedtak: hasManuelleVedtakUtenInnkreving
             ? valgManuelleVedtakUtenInnkreving
-            : selectedVirkningstidspunktObjekt.grunnlagFraVedtak,
+            : selectedVirkningstidspunktObjekt?.grunnlagFraVedtak,
     };
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
     const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
@@ -171,7 +171,9 @@ export const PrivatAvtalePerioder = ({
                     >
                         {Object.keys(PrivatAvtaleType)
                             .filter((value) =>
-                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak?.vedtaksliste.length : true
+                                value === PrivatAvtaleType.VEDTAK_FRA_NAV
+                                    ? !!manuelleVedtak?.vedtaksliste?.length
+                                    : true
                             )
                             .map((value) => (
                                 <option key={value} value={value}>
