@@ -872,13 +872,13 @@ export const useUpdatePrivatAvtaleBegrunnelse = () => {
         mutationFn: async (
             payload: OppdaterePrivatAvtaleBegrunnelseRequest
         ): Promise<OppdaterePrivatAvtaleResponsDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdaterPrivatAvtaleV2(Number(behandlingId), payload);
+            const { data } = await BEHANDLING_API_V1.api.oppdaterPrivatAvtaleBegrunnelse(Number(behandlingId), payload);
 
             return data;
         },
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av privat avtale", error);
+            LoggerService.error("Feil ved oppdatering av begrunnelse for privat avtale", error);
         },
     });
 };

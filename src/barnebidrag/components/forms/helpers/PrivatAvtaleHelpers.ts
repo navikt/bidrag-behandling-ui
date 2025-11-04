@@ -1,6 +1,6 @@
 import {
     BpsBarnUtenLopendeBidragDto,
-    PrivatAvtaleDto,
+    PrivatAvtaleBarnDto,
     PrivatAvtalePeriodeDto,
     RolleDto,
 } from "@api/BidragBehandlingApiV1";
@@ -12,14 +12,14 @@ import {
 } from "../../../types/privatAvtaleFormValues";
 
 export const createInitialValues = (
-    privatAvtaler: PrivatAvtaleDto[],
+    privatAvtaler: PrivatAvtaleBarnDto[],
     baRoller: RolleDto[],
     bpsBarnUtenLøpendeBidrag: BpsBarnUtenLopendeBidragDto[]
 ): PrivatAvtaleFormValues => {
     const paSøknadsbarn: PrivatAvtaleFormValue[] = baRoller.map((rolle) => {
-        const privatAvtale = privatAvtaler
-            .filter((p) => p.erSøknadsbarn)
-            .find((avtale) => avtale.gjelderBarn.ident === rolle.ident);
+        const privatAvtale = privatAvtaler.find(
+            (avtale) => avtale.erSøknadsbarn && avtale.gjelderBarn.ident === rolle.ident
+        );
         return {
             gjelderBarn: {
                 ident: rolle.ident,
@@ -74,7 +74,7 @@ export const transformPrivatAvtalePeriode = (periode: PrivatAvtalePeriodeDto) =>
     beløp: periode.beløp,
 });
 
-export const createPrivatAvtaleInitialValues = (privatAvtale: PrivatAvtaleDto): PrivatAvtaleFormValuesPerBarn => {
+export const createPrivatAvtaleInitialValues = (privatAvtale: PrivatAvtaleBarnDto): PrivatAvtaleFormValuesPerBarn => {
     return {
         avtaleId: privatAvtale.id,
         skalIndeksreguleres: privatAvtale.skalIndeksreguleres,

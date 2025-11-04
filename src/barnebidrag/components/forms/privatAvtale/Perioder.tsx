@@ -1,6 +1,6 @@
 import {
     OppdaterePrivatAvtaleRequest,
-    PrivatAvtaleDto,
+    PrivatAvtaleBarnDto,
     PrivatAvtaleValideringsfeilDto,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -49,14 +49,17 @@ const Periode = ({
     field: "fom" | "tom";
     label: string;
     editableRow: boolean;
-    privatAvtale: PrivatAvtaleDto;
+    privatAvtale: PrivatAvtaleBarnDto;
 }) => {
-    const { stønadstype } = useGetBehandlingV2();
+    const { roller } = useGetBehandlingV2();
     const { lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<PrivatAvtaleFormValues>();
+    const selectedRolle = roller.find(
+        (rolle) => privatAvtale.erSøknadsbarn && rolle.ident === privatAvtale.gjelderBarn?.ident
+    );
     const fom = useMemo(() => {
-        return getFomForPrivatAvtale(stønadstype, privatAvtale.gjelderBarn.fødselsdato);
-    }, [stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
+        return getFomForPrivatAvtale(selectedRolle?.stønadstype, privatAvtale.gjelderBarn.fødselsdato);
+    }, [selectedRolle?.stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
     const tom = useMemo(() => new Date(), []);
     const fieldIsDatoTom = field === "tom";
 
@@ -327,7 +330,7 @@ export const Perioder = ({
     return (
         <div className="grid gap-2">
             {!lesemodus && selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
-                <BehandlingAlert variant="info" className="mb-4">
+                <BehandlingAlert variant="info">
                     <Heading size="xsmall" level="6">
                         {text.alert.løpendeBidrag}.
                     </Heading>
@@ -346,7 +349,7 @@ export const Perioder = ({
                 </BehandlingAlert>
             )}
             {!lesemodus && tableValideringsfeil && (
-                <BehandlingAlert variant="warning" className="mb-4">
+                <BehandlingAlert variant="warning">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>

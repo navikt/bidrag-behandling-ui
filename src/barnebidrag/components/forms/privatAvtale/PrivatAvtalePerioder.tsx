@@ -9,7 +9,6 @@ import { FormControlledSwitch } from "../../../../common/components/formFields/F
 import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
 import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
 import { useGetBehandlingV2, useRefetchFFInfoFn } from "../../../../common/hooks/useApiData";
-import { useDebounce } from "../../../../common/hooks/useDebounce";
 import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
 import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
@@ -112,18 +111,8 @@ export const PrivatAvtalePerioder = ({
         });
     };
 
-    const debouncedOnSave = useDebounce(updatePrivatAvtale);
-
     useEffect(() => {
         const subscription = watch((value, { name }) => {
-            if (name === `${prefix}.${barnIndex}.privatAvtale.begrunnelse`) {
-                const payload = { begrunnelse: value[prefix][barnIndex].privatAvtale.begrunnelse };
-                debouncedOnSave(payload);
-            }
-            if (name === `andreBarnBegrunnelse`) {
-                const payload = { andreBarnBegrunnelse: value.andreBarnBegrunnelse };
-                debouncedOnSave(payload);
-            }
             if (
                 name === `${prefix}.${barnIndex}.privatAvtale.avtaleDato` &&
                 value[prefix][barnIndex].privatAvtale.avtaleDato

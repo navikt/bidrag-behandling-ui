@@ -214,28 +214,30 @@ function PrivatAvtaleAnnenBarnDetaljer({
             borderColor="border-subtle"
             borderWidth="1"
         >
-            <RolleInfoBox item={item} onDelete={() => onDeletePrivatAvtale(item, barnIndex)} />
-            {renderBarnUtenLøpendeBidragDetaljer()}
-            {!item.privatAvtale && (
-                <Button
-                    type="button"
-                    onClick={() => onCreatePrivatAvtale(item, barnIndex)}
-                    variant="tertiary"
-                    size="small"
-                    className="w-fit"
-                    disabled={false}
-                >
-                    {text.label.opprettePrivatAvtale}
-                </Button>
-            )}
-            {item.privatAvtale && (
-                <PrivatAvtalePerioder
-                    prefix="andreBarn"
-                    initialValues={initialValues}
-                    item={item}
-                    barnIndex={barnIndex}
-                />
-            )}
+            <VStack gap="2">
+                <RolleInfoBox item={item} onDelete={() => onDeletePrivatAvtale(item, barnIndex)} />
+                {renderBarnUtenLøpendeBidragDetaljer()}
+                {!item.privatAvtale && (
+                    <Button
+                        type="button"
+                        onClick={() => onCreatePrivatAvtale(item, barnIndex)}
+                        variant="tertiary"
+                        size="small"
+                        className="w-fit"
+                        disabled={false}
+                    >
+                        {text.label.opprettePrivatAvtale}
+                    </Button>
+                )}
+                {item.privatAvtale && (
+                    <PrivatAvtalePerioder
+                        prefix="andreBarn"
+                        initialValues={initialValues}
+                        item={item}
+                        barnIndex={barnIndex}
+                    />
+                )}
+            </VStack>
         </Box>
     );
 }

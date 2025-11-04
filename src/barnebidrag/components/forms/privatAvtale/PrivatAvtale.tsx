@@ -1,4 +1,11 @@
-import { BarnDto, Rolletype, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import {
+    BarnDto,
+    OppdaterePrivatAvtaleBegrunnelseRequest,
+    PrivatAvtaleBarnDto,
+    Rolletype,
+    Stonadstype,
+    Vedtakstype,
+} from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
@@ -11,17 +18,19 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2, useRefetchFFInfoFn } from "@common/hooks/useApiData";
+import { useDebounce } from "@common/hooks/useDebounce";
 import { TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils, PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { Alert, Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
-import React, { Fragment, useEffect, useMemo, useRef } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
+import { useOnUpdatePrivatAvtaleBegrunnelse } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
 import { PrivatAvtaleAndreBarn } from "./PrivatAvtaleAndreBarn";
@@ -275,8 +284,9 @@ const PrivatAvtaleBarn = ({
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, privatAvtale, vedtakstype } = useGetBehandlingV2();
-    const { onStepChange, getNextStep } = useBehandlingProvider();
-    const { getValues } = useFormContext<PrivatAvtaleFormValues>();
+    const { onStepChange, getNextStep, setSaveErrorState } = useBehandlingProvider();
+    const updatePrivatAvtaleBegrunnelseQuery = useOnUpdatePrivatAvtaleBegrunnelse();
+    const { getValues, watch } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
     const roller = getValues("roller");
     const baRolleIndex = roller.findIndex((rolle) => rolle?.gjelderBarn?.ident === tabBarnIdent);
@@ -287,10 +297,73 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const begrunnelseName =
-        tabBarnIdent === "roller" ? `roller.${rolleIndex}.privatAvtale.begrunnelse` : "andreBarnBegrunnelse";
+        tabBarnIdent === "andrebarn" ? "andreBarnBegrunnelse" : `roller.${rolleIndex}.privatAvtale.begrunnelse`;
+
+    const updatePrivatAvtaleBegrunnelse = useCallback(
+        (payload: OppdaterePrivatAvtaleBegrunnelseRequest) => {
+            updatePrivatAvtaleBegrunnelseQuery.mutation.mutate(payload, {
+                onSuccess: (response) => {
+                    updatePrivatAvtaleBegrunnelseQuery.queryClientUpdater((currentData) => {
+                        const privatAvtale =
+                            tabBarnIdent === "andrebarn"
+                                ? currentData.privatAvtale.map((avtale) => {
+                                      if (!avtale?.id)
+                                          return {
+                                              ...avtale,
+                                              begrunnelse: response.begrunnelseAndreBarn,
+                                              valideringsfeil: {
+                                                  ...avtale.valideringsfeil,
+                                                  manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
+                                              },
+                                          };
+                                      return avtale;
+                                  })
+                                : currentData.privatAvtale.map((avtale) => {
+                                      if (response.oppdatertPrivatAvtale.id === avtale?.id)
+                                          return response.oppdatertPrivatAvtale;
+                                      return avtale;
+                                  });
+                        return {
+                            ...currentData,
+                            privatAvtale,
+                        };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updatePrivatAvtaleBegrunnelse(payload),
+                    });
+                },
+            });
+        },
+        [tabBarnIdent, selectedBarnIdent]
+    );
+
+    const debouncedOnSave = useDebounce(updatePrivatAvtaleBegrunnelse);
+
+    useEffect(() => {
+        const subscription = watch((value, { name }) => {
+            if (name?.includes("privatAvtale.begrunnelse")) {
+                const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
+                    privatavtaleid: selectedPrivatAvtale.id,
+                    begrunnelse: value.roller[rolleIndex].privatAvtale.begrunnelse,
+                };
+                debouncedOnSave(payload);
+            }
+            if (name === "andreBarnBegrunnelse") {
+                const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
+                    privatavtaleid: null,
+                    begrunnelse: value.andreBarnBegrunnelse,
+                };
+                debouncedOnSave(payload);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [updatePrivatAvtaleBegrunnelse, tabBarnIdent]);
 
     return (
-        <Fragment key={selectedBarnIdent}>
+        <Fragment key={tabBarnIdent}>
             {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
                 <FormControlledCustomTextareaEditor name={`${begrunnelseName}`} label={text.title.begrunnelse} resize />
             )}
@@ -316,6 +389,32 @@ const PrivatAvtaleForm = () => {
         () => createInitialValues(privatAvtale, baRoller, bpsBarnUtenLøpendeBidrag),
         [JSON.stringify(privatAvtale), JSON.stringify(baRoller), JSON.stringify(bpsBarnUtenLøpendeBidrag)]
     );
+
+    useEffect(() => {
+        const privatAvtaleBarn = privatAvtale.filter((avtale) => avtale.erSøknadsbarn);
+        const privatAvtaleAndreBarn = privatAvtale.filter((avtale) => !avtale.erSøknadsbarn);
+
+        const checkForBegrunnelseValidationError = (avtale: PrivatAvtaleBarnDto) =>
+            avtale?.valideringsfeil?.manglerBegrunnelse;
+
+        const setBegrunnelseError = (
+            fieldname: `roller.${number}.privatAvtale.begrunnelse` | "andreBarnBegrunnelse"
+        ) => {
+            useFormMethods.setError(fieldname, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        };
+
+        privatAvtaleBarn.forEach((avtale, index) => {
+            if (checkForBegrunnelseValidationError(avtale)) {
+                setBegrunnelseError(`roller.${index}.privatAvtale.begrunnelse`);
+            }
+        });
+        if (privatAvtaleAndreBarn.some(checkForBegrunnelseValidationError)) {
+            setBegrunnelseError("andreBarnBegrunnelse");
+        }
+    }, []);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
