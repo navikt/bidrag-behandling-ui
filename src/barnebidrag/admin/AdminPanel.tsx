@@ -1,5 +1,5 @@
 import { ArrowCirclepathIcon, CogIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, Button, Modal } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, CopyButton, Modal } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 
@@ -91,59 +91,79 @@ export const AdminPanel: React.FC = () => {
 
     if (!isAdminEnabled) return null;
     return (
-        <div className="agroup fixed bottom-0 right-[180px] p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
-            <Button variant="tertiary" size="small" icon={<CogIcon />} onClick={() => setIsModalOpen(true)}>
-                Admin
-            </Button>
+        <>
+            <Søknadsid />
+            <div className="agroup fixed bottom-0 right-[180px] p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
+                <Button variant="tertiary" size="small" icon={<CogIcon />} onClick={() => setIsModalOpen(true)}>
+                    Admin
+                </Button>
 
-            <Modal
-                open={isModalOpen}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    setConfirmAction(null);
-                }}
-                header={{ heading: "Admin Panel" }}
-                width="medium"
-            >
-                <Modal.Body>
-                    <div className="space-y-4">
-                        <Alert variant="warning">
-                            Disse handlingene er irreversible og skal kun brukes av administratorer.
-                        </Alert>
-
-                        {confirmAction && (
-                            <Alert variant="error">Er du sikker på at du vil tilbakestille behandlingen?.</Alert>
-                        )}
-
-                        <div className="flex flex-col gap-3">
-                            {actions.map((action) => (
-                                <Button
-                                    key={action.key}
-                                    variant={confirmAction === action.key ? "danger" : "secondary"}
-                                    size="medium"
-                                    icon={<action.icon />}
-                                    onClick={() => handleAction(action)}
-                                    loading={isLoading && confirmAction === action.key}
-                                    disabled={isLoading}
-                                >
-                                    {confirmAction === action.key ? action.confirmLabel : action.label}
-                                </Button>
-                            ))}
+                <Modal
+                    open={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setConfirmAction(null);
+                    }}
+                    header={{ heading: "Admin Panel" }}
+                    width="medium"
+                >
+                    <Modal.Body>
+                        <div className="space-y-4">
+                            <Alert variant="warning">
+                                Disse handlingene er irreversible og skal kun brukes av administratorer.
+                            </Alert>
 
                             {confirmAction && (
-                                <Button
-                                    variant="tertiary"
-                                    size="medium"
-                                    onClick={resetConfirmation}
-                                    disabled={isLoading}
-                                >
-                                    Avbryt
-                                </Button>
+                                <Alert variant="error">Er du sikker på at du vil tilbakestille behandlingen?.</Alert>
                             )}
+
+                            <div className="flex flex-col gap-3">
+                                {actions.map((action) => (
+                                    <Button
+                                        key={action.key}
+                                        variant={confirmAction === action.key ? "danger" : "secondary"}
+                                        size="medium"
+                                        icon={<action.icon />}
+                                        onClick={() => handleAction(action)}
+                                        loading={isLoading && confirmAction === action.key}
+                                        disabled={isLoading}
+                                    >
+                                        {confirmAction === action.key ? action.confirmLabel : action.label}
+                                    </Button>
+                                ))}
+
+                                {confirmAction && (
+                                    <Button
+                                        variant="tertiary"
+                                        size="medium"
+                                        onClick={resetConfirmation}
+                                        disabled={isLoading}
+                                    >
+                                        Avbryt
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </Modal.Body>
-            </Modal>
-        </div>
+                    </Modal.Body>
+                </Modal>
+            </div>
+        </>
     );
 };
+
+function Søknadsid() {
+    const { søknadsid } = useGetBehandlingV2();
+    return (
+        <BodyShort
+            size="small"
+            className="z-[10000] agroup fixed bottom-0 left-0 p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]"
+        >
+            <CopyButton
+                size="small"
+                text={søknadsid.toString()}
+                copyText={søknadsid.toString()}
+                title="Kopier søknadsid"
+            />
+        </BodyShort>
+    );
+}

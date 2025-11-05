@@ -487,7 +487,7 @@ const VirkningstidspunktBarn = ({
     const vedtakstype = selectedVirkningstidspunkt.vedtakstype ?? behandling.vedtakstype;
     const søktAv = selectedVirkningstidspunkt.søktAv ?? behandling.søktAv;
     const søktFomDato = selectedVirkningstidspunkt.søktFomDato ?? behandling.søktFomDato;
-    const saksnummer = selectedVirkningstidspunkt.saksnummer ?? behandling.saksnummer;
+    const saksnummer = item.rolle.saksnummer ?? behandling.saksnummer;
     const stønadstype = item.rolle.stønadstype ?? behandling.stønadstype;
     const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValuesPerBarn>(initialValues);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(selectedVirkningstidspunkt.virkningstidspunkt);
@@ -736,7 +736,7 @@ const VirkningstidspunktBarn = ({
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">{hentVisningsnavn(vedtakstype)}</BodyShort>
+                    <BodyShort size="small">{`${hentVisningsnavn(vedtakstype)}${stønadstype === Stonadstype.BIDRAG18AAR ? " (18-år)" : ""}`}</BodyShort>
                     <KlagetPåVedtakButton />
                 </div>
                 <div className="flex gap-x-2">
