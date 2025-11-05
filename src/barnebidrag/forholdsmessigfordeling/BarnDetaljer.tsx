@@ -116,7 +116,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
                             <Label size="small">Innkreving</Label>
                             <BodyShort size="small">{renderInnkreving(barn)} </BodyShort>
                         </div>
-                        {barn.eldsteSøktFraDato && (
+                        {barn.eldsteSøktFraDato && barn.åpneBehandlinger.length > 1 && (
                             <div>
                                 <Label size="small">Eldste søkt fra dato</Label>
                                 <BodyShort size="small">
