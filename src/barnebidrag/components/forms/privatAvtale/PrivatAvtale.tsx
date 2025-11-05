@@ -272,7 +272,10 @@ const Side = () => {
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
     const begrunnelseName =
-        tabBarnIdent === "andrebarn" ? "andreBarnBegrunnelse" : `roller.${rolleIndex}.privatAvtale.begrunnelse`;
+        tabBarnIdent === "andrebarn"
+            ? "andreBarnBegrunnelse"
+            : (`roller.${rolleIndex}.privatAvtale.begrunnelse` as const);
+    const prevValue = useRef(getValues(begrunnelseName));
 
     const updatePrivatAvtaleBegrunnelse = useCallback(
         (payload: OppdaterePrivatAvtaleBegrunnelseRequest) => {
@@ -318,24 +321,25 @@ const Side = () => {
     const debouncedOnSave = useDebounce(updatePrivatAvtaleBegrunnelse);
 
     useEffect(() => {
-        const subscription = watch((value, { name, type }) => {
-            if (name?.includes("privatAvtale.begrunnelse") && type === "change") {
-                const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
-                    privatavtaleid: selectedPrivatAvtale?.id,
-                    begrunnelse: value.roller[rolleIndex].privatAvtale.begrunnelse,
-                };
-                debouncedOnSave(payload);
+        const subscription = watch((value, { name }) => {
+            if (tabBarnIdent !== "andrebarn" && !selectedPrivatAvtale?.id) {
+                return;
             }
-            if (name === "andreBarnBegrunnelse" && type === "change") {
+            const begrunnelseValue = name?.includes("privatAvtale.begrunnelse")
+                ? value.roller[rolleIndex]?.privatAvtale?.begrunnelse
+                : value.andreBarnBegrunnelse;
+
+            if (begrunnelseValue !== undefined && begrunnelseValue !== prevValue.current) {
+                prevValue.current = begrunnelseValue;
                 const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
-                    privatavtaleid: null,
-                    begrunnelse: value.andreBarnBegrunnelse,
+                    privatavtaleid: tabBarnIdent === "andrebarn" ? null : selectedPrivatAvtale?.id,
+                    begrunnelse: begrunnelseValue,
                 };
                 debouncedOnSave(payload);
             }
         });
         return () => subscription.unsubscribe();
-    }, [updatePrivatAvtaleBegrunnelse, tabBarnIdent]);
+    }, [watch, tabBarnIdent, selectedPrivatAvtale?.id]);
 
     return (
         <Fragment key={tabBarnIdent}>

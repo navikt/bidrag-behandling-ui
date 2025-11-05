@@ -39,7 +39,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
     function renderÅpenBehandling(barn: ForholdsmessigFordelingBarnDto) {
         let link = null;
         let behandlingstype = null;
-        const åpneBehandling = barn.åpneBehandlinger.map((b) => {
+        const åpneBehandling = barn.åpneBehandlinger.map((b, index) => {
             if (b?.behandlingId) {
                 link = <BehandlingLenke saksnummer={barn.saksnr} id={b.behandlingId} />;
                 behandlingstype = hentVisningsnavn(b.behandlingstype);
@@ -48,14 +48,14 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
                 behandlingstype = hentVisningsnavn(b.behandlingstype);
             }
             return (
-                <BodyShort size="small">
+                <BodyShort size="small" key={b?.behandlingId + b?.søknadsid + index}>
                     {behandlingstype ? ` ${behandlingstype?.toLowerCase()}` : " "} {link}{" "}
                 </BodyShort>
             );
         });
         return åpneBehandling.length > 0 ? (
             <HStack gap="2" className="items-center">
-                <BodyShort size="small">Ja,</BodyShort> {åpneBehandling.map((b) => b)}
+                <BodyShort size="small">Ja,</BodyShort> {åpneBehandling}
             </HStack>
         ) : (
             <BodyShort size="small">Nei</BodyShort>
@@ -98,7 +98,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
                 </Box>
             )}
             {barn.map((barn, index) => (
-                <Box key={barn.ident} padding="1" className="border-t border-border-subtle">
+                <Box key={barn.ident + index} padding="1" className="border-t border-border-subtle">
                     {index > 0 && <hr className="my-1 border-t border-border-subtle" />}
                     <BodyShort size="small" className="ml-[-2px] font-semibold">
                         <PersonNavnIdent ident={barn.ident} variant="compact" />
@@ -181,7 +181,7 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerFFProps) {
                 </HStack>
             </Box>
             {barn.map((barn, index) => (
-                <Box key={barn.ident} padding="2" className="border-t border-border-subtle">
+                <Box key={barn.ident + index} padding="2" className="border-t border-border-subtle">
                     {index > 0 && <hr className="my-1 border-t border-border-subtle" />}
                     <BodyShort size="small" className="ml-[-3px] font-semibold">
                         <PersonNavnIdent ident={barn.ident} variant="compact" />
