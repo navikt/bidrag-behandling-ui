@@ -29,11 +29,7 @@ export const PrivatAvtalePerioder = ({
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
 }) => {
-    const {
-        privatAvtaleV2: privatAvtale,
-        stønadstype,
-        virkningstidspunktV3: virkningstidspunkt,
-    } = useGetBehandlingV2();
+    const { privatAvtaleV2: privatAvtale, virkningstidspunktV3: virkningstidspunkt, roller } = useGetBehandlingV2();
     const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const deletePrivatAvtale = useOnDeletePrivatAvtale();
     const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
@@ -61,9 +57,10 @@ export const PrivatAvtalePerioder = ({
     const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
     const vedtakFraNav = item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
     const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
+    const selectedRolle = roller.find((rolle) => rolle.ident === selectedPrivatAvtale?.gjelderBarn?.ident);
     const fom = useMemo(() => {
-        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato);
-    }, [stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato]);
+        return getFomForPrivatAvtale(selectedRolle?.stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato);
+    }, [selectedRolle?.stønadstype, selectedPrivatAvtale?.gjelderBarn?.fødselsdato]);
     const tom = useMemo(
         () => getTomForPrivatAvtale(selectedPrivatAvtale?.gjelderBarn?.fødselsdato),
         [selectedPrivatAvtale?.gjelderBarn?.fødselsdato]
