@@ -191,7 +191,7 @@ export default function BarnDetaljerFF({ barn }: BarnDetaljerFFProps) {
                             <Label size="small">Har løpende bidrag?</Label>
                             <BodyShort size="small">{barn.harLøpendeBidrag ? "Ja" : "Nei"} </BodyShort>
                         </div>
-                        {barn.eldsteSøktFraDato && (
+                        {barn.eldsteSøktFraDato && barn.åpneBehandlinger.length > 1 && (
                             <div>
                                 <Label size="small">Senest søkt fra dato</Label>
                                 <BodyShort size="small">
