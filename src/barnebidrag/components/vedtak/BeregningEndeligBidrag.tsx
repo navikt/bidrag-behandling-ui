@@ -15,7 +15,7 @@ export const EndeligBidragTable = () => {
                     label: "Etter samværsfradraget",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.bpAndelBeløp ?? sluttberegning.bruttoBidragEtterBarnetilleggBP)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.nettoBidragEtterSamværsfradrag)}`,
+                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.bpAndelBeløp ?? sluttberegning.bruttoBidragEtterBarnetilleggBP)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.beregnetBeløp)}`,
                 },
                 {
                     label: "Avrundet beløp",
