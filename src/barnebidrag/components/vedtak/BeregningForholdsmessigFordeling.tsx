@@ -44,7 +44,7 @@ export const BeregningForholdsmessigFordeling = () => {
                     value: `${formatterBeløpForBeregning(bpsSumAndelAvU)}`,
                 },
                 {
-                    label: "Andel av underholdskostnad",
+                    label: "Barnets andel av underholdskostnad",
                     textRight: false,
                     labelBold: true,
                     value: `${formatterBeløpForBeregning(andelFordeltTilBarnet)} / ${formatterBeløpForBeregning(bpsSumAndelAvU)}`,
