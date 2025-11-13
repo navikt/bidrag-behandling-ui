@@ -1,4 +1,4 @@
-import { PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
+import { PersonNavnIdent, RolleTypeAbbreviation, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { BodyShort, VStack } from "@navikt/ds-react";
 import { useMemo } from "react";
 
@@ -25,10 +25,12 @@ export default function PersonIdentSak({
             (roller.find((r) => r.ident === ident)?.rolletype as RolleTypeFullName),
         [roller, ident]
     );
+    //@ts-ignore
+    const erBp = rolle === RolleTypeAbbreviation.BP || rolle === RolleTypeFullName.BIDRAGSPLIKTIG;
     return (
         <VStack gap="0">
             <PersonNavnIdent skjulNavn rolle={rolle ?? RolleTypeFullName.BARN} ident={ident} variant="compact" />
-            {harUlikeSaksnummer && saksnummerIdent && (
+            {harUlikeSaksnummer && saksnummerIdent && !erBp && (
                 <BodyShort className="self-end mr-[5px]" size="small">
                     sak {saksnummerIdent}
                 </BodyShort>

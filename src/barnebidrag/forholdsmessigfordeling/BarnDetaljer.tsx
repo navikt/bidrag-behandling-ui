@@ -106,7 +106,7 @@ export function BarnDetaljerOpprettFF({ barn }: BarnDetaljerOpprettFFProps) {
                     <HGrid gap="space-1" columns={{ xs: 1, sm: 2 }} className="mt-1">
                         {stønadstype !== barn.stønadstype && barn.stønadstype && (
                             <div>
-                                <Label size="small">Søkt om</Label>
+                                <Label size="small">Gjelder</Label>
                                 <BodyShort size="small">
                                     {barn.stønadstype === Stonadstype.BIDRAG18AAR ? "Bidrag 18 år" : "Bidrag"}{" "}
                                 </BodyShort>
