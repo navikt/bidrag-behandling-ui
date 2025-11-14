@@ -16,6 +16,7 @@ import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import {
+    ForholdsmessigFordelingVarsel,
     GrunnlagFraVedtakButton,
     NesteIndeksår,
     VedtakProvider,
@@ -81,6 +82,7 @@ const Vedtak = () => {
                         <GrunnlagFraVedtakButton />
                     </div>
                 )}
+                <ForholdsmessigFordelingVarsel />
 
                 <VedtakResultat />
             </div>

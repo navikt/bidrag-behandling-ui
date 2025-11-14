@@ -4,13 +4,19 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const BeregningFordeltBidrag = () => {
     const {
-        beregningsdetaljer: { sluttberegning, sluttberegningAldersjustering, delberegningBidragsevne: evne },
+        beregningsdetaljer: {
+            sluttberegning,
+            sluttberegningAldersjustering,
+            delberegningBidragsevne: evne,
+            forholdsmessigFordeling,
+        },
     } = useBidragBeregningPeriode();
 
     if (!evne) return null;
     const erFF =
-        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
-        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1;
+        (sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
+            sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1) ||
+        forholdsmessigFordeling.erForholdsmessigFordelt;
     function renderResult() {
         if (erFF) return "";
         if (sluttberegning.bidragJustertNedTilEvne) {
@@ -21,6 +27,10 @@ export const BeregningFordeltBidrag = () => {
         return "";
     }
 
+    const foreløpigBidrag =
+        forholdsmessigFordeling?.bidragTilFordelingForBarnet ??
+        sluttberegningAldersjustering?.beregnetBeløp ??
+        sluttberegning.bruttoBidragJustertForEvneOg25Prosent;
     return (
         <ResultatDescription
             data={[
@@ -34,7 +44,7 @@ export const BeregningFordeltBidrag = () => {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegningAldersjustering?.beregnetBeløp ?? sluttberegning.bruttoBidragJustertForEvneOg25Prosent)}${renderResult()}`,
+                    value: `${formatterBeløpForBeregning(foreløpigBidrag)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />

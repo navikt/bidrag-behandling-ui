@@ -1,6 +1,6 @@
 import {
     OppdaterePrivatAvtaleRequest,
-    PrivatAvtaleDto,
+    PrivatAvtaleBarnDto,
     PrivatAvtaleValideringsfeilDto,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
@@ -45,18 +45,21 @@ const Periode = ({
     privatAvtale,
 }: {
     item: PrivatAvtalePeriode;
-    fieldName: `roller.${number}.privatAvtale.perioder.${number}`;
+    fieldName: `${"roller" | "andreBarn"}.${number}.privatAvtale.perioder.${number}`;
     field: "fom" | "tom";
     label: string;
     editableRow: boolean;
-    privatAvtale: PrivatAvtaleDto;
+    privatAvtale: PrivatAvtaleBarnDto;
 }) => {
-    const { stønadstype } = useGetBehandlingV2();
+    const { roller } = useGetBehandlingV2();
     const { lesemodus } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<PrivatAvtaleFormValues>();
+    const selectedRolle = roller.find(
+        (rolle) => privatAvtale.erSøknadsbarn && rolle.ident === privatAvtale.gjelderBarn?.ident
+    );
     const fom = useMemo(() => {
-        return getFomForPrivatAvtale(stønadstype, privatAvtale.gjelderBarn.fødselsdato);
-    }, [stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
+        return getFomForPrivatAvtale(selectedRolle?.stønadstype, privatAvtale.gjelderBarn.fødselsdato);
+    }, [selectedRolle?.stønadstype, privatAvtale.gjelderBarn.fødselsdato]);
     const tom = useMemo(() => new Date(), []);
     const fieldIsDatoTom = field === "tom";
 
@@ -164,10 +167,12 @@ const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => 
 };
 
 export const Perioder = ({
+    prefix,
     barnIndex,
     item,
     valideringsfeil,
 }: {
+    prefix: "roller" | "andreBarn";
     barnIndex: number;
     item: PrivatAvtaleFormValuesPerBarn;
     valideringsfeil: PrivatAvtaleValideringsfeilDto;
@@ -181,9 +186,9 @@ export const Perioder = ({
         useFormContext<PrivatAvtaleFormValues>();
     const barnFieldArray = useFieldArray({
         control,
-        name: `roller.${barnIndex}.privatAvtale.perioder`,
+        name: `${prefix}.${barnIndex}.privatAvtale.perioder`,
     });
-    const watchFieldArray = useWatch({ control, name: `roller.${barnIndex}.privatAvtale.perioder` });
+    const watchFieldArray = useWatch({ control, name: `${prefix}.${barnIndex}.privatAvtale.perioder` });
     const controlledFields = barnFieldArray.fields.map((field, index) => {
         return {
             ...field,
@@ -192,9 +197,9 @@ export const Perioder = ({
     });
 
     const validateRow = (index: number) => {
-        const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+        const periode = getValues(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`);
         if (periode.fom === null) {
-            setError(`roller.${barnIndex}.privatAvtale.perioder.${index}.fom`, {
+            setError(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}.fom`, {
                 type: "notValid",
                 message: text.error.datoMåFyllesUt,
             });
@@ -203,10 +208,10 @@ export const Perioder = ({
 
     const onSaveRow = (index: number) => {
         validateRow(index);
-        const fieldState = getFieldState(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+        const fieldState = getFieldState(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`);
         if (fieldState.error) return;
 
-        const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+        const periode = getValues(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`);
         let payload: OppdaterePrivatAvtaleRequest = {
             oppdaterPeriode: {
                 periode: {
@@ -226,7 +231,7 @@ export const Perioder = ({
                 setEditableRow(undefined);
                 if (!periode.id) {
                     setValue(
-                        `roller.${barnIndex}.privatAvtale.perioder`,
+                        `${prefix}.${barnIndex}.privatAvtale.perioder`,
                         response.oppdatertPrivatAvtale.perioder.map(transformPrivatAvtalePeriode)
                     );
                 }
@@ -283,9 +288,9 @@ export const Perioder = ({
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            const periode = getValues(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+            const periode = getValues(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`);
             const removeAndCleanPeriodeErrors = () => {
-                clearErrors(`roller.${barnIndex}.privatAvtale.perioder.${index}`);
+                clearErrors(`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`);
                 barnFieldArray.remove(index);
                 setEditableRow(undefined);
             };
@@ -324,8 +329,8 @@ export const Perioder = ({
 
     return (
         <div className="grid gap-2">
-            {!lesemodus && selectedPrivatAvtale.perioderLøperBidrag.length > 0 && (
-                <BehandlingAlert variant="info" className="mb-4">
+            {!lesemodus && selectedPrivatAvtale?.perioderLøperBidrag?.length > 0 && (
+                <BehandlingAlert variant="info">
                     <Heading size="xsmall" level="6">
                         {text.alert.løpendeBidrag}.
                     </Heading>
@@ -344,7 +349,7 @@ export const Perioder = ({
                 </BehandlingAlert>
             )}
             {!lesemodus && tableValideringsfeil && (
-                <BehandlingAlert variant="warning" className="mb-4">
+                <BehandlingAlert variant="warning">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
@@ -427,7 +432,7 @@ export const Perioder = ({
                                     <Table.DataCell textSize="small">
                                         <Periode
                                             label={text.label.fraOgMed}
-                                            fieldName={`roller.${barnIndex}.privatAvtale.perioder.${index}`}
+                                            fieldName={`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`}
                                             field="fom"
                                             item={item}
                                             editableRow={editableRow === index}
@@ -437,7 +442,7 @@ export const Perioder = ({
                                     <Table.DataCell textSize="small">
                                         <Periode
                                             label={text.label.tilOgMed}
-                                            fieldName={`roller.${barnIndex}.privatAvtale.perioder.${index}`}
+                                            fieldName={`${prefix}.${barnIndex}.privatAvtale.perioder.${index}`}
                                             field="tom"
                                             item={item}
                                             editableRow={editableRow === index}
@@ -448,7 +453,7 @@ export const Perioder = ({
                                         <Beløp
                                             item={item}
                                             editableRow={editableRow === index}
-                                            field={`roller.${barnIndex}.privatAvtale.perioder.${index}.beløp`}
+                                            field={`${prefix}.${barnIndex}.privatAvtale.perioder.${index}.beløp`}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">

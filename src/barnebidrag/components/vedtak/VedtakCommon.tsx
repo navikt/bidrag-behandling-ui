@@ -1,8 +1,8 @@
 import text from "@common/constants/texts";
-import { QueryKeys, useGetBehandlingV2, useOppdaterOpprettP35c } from "@common/hooks/useApiData";
+import { QueryKeys, useGetBehandlingV2, useGetBeregningBidrag, useOppdaterOpprettP35c } from "@common/hooks/useApiData";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, deductDays, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { BodyShort, Button, Checkbox, Heading, HStack, Link, Modal, Switch, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Checkbox, Heading, HStack, Link, Modal, Switch, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
@@ -225,6 +225,18 @@ export const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsber
     );
 };
 
+export const ForholdsmessigFordelingVarsel = () => {
+    const { data: beregning } = useGetBeregningBidrag(false);
+
+    const ff = beregning?.resultat?.resultatBarn?.some((f) => f.perioderSlåttUtTilFF.length > 0);
+    if (!ff) return;
+    return (
+        <Alert variant="info" size="small">
+            <Heading size="xsmall">Forholdsmessig fordeling</Heading>
+            BP har fått redusert bidragsevne i minst ett av periodene på grunn av forholdsmessig fordeling
+        </Alert>
+    );
+};
 export const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
         <RolleTag rolleType={Rolletype.BA} />

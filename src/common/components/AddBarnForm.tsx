@@ -13,7 +13,9 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 export const AddBarnForm = ({
     setOpenAddBarnForm,
     onSave,
+    showFritekst = true,
 }: {
+    showFritekst?: boolean;
     setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
     onSave: (barn: OpprettHusstandsstandsmedlem) => void;
 }) => {
@@ -118,7 +120,7 @@ export const AddBarnForm = ({
                 >
                     <Stack gap="0 6" direction={{ xs: "column", sm: "row" }} wrap={false}>
                         <Radio value="dnummer">{text.label.fødselsnummerDnummer}</Radio>
-                        <Radio value="fritekst">Fritekst</Radio>
+                        {showFritekst && <Radio value="fritekst">Fritekst</Radio>}
                     </Stack>
                 </RadioGroup>
                 <FlexRow>

@@ -1,7 +1,7 @@
 import {
     BarnDto,
-    OppdaterePrivatAvtaleRequest,
-    PrivatAvtaleType,
+    OppdaterePrivatAvtaleBegrunnelseRequest,
+    PrivatAvtaleBarnDto,
     Rolletype,
     Stonadstype,
     Vedtakstype,
@@ -9,10 +9,6 @@ import {
 import { ActionButtons } from "@common/components/ActionButtons";
 import { CustomTextareaEditor } from "@common/components/CustomEditor";
 import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
-import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
-import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
-import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -21,26 +17,25 @@ import { default as urlSearchParams } from "@common/constants/behandlingQueryKey
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useGetBehandlingV2, useRefetchFFInfoFn } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { TrashIcon } from "@navikt/aksel-icons";
-import { ObjectUtils, PersonNavnIdent } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, Tabs } from "@navikt/ds-react";
+import { ObjectUtils, PersonNavnIdent, RolleTypeFullName } from "@navikt/bidrag-ui-common";
+import { Alert, Box, Button, Heading, Tabs } from "@navikt/ds-react";
 import { addMonths, firstDayOfMonth, isAfterDate, isBeforeDate } from "@utils/date-utils";
-import React, { Fragment, useEffect, useMemo, useRef } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnCreatePrivatAvtale } from "../../../hooks/useOnCreatePrivatAvtale";
-import { useOnDeletePrivatAvtale } from "../../../hooks/useOnDeletePrivatAvtale";
-import { useOnUpdatePrivatAvtale } from "../../../hooks/useOnUpdatePrivatAvtale";
+import { useOnUpdatePrivatAvtaleBegrunnelse } from "../../../hooks/useOnUpdatePrivatAvtale";
 import { PrivatAvtaleFormValue, PrivatAvtaleFormValues } from "../../../types/privatAvtaleFormValues";
-import { VedtaksListeBeregning } from "../../Vedtakliste";
+import PersonIdentSak from "../../PersonIdentSak";
 import { createInitialValues, createPrivatAvtaleInitialValues } from "../helpers/PrivatAvtaleHelpers";
-import { BeregnetTabel } from "./BeregnetTabel";
-import { Perioder } from "./Perioder";
+import { PrivatAvtaleAndreBarn } from "./PrivatAvtaleAndreBarn";
+import { PrivatAvtalePerioder } from "./PrivatAvtalePerioder";
 
 export const getFomForPrivatAvtale = (stønadstype: Stonadstype, fødselsdato: string) => {
     const fomMin = new Date("2012-01-01");
@@ -100,11 +95,14 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     const { control } = useFormContext<PrivatAvtaleFormValues>();
     const { onNavigateToTab } = useBehandlingProvider();
     const [searchParams] = useSearchParams();
+
+    const { bidragFlereBarn } = useFeatureToogle();
     const roller = useFieldArray({
         control,
         name: "roller",
     });
     const watchFieldArray = useWatch({ control, name: "roller" });
+    const andreBarn = useWatch({ control, name: "andreBarn" });
     const controlledFields = roller.fields.map((field, index) => ({
         ...field,
         ...watchFieldArray?.[index],
@@ -118,22 +116,30 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
     }, []);
     const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
-    if (controlledFields.length > 1) {
-        return (
+    return (
+        <>
+            {andreBarn.length > 0 && (
+                <Alert variant="info" size="small">
+                    Bidragspliktig har barn uten bidragsak/løpende bidrag. De er listet under "Andre barn". Hvis BP har
+                    privat avtale for andre barn kan du fylle ut bidragsbeløpene for å se om det slår ut til
+                    forholdsmessig fordeling.
+                </Alert>
+            )}
             <Tabs
                 defaultValue={defaultTab}
                 value={selectedTab}
                 onChange={onNavigateToTab}
-                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
+                className={`lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full`}
             >
                 <Tabs.List>
                     {controlledFields.map(({ gjelderBarn }) => (
                         <Tabs.Tab
                             key={gjelderBarn.ident}
                             value={gjelderBarn.ident}
-                            label={<PersonNavnIdent ident={gjelderBarn.ident} rolle={Rolletype.BA} skjulNavn />}
+                            label={<PersonIdentSak ident={gjelderBarn.ident} rolle={RolleTypeFullName.BARN} />}
                         />
                     ))}
+                    {bidragFlereBarn && <Tabs.Tab key="andrebarn" value="andrebarn" label="Andre barn" />}
                 </Tabs.List>
                 {controlledFields.map((item, index) => {
                     return (
@@ -143,6 +149,7 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                             className="grid gap-y-4"
                         >
                             <PrivatAvtaleBarn
+                                multiple
                                 key={item.id}
                                 item={item}
                                 barnIndex={index}
@@ -151,27 +158,23 @@ const Main = ({ initialValues }: { initialValues: PrivatAvtaleFormValues }) => {
                         </Tabs.Panel>
                     );
                 })}
+                {bidragFlereBarn && (
+                    <Tabs.Panel key={"andrebarn"} value={"andrebarn"} className="grid gap-y-4">
+                        <PrivatAvtaleAndreBarn initialValues={initialValues} />
+                    </Tabs.Panel>
+                )}
             </Tabs>
-        );
-    }
-
-    return (
-        <>
-            <PrivatAvtaleBarn
-                key={controlledFields[0].id}
-                item={controlledFields[0]}
-                barnIndex={0}
-                initialValues={initialValues}
-            />
         </>
     );
 };
 
 const PrivatAvtaleBarn = ({
+    multiple,
     item,
     barnIndex,
     initialValues,
 }: {
+    multiple: boolean;
     item: PrivatAvtaleFormValue;
     barnIndex: number;
     initialValues: PrivatAvtaleFormValues;
@@ -179,6 +182,7 @@ const PrivatAvtaleBarn = ({
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const createPrivatAvtale = useOnCreatePrivatAvtale();
     const { setValue } = useFormContext<PrivatAvtaleFormValues>();
+    const refetchFFInfo = useRefetchFFInfoFn();
 
     const onCreatePrivatAvtale = () => {
         const payload: BarnDto = {
@@ -197,6 +201,7 @@ const PrivatAvtaleBarn = ({
                     ...currentData,
                     privatAvtale: currentData.privatAvtale.concat(response.oppdatertPrivatAvtale),
                 }));
+                refetchFFInfo();
             },
             onError: () => {
                 setSaveErrorState({
@@ -210,23 +215,27 @@ const PrivatAvtaleBarn = ({
     return (
         <>
             <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
-                <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
-                    <div>
-                        <RolleTag rolleType={Rolletype.BA} />
+                {!multiple && (
+                    <div
+                        className={`grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]`}
+                    >
+                        <div>
+                            <RolleTag rolleType={Rolletype.BA} />
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <PersonNavnIdent
+                                navn={item.gjelderBarn.navn}
+                                ident={item.gjelderBarn.ident}
+                                fødselsdato={item.gjelderBarn.fødselsdato}
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <PersonNavnIdent
-                            navn={item.gjelderBarn.navn}
-                            ident={item.gjelderBarn.ident}
-                            fødselsdato={item.gjelderBarn.fødselsdato}
-                        />
-                    </div>
-                </div>
-                {!item.privatAvtale && (
+                )}
+                {!item.privatAvtale?.avtaleId && (
                     <Button
                         type="button"
                         onClick={onCreatePrivatAvtale}
-                        variant="secondary"
+                        variant="tertiary"
                         size="small"
                         className="w-fit"
                         disabled={lesemodus}
@@ -234,186 +243,15 @@ const PrivatAvtaleBarn = ({
                         {text.label.opprettePrivatAvtale}
                     </Button>
                 )}
-                {item.privatAvtale && (
-                    <PrivatAvtalePerioder item={item} barnIndex={barnIndex} initialValues={initialValues} />
+                {item.privatAvtale?.avtaleId && (
+                    <PrivatAvtalePerioder
+                        prefix="roller"
+                        item={item}
+                        barnIndex={barnIndex}
+                        initialValues={initialValues}
+                    />
                 )}
             </Box>
-        </>
-    );
-};
-
-const PrivatAvtalePerioder = ({
-    item,
-    barnIndex,
-    initialValues,
-}: {
-    item: PrivatAvtaleFormValue;
-    barnIndex: number;
-    initialValues: PrivatAvtaleFormValues;
-}) => {
-    const { privatAvtale, stønadstype, vedtakstype, virkningstidspunktV2 } = useGetBehandlingV2();
-    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
-    const deletePrivatAvtale = useOnDeletePrivatAvtale();
-    const updatePrivatAvtaleQuery = useOnUpdatePrivatAvtale(item.privatAvtale.avtaleId);
-    const manuelleVedtak = virkningstidspunktV2.find(
-        (virkingstingspunkt) => virkingstingspunkt.rolle.ident === item.gjelderBarn.ident
-    ).manuelleVedtak;
-    const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.id === item.privatAvtale.avtaleId);
-    const beregnetPrivatAvtale = selectedPrivatAvtale?.beregnetPrivatAvtale;
-    const valideringsfeil = selectedPrivatAvtale?.valideringsfeil;
-    const isInnkrevingOgVedtakFraNav =
-        vedtakstype === Vedtakstype.INNKREVING && item.privatAvtale.avtaleType === PrivatAvtaleType.VEDTAK_FRA_NAV;
-    const { watch, setValue, setError, getFieldState } = useFormContext<PrivatAvtaleFormValues>();
-    const fom = useMemo(() => {
-        return getFomForPrivatAvtale(stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato);
-    }, [stønadstype, selectedPrivatAvtale.gjelderBarn.fødselsdato]);
-    const tom = useMemo(
-        () => getTomForPrivatAvtale(selectedPrivatAvtale.gjelderBarn.fødselsdato),
-        [selectedPrivatAvtale.gjelderBarn.fødselsdato]
-    );
-
-    useEffect(() => {
-        const { error: avtaleDatoError } = getFieldState(`roller.${barnIndex}.privatAvtale.avtaleDato`);
-        const { error: manglerBegrunnelseError } = getFieldState(`roller.${barnIndex}.privatAvtale.begrunnelse`);
-        if (valideringsfeil?.manglerAvtaledato && !avtaleDatoError) {
-            setError(`roller.${barnIndex}.privatAvtale.avtaleDato`, {
-                type: "notValid",
-                message: text.error.feltErPåkrevd,
-            });
-        }
-        if (valideringsfeil?.manglerBegrunnelse && !manglerBegrunnelseError) {
-            setError(`roller.${barnIndex}.privatAvtale.begrunnelse`, {
-                type: "notValid",
-                message: text.error.feltErPåkrevd,
-            });
-        }
-    }, [valideringsfeil?.manglerAvtaledato, valideringsfeil?.manglerBegrunnelse]);
-
-    const onDeletePrivatAvtale = () => {
-        deletePrivatAvtale.mutation.mutate(item.privatAvtale.avtaleId, {
-            onSuccess: () => {
-                setValue(`roller.${barnIndex}.privatAvtale`, null);
-                deletePrivatAvtale.queryClientUpdater((currentData) => ({
-                    ...currentData,
-                    privatAvtale: currentData.privatAvtale.filter(
-                        (avtale) => avtale.gjelderBarn.ident !== item.gjelderBarn.ident
-                    ),
-                }));
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => onDeletePrivatAvtale(),
-                });
-            },
-        });
-    };
-
-    const updatePrivatAvtale = (payload: OppdaterePrivatAvtaleRequest) => {
-        updatePrivatAvtaleQuery.mutation.mutate(payload, {
-            onSuccess: (response) => {
-                updatePrivatAvtaleQuery.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        privatAvtale: currentData.privatAvtale.map((avtale) => {
-                            if (avtale.id === item.privatAvtale.avtaleId) return response.oppdatertPrivatAvtale;
-                            return avtale;
-                        }),
-                    };
-                });
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => updatePrivatAvtale(payload),
-                });
-            },
-        });
-    };
-
-    const debouncedOnSave = useDebounce(updatePrivatAvtale);
-
-    useEffect(() => {
-        const subscription = watch((value, { name }) => {
-            if (name === `roller.${barnIndex}.privatAvtale.begrunnelse`) {
-                const payload = { begrunnelse: value.roller[barnIndex].privatAvtale.begrunnelse };
-                debouncedOnSave(payload);
-            }
-
-            if (
-                name === `roller.${barnIndex}.privatAvtale.avtaleDato` &&
-                value.roller[barnIndex].privatAvtale.avtaleDato
-            ) {
-                const payload = { avtaleDato: value.roller[barnIndex].privatAvtale.avtaleDato };
-                updatePrivatAvtale(payload);
-            }
-
-            if (
-                name === `roller.${barnIndex}.privatAvtale.avtaleType` &&
-                value.roller[barnIndex].privatAvtale.avtaleType
-            ) {
-                const payload = {
-                    avtaleType: value.roller[barnIndex].privatAvtale.avtaleType as PrivatAvtaleType,
-                };
-                updatePrivatAvtale(payload);
-            }
-        });
-        return () => subscription.unsubscribe();
-    }, [updatePrivatAvtale]);
-
-    const onToggle = (checked: boolean) => {
-        updatePrivatAvtale({ skalIndeksreguleres: checked });
-    };
-
-    return (
-        <>
-            <FlexRow className="justify-between">
-                <div className="flex flex-row gap-2">
-                    <FormControlledMonthPicker
-                        name={`roller.${barnIndex}.privatAvtale.avtaleDato`}
-                        label={text.label.avtaleDato}
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        defaultValue={initialValues.roller[barnIndex].privatAvtale?.avtaleDato ?? null}
-                        fromDate={fom}
-                        toDate={tom}
-                        readonly={lesemodus || isInnkrevingOgVedtakFraNav}
-                        required
-                    />
-                    <FormControlledSelectField
-                        name={`roller.${barnIndex}.privatAvtale.avtaleType`}
-                        label={"Avtaletype"}
-                        className="w-max max-h-[10px]"
-                    >
-                        {Object.keys(PrivatAvtaleType)
-                            .filter((value) =>
-                                value === PrivatAvtaleType.VEDTAK_FRA_NAV ? !!manuelleVedtak.length : true
-                            )
-                            .map((value) => (
-                                <option key={value} value={value}>
-                                    {hentVisningsnavn(value)}
-                                </option>
-                            ))}
-                    </FormControlledSelectField>
-                </div>
-                <RemoveButton onDelete={onDeletePrivatAvtale} />
-            </FlexRow>
-            {!isInnkrevingOgVedtakFraNav && (
-                <Perioder barnIndex={barnIndex} item={item.privatAvtale} valideringsfeil={valideringsfeil} />
-            )}
-            {isInnkrevingOgVedtakFraNav && (
-                <VedtaksListeBeregning barnIdent={item.gjelderBarn.ident} omgjøring={false} />
-            )}
-            <FlexRow>
-                <FormControlledSwitch
-                    name={`roller.${barnIndex}.privatAvtale.skalIndeksreguleres`}
-                    legend={text.label.skalIndeksreguleres}
-                    onChange={onToggle}
-                    readOnly={!item.privatAvtale.perioder.length || isInnkrevingOgVedtakFraNav}
-                />
-            </FlexRow>
-            {item.privatAvtale.skalIndeksreguleres && beregnetPrivatAvtale?.perioder && (
-                <BeregnetTabel perioder={beregnetPrivatAvtale.perioder} />
-            )}
         </>
     );
 };
@@ -421,29 +259,96 @@ const PrivatAvtalePerioder = ({
 const Side = () => {
     const [searchParams] = useSearchParams();
     const { erBisysVedtak, privatAvtale, vedtakstype } = useGetBehandlingV2();
-    const { onStepChange, getNextStep } = useBehandlingProvider();
-    const { getValues } = useFormContext<PrivatAvtaleFormValues>();
+    const { onStepChange, getNextStep, setSaveErrorState } = useBehandlingProvider();
+    const updatePrivatAvtaleBegrunnelseQuery = useOnUpdatePrivatAvtaleBegrunnelse();
+    const { getValues, watch } = useFormContext<PrivatAvtaleFormValues>();
     const tabBarnIdent = searchParams.get(urlSearchParams.tab);
     const roller = getValues("roller");
-    const baRolleIndex = roller.findIndex((rolle) => rolle.gjelderBarn.ident === tabBarnIdent);
+    const baRolleIndex = roller.findIndex((rolle) => rolle?.gjelderBarn?.ident === tabBarnIdent);
     const rolleIndex = baRolleIndex !== -1 ? baRolleIndex : 0;
-    const selectedBarnIdent = roller[rolleIndex].gjelderBarn.ident;
+    const rolle = roller[rolleIndex];
+    const selectedBarnIdent = rolle?.gjelderBarn?.ident;
     const selectedPrivatAvtale = privatAvtale.find((avtale) => avtale.gjelderBarn.ident === selectedBarnIdent);
     const begrunnelseFraOpprinneligVedtak = selectedPrivatAvtale?.begrunnelseFraOpprinneligVedtak;
     const erAldersjusteringsVedtakstype = vedtakstype === Vedtakstype.ALDERSJUSTERING;
+    const begrunnelseName =
+        tabBarnIdent === "andrebarn"
+            ? "andreBarnBegrunnelse"
+            : (`roller.${rolleIndex}.privatAvtale.begrunnelse` as const);
+    const prevValue = useRef(getValues(begrunnelseName));
+
+    const updatePrivatAvtaleBegrunnelse = useCallback(
+        (payload: OppdaterePrivatAvtaleBegrunnelseRequest) => {
+            updatePrivatAvtaleBegrunnelseQuery.mutation.mutate(payload, {
+                onSuccess: (response) => {
+                    updatePrivatAvtaleBegrunnelseQuery.queryClientUpdater((currentData) => {
+                        const privatAvtale =
+                            tabBarnIdent === "andrebarn"
+                                ? currentData.privatAvtale.map((avtale) => {
+                                      if (!avtale?.id)
+                                          return {
+                                              ...avtale,
+                                              begrunnelse: response.begrunnelseAndreBarn,
+                                              valideringsfeil: {
+                                                  ...avtale.valideringsfeil,
+                                                  manglerBegrunnelse: response.mangleBegrunnelseAndreBarn,
+                                              },
+                                          };
+                                      return avtale;
+                                  })
+                                : currentData.privatAvtale.map((avtale) => {
+                                      if (response.oppdatertPrivatAvtale.id === avtale?.id)
+                                          return response.oppdatertPrivatAvtale;
+                                      return avtale;
+                                  });
+                        return {
+                            ...currentData,
+                            privatAvtale,
+                        };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updatePrivatAvtaleBegrunnelse(payload),
+                    });
+                },
+            });
+        },
+        [tabBarnIdent, selectedBarnIdent]
+    );
+
+    const debouncedOnSave = useDebounce(updatePrivatAvtaleBegrunnelse);
+
+    useEffect(() => {
+        const subscription = watch((value, { name }) => {
+            if (tabBarnIdent !== "andrebarn" && !selectedPrivatAvtale?.id) {
+                return;
+            }
+            const begrunnelseValue = name?.includes("privatAvtale.begrunnelse")
+                ? value.roller[rolleIndex]?.privatAvtale?.begrunnelse
+                : value.andreBarnBegrunnelse;
+
+            if (begrunnelseValue !== undefined && begrunnelseValue !== prevValue.current) {
+                prevValue.current = begrunnelseValue;
+                const payload: OppdaterePrivatAvtaleBegrunnelseRequest = {
+                    privatavtaleid: tabBarnIdent === "andrebarn" ? null : selectedPrivatAvtale?.id,
+                    begrunnelse: begrunnelseValue,
+                };
+                debouncedOnSave(payload);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, tabBarnIdent, selectedPrivatAvtale?.id]);
 
     return (
-        <Fragment key={selectedBarnIdent}>
+        <Fragment key={tabBarnIdent}>
             {!erBisysVedtak && !erAldersjusteringsVedtakstype && (
-                <FormControlledCustomTextareaEditor
-                    name={`roller.${rolleIndex}.privatAvtale.begrunnelse`}
-                    label={text.title.begrunnelse}
-                    resize
-                />
+                <FormControlledCustomTextareaEditor name={`${begrunnelseName}`} label={text.title.begrunnelse} resize />
             )}
             {!erBisysVedtak && !erAldersjusteringsVedtakstype && begrunnelseFraOpprinneligVedtak && (
                 <CustomTextareaEditor
-                    name="begrunnelseFraOpprinneligVedtak"
+                    name={`begrunnelseFraOpprinneligVedtak`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}
                     value={begrunnelseFraOpprinneligVedtak}
                     resize
@@ -456,17 +361,51 @@ const Side = () => {
 };
 
 const PrivatAvtaleForm = () => {
-    const { privatAvtale, roller: behandlingRoller } = useGetBehandlingV2();
+    const { privatAvtaleV2: privatAvtale, roller: behandlingRoller, bpsBarnUtenLøpendeBidrag } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState } = useBehandlingProvider();
-    const baRoller = behandlingRoller.filter((rolle) => rolle.rolletype === Rolletype.BA);
+    const privatAvtaleRef = useRef(privatAvtale);
+    const behandlingRollerRef = useRef(behandlingRoller.filter((b) => b.rolletype === Rolletype.BA));
+    const bpsBarnUtenLøpendeBidragRef = useRef(bpsBarnUtenLøpendeBidrag);
     const initialValues = useMemo(
-        () => createInitialValues(privatAvtale, baRoller),
-        [JSON.stringify(privatAvtale), JSON.stringify(baRoller)]
+        () =>
+            createInitialValues(
+                privatAvtaleRef.current,
+                behandlingRollerRef.current,
+                bpsBarnUtenLøpendeBidragRef.current
+            ),
+        [privatAvtaleRef, behandlingRollerRef, bpsBarnUtenLøpendeBidragRef]
     );
+
+    useEffect(() => {
+        const checkForBegrunnelseValidationError = (avtale: PrivatAvtaleBarnDto) =>
+            avtale?.valideringsfeil?.manglerBegrunnelse;
+
+        const setBegrunnelseError = (
+            fieldname: `roller.${number}.privatAvtale.begrunnelse` | "andreBarnBegrunnelse"
+        ) => {
+            useFormMethods.setError(fieldname, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        };
+
+        privatAvtale.barn.forEach((avtale, index) => {
+            if (checkForBegrunnelseValidationError(avtale)) {
+                setBegrunnelseError(`roller.${index}.privatAvtale.begrunnelse`);
+            }
+        });
+        if (privatAvtale.andreBarn.manglerBegrunnelse) {
+            setBegrunnelseError("andreBarnBegrunnelse");
+        }
+    }, []);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    useEffect(() => {
+        useFormMethods.reset(initialValues);
+    }, [initialValues]);
 
     useEffect(() => {
         setPageErrorsOrUnsavedState((prevState) => ({

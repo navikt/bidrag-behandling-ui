@@ -4,12 +4,13 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export const BeregningForholdsmessigFordeling = () => {
     const {
-        beregningsdetaljer: { sluttberegning, bpsAndel, delberegningBidragsevne },
+        beregningsdetaljer: { sluttberegning, bpsAndel, delberegningBidragsevne, forholdsmessigFordeling },
     } = useBidragBeregningPeriode();
 
     const erFF =
-        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
-        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1;
+        (sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
+            sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1) ||
+        forholdsmessigFordeling.erForholdsmessigFordelt;
     if (!erFF) return null;
     function renderResult() {
         if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
@@ -19,6 +20,19 @@ export const BeregningForholdsmessigFordeling = () => {
         }
         return "";
     }
+    const bpAndelAvUVedForholdsmessigFordelingFaktor =
+        sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ??
+        forholdsmessigFordeling?.andelAvSumBidragTilFordelingFaktor;
+    const bpEvneVedForholdsmessigFordeling =
+        forholdsmessigFordeling?.andelAvEvneBeløp ?? sluttberegning.bpEvneVedForholdsmessigFordeling;
+    const bidragTilFordelingForBarnet = Math.min(
+        delberegningBidragsevne.bidragsevne,
+        delberegningBidragsevne.sumInntekt25Prosent
+    );
+    const foreløpigBidrag =
+        forholdsmessigFordeling?.bidragEtterFordeling ?? sluttberegning.bruttoBidragJustertForEvneOg25Prosent ?? 0;
+    const bpsSumAndelAvU = forholdsmessigFordeling?.sumBidragTilFordeling ?? sluttberegning.bpSumAndelAvU ?? 0;
+    const andelFordeltTilBarnet = forholdsmessigFordeling?.bidragTilFordelingForBarnet ?? bpsAndel.andelBeløp ?? 0;
     return (
         <ResultatDescription
             title="Forholdsmessig fordeling"
@@ -27,27 +41,27 @@ export const BeregningForholdsmessigFordeling = () => {
                     label: "BPs totale underholdskostnad",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegning.bpSumAndelAvU ?? 0)}`,
+                    value: `${formatterBeløpForBeregning(bpsSumAndelAvU)}`,
                 },
                 {
-                    label: "Andel av underholdskostnad",
+                    label: "Barnets andel av underholdskostnad",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(bpsAndel?.andelBeløp ?? 0)} / ${formatterBeløpForBeregning(sluttberegning.bpSumAndelAvU ?? 0)}`,
-                    result: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor)}`,
+                    value: `${formatterBeløpForBeregning(andelFordeltTilBarnet)} / ${formatterBeløpForBeregning(bpsSumAndelAvU)}`,
+                    result: `${formatterProsent(bpAndelAvUVedForholdsmessigFordelingFaktor)}`,
                 },
                 {
                     label: "BPs evne etter forholdsmessig fordeling",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterProsent(sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor ?? 0)} x ${formatterBeløpForBeregning(Math.min(delberegningBidragsevne.bidragsevne, delberegningBidragsevne.sumInntekt25Prosent))}`,
-                    result: `${formatterBeløpForBeregning(sluttberegning.bpEvneVedForholdsmessigFordeling)}`,
+                    value: `${formatterProsent(bpAndelAvUVedForholdsmessigFordelingFaktor)} x ${formatterBeløpForBeregning(bidragTilFordelingForBarnet)}`,
+                    result: `${formatterBeløpForBeregning(bpEvneVedForholdsmessigFordeling)}`,
                 },
                 {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: ` ${formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent ?? 0)}${renderResult()}`,
+                    value: ` ${formatterBeløpForBeregning(foreløpigBidrag)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />
