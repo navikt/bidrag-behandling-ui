@@ -38,7 +38,7 @@ export const BeregningForholdsmessigFordeling = () => {
             title="Forholdsmessig fordeling"
             data={[
                 {
-                    label: "BPs totale andel underholdskostnad",
+                    label: "BPs totale underholdskostnad",
                     textRight: false,
                     labelBold: true,
                     value: `${formatterBeløpForBeregning(bpsSumAndelAvU)}`,
