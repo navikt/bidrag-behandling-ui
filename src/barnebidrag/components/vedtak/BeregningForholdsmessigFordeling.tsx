@@ -10,7 +10,7 @@ export const BeregningForholdsmessigFordeling = () => {
     const erFF =
         (sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor &&
             sluttberegning.bpAndelAvUVedForholdsmessigFordelingFaktor < 1) ||
-        !forholdsmessigFordeling.harBPFullEvne;
+        forholdsmessigFordeling.erForholdsmessigFordelt;
     if (!erFF) return null;
     function renderResult() {
         if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
